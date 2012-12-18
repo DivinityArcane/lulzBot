@@ -36,9 +36,66 @@ namespace lulzbot.Networking
         /// Here, we'll parse the string data of a packet and create our object.
         /// </summary>
         /// <param name="data">The string data of a packet.</param>
-        public void Parse(String data)
+        public dAmnPacket(String data)
         {
+            if (data.Contains("\n"))
+            {
+                int pos = data.IndexOf("\n");
+                String header = data.Substring(0, pos);
 
+                if (header.Contains(" "))
+                {
+                    String[] bits   = header.Split(' ');
+                    Command         = bits[0];
+                    Parameter       = bits[1];
+                }
+                else
+                {
+                    Command = header;
+                }
+                data = data.Substring(pos + 1);
+                if (data.Contains("\n\n"))
+                {
+                    pos  = data.IndexOf("\n\n");
+                    Body = data.Substring(pos + 2);
+                    data = data.Substring(0, pos);
+                }
+                foreach (String chunk in data.Split('\n'))
+                {
+                    if (String.IsNullOrWhiteSpace(chunk))
+                    {
+                        // Don't bother with empty chunks!
+                        continue;
+                    }
+                    if (chunk.Contains(Separator))
+                    {
+                        String argument     = chunk.Substring(0, chunk.IndexOf(Separator));
+                        String value        = chunk.Substring(chunk.IndexOf(Separator) + 1);
+
+                        Arguments.Add(argument, value);
+                    }
+                    else
+                    {
+                        if (String.IsNullOrWhiteSpace(SubCommand))
+                        {
+                            if (chunk.Contains(" "))
+                            {
+                                String[] bits   = chunk.Split(' ');
+                                SubCommand      = bits[0];
+                                SubParameter    = bits[1];
+                            }
+                            else
+                            {
+                                SubCommand      = chunk;
+                            }
+                        }
+                        else
+                        {
+                            // Shouldn't happen
+                        }
+                    }
+                }
+            }
         }
     }
 }

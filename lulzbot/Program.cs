@@ -7,8 +7,10 @@
  * Desc.: The main purpose of this bot is to teach the basics of C#.
  */
 
+using lulzbot.Extensions;
 using System;
 using System.IO;
+using System.Threading;
 
 namespace lulzbot
 {
@@ -18,7 +20,17 @@ namespace lulzbot
         public static bool Running = true;
 
         // This is our configuration.
-        public static Config Config = new Config();
+        private static Config Config = new Config();
+
+        // This is our bot object.
+        public static Bot Bot = null;
+
+        // Force the bot to reconnect?
+        public static bool ForceReconnect = false;
+
+        // Our bot thread!
+        private static Thread _thread;
+        public static ManualResetEvent wait_event;
 
         // Bot related globals.
         public const String BotName = "lulzBot";
@@ -77,7 +89,7 @@ namespace lulzbot
                     channel = ConIO.Read("Add a channel?");
                 }
 
-                if (Config.Channels.Count <= 1)
+                if (Config.Channels.Count <= 0)
                 {
                     ConIO.Write("No channels added. Defaulting to #Botdom");
                     Config.Channels.Add("#Botdom");
@@ -91,10 +103,7 @@ namespace lulzbot
                 ConIO.Write("Configuration exists, loading it...");
                 if (Config.Load("Config.dat"))
                 {
-                    ConIO.Write("Bot's username: " + Config.Username);
-                    ConIO.Write("Bot's trigger : " + Config.Trigger);
-                    ConIO.Write("Bot's owner   : " + Config.Owner);
-                    ConIO.Write("Bot's autojoin: " + String.Join(", ", Config.Channels));
+                    ConIO.Write("Config loaded for: " + Config.Username);
                 }
                 else
                 {
@@ -107,14 +116,39 @@ namespace lulzbot
                 }
             }
 
+            // Initialize events system
+            Events.InitEvents();
+
+            // Initialize the wait event
+            wait_event = new ManualResetEvent(true);
+
+            // Ok, let's fire up the bot!
+            // I considered passing the config as a reference, but there's no point.
+            // Instead, let's just copy the config to the bot.
+            _thread = new Thread(new ThreadStart(Start));
+            _thread.IsBackground = false;
+            _thread.Start();
+
+            // We could call Bot.Connect() or whatever from here, but, eh. Let's do it
+            //  from within the constructor of Bot() instead.
+
             while (Running)
             {
-                // Do non bot related stuff? Maybe keep track of memory usage with
-                //  Marshall.SizeOf? Though, that's "unsafe" code and requires that
-                //  we enable that in settings. Who knows.
+                // Wait for a signal
+                wait_event.WaitOne();
 
-                // Make the main thread sleep for 100ms. So max of 10 iterations/second.
-                System.Threading.Thread.Sleep(100);
+                // Check if we need to reconnect
+                if (ForceReconnect)
+                {
+                    ForceReconnect = false;
+                    _thread.Join();
+                    _thread = new Thread(new ThreadStart(Start));
+                    _thread.IsBackground = false;
+                    _thread.Start();
+                }
+
+                // Wait for another signal
+                wait_event.Reset();
             }
 
             // Make sure they see whatever happened first.
@@ -122,6 +156,15 @@ namespace lulzbot
 
             // Make sure all threads are killed off, and exit. Exit code 0 = OK
             Environment.Exit(0);
+        }
+
+        /// <summary>
+        /// Initializes a new bot instance
+        /// </summary>
+        public static void Start()
+        {
+            Program.Bot = null;
+            Program.Bot = new Bot(Config);
         }
     }
 }

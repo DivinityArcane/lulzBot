@@ -1,5 +1,6 @@
 ﻿using lulzbot.Networking;
 using System;
+using System.Collections.Generic;
 
 namespace lulzbot.Extensions
 {
@@ -44,24 +45,62 @@ namespace lulzbot.Extensions
             // minimum_privs = minimum privilege level. 25 = guests, 50 = members, 75 = opers, 99 = admins, 100 = owner.
             Events.AddCommand("about",      new Command(this, "cmd_about", "DivinityArcane", "No help.", 25, "Displays information about the bot."));
             Events.AddCommand("ping",       new Command(this, "cmd_ping", "DivinityArcane", "No help.", 25, "Tests the latency between the bot and the server."));
+            Events.AddCommand("commands",   new Command(this, "cmd_commands", "DivinityArcane", "No help", 25, "Displays commands available to the user."));
+            Events.AddCommand("quit",       new Command(this, "cmd_quit", "DivinityArcane", "No help", 100, "Closes the bot down gracefully."));
         }
 
         #region Commands
         /// <summary>
         /// About command!
         /// </summary>
-        public void cmd_about(Bot bot, String ns, String msg, dAmnPacket packet)
+        public void cmd_about(Bot bot, String ns, String msg, String from, dAmnPacket packet)
         {
-            bot.Say(ns, String.Format("<b>&raquo; {0} v{1}</b> - <i>\"Embrace the lulz. &trade;\"</i><br/><b>&raquo; Written by:</b> :devDivinityArcane:, :devOrrinFox:<br/><b>&raquo; Owned by:</b> :dev{2}:", Program.BotName, Program.Version, bot.Config.Owner));
+            String output = String.Empty;
+
+            output += String.Format("<b>&raquo; {0} v{1}</b> - <i>\"Embrace the lulz. &trade;\"</i><br/>", Program.BotName, Program.Version);
+            output += String.Format("<b>&raquo; Written by:</b> :devDivinityArcane:, :devOrrinFox:<br/><b>&raquo; Owned by:</b> :dev{0}:<br/>", bot.Config.Owner);
+            output += String.Format("<b>&raquo; System:</b> {0}", Program.OS);
+
+            bot.Say(ns, output);
         }
 
         /// <summary>
         /// Ping command!
         /// </summary>
-        public void cmd_ping(Bot bot, String ns, String msg, dAmnPacket packet)
+        public void cmd_ping(Bot bot, String ns, String msg, String from, dAmnPacket packet)
         {
             bot.Say(ns, "Ping...");
             bot._pinged = Environment.TickCount;
+        }
+
+        /// <summary>
+        /// Commands command!
+        /// </summary>
+        public void cmd_commands(Bot bot, String ns, String msg, String from, dAmnPacket packet)
+        {
+            // To be replaced later when the user system is added
+            int my_privs = 25;
+
+            List<String> commands = Events.GetAvailableCommands(my_privs);
+
+            if (commands.Count <= 0)
+            {
+                bot.Say(ns, "<b>&raquo; No command available for :dev" + from + ":.");
+            }
+            else
+            {
+                bot.Say(ns, String.Format("<b>&raquo; {0} command(s) available for :dev{1}::<br/>&raquo;</b> {2}", commands.Count, from, String.Join(", ", commands)));
+            }
+        }
+
+        /// <summary>
+        /// Quit command!
+        /// </summary>
+        public void cmd_quit(Bot bot, String ns, String msg, String from, dAmnPacket packet)
+        {
+            bot.Say(ns, "<b>&raquo; Quitting.</b>");
+            bot.Quitting = true;
+            bot.Disconnect();
         }
         #endregion Commands
 
@@ -72,7 +111,8 @@ namespace lulzbot.Extensions
         /// </summary>
         public void evt_connect(Bot bot, dAmnPacket packet)
         {
-            ConIO.Write("Connected to the server: " + bot.Endpoint());
+            if (Program.Debug)
+                ConIO.Write("Connected to the server: " + bot.Endpoint());
 
             bot.Send(dAmnPackets.dAmnClient(0.3, Program.BotName, bot.Config.Owner));
         }
@@ -164,7 +204,10 @@ namespace lulzbot.Extensions
             if (packet.Parameter.ToLower() == "chat:datashare") return;
 
             // We need to store these later!
-            ConIO.Write(String.Format("*** Got {0}", packet.Arguments["p"]), Tools.FormatChat(packet.Parameter));
+
+            // Only output this in debug mode.
+            if (Program.Debug)
+                ConIO.Write(String.Format("*** Got {0}", packet.Arguments["p"]), Tools.FormatChat(packet.Parameter));
         }
 
         /// <summary>
@@ -316,7 +359,12 @@ namespace lulzbot.Extensions
             if (packet.Parameter.ToLower() == "chat:datashare") return;
 
             ConIO.Write(String.Format("*** Disconnected [{0}]", packet.Arguments["e"]));
-            bot.Reconnect();
+
+            // Add an override for a restart command later?
+            if (bot.Quitting)
+                bot.Close();
+            else
+                bot.Reconnect();
         }
 
         /// <summary>

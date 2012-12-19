@@ -23,9 +23,13 @@ namespace lulzbot
         // Basic vars that will be saved later
         public bool AutoReJoin = true;
 
+        // Are we shutting down?
+        public bool Quitting = false;
+
         // Core extensions
         public static Core Core;
         public static BDS BDS;
+        public static Logger Logger;
 
         // Whether or not we can loop
         private bool can_loop = false;
@@ -95,6 +99,7 @@ namespace lulzbot
             // Initialize the Core extensions
             Core = new Core();
             BDS = new BDS();
+            Logger = new Logger();
 
             // Now, let's initialize the socket.
             Socket = new SocketWrapper();
@@ -147,6 +152,9 @@ namespace lulzbot
         /// </summary>
         public void Reconnect()
         {
+            if (Quitting)
+                return;
+
             Events.ClearEvents();
 
             ConIO.Write("Reconnecting in 5 seconds!");
@@ -247,6 +255,25 @@ namespace lulzbot
         public void Send(String packet)
         {
             Socket.Send(packet);
+        }
+
+        /// <summary>
+        /// Sends the disconnect packet.
+        /// </summary>
+        public void Disconnect()
+        {
+            Send("disconnect\n\0");
+        }
+
+        /// <summary>
+        /// Closes down the bot.
+        /// </summary>
+        public void Close()
+        {
+            Socket.Close();
+            can_loop = false;
+            Program.Running = false;
+            Program.wait_event.Set();
         }
 
         /// <summary>

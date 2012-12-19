@@ -33,6 +33,9 @@ namespace lulzbot.Networking
         private byte[] _buffer;
         private String _packet = String.Empty;
 
+        // Close override
+        private bool Closed = false;
+
         // Our server variables
         private String _host;
         private IPAddress _ip;
@@ -77,6 +80,9 @@ namespace lulzbot.Networking
         {
             try
             {
+                if (Closed)
+                    return;
+
                 // We got a connection!
                 _socket.EndConnect(result);
 
@@ -96,6 +102,9 @@ namespace lulzbot.Networking
         {
             try
             {
+                if (Closed)
+                    return;
+
                 _socket.EndSend(result);
             }
             catch (Exception E)
@@ -108,6 +117,9 @@ namespace lulzbot.Networking
         {
             try
             {
+                if (Closed)
+                    return;
+
                 // End the receive, and get the number of bytes that are data.
                 int received_bytes = _socket.EndSend(result);
 
@@ -172,6 +184,9 @@ namespace lulzbot.Networking
         {
             try
             {
+                if (Closed)
+                    return;
+
                 _socket.BeginSend(packet, 0, packet.Length, SocketFlags.None, new AsyncCallback(on_sent), null);
             }
             catch (SocketException)
@@ -223,6 +238,7 @@ namespace lulzbot.Networking
         {
             try
             {
+                Closed = true;
                 _socket.Disconnect(false);
                 _socket.Close();
             }

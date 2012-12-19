@@ -23,32 +23,45 @@ namespace lulzbot
         {
             ConIO.Write("Initializing events...");
 
-            _events.Add("on_connect",   new List<Event>());
-            _events.Add("dAmnServer",   new List<Event>());
-            _events.Add("disconnect",   new List<Event>());
-            _events.Add("login",        new List<Event>());
-            _events.Add("join",         new List<Event>());
-            _events.Add("part",         new List<Event>());
-            _events.Add("get",          new List<Event>());
-            _events.Add("set",          new List<Event>());
-            _events.Add("send",         new List<Event>());
-            _events.Add("kick",         new List<Event>());
-            _events.Add("kicked",       new List<Event>());
-            _events.Add("kill",         new List<Event>());
-            _events.Add("ping",         new List<Event>());
-            _events.Add("whois",        new List<Event>());
-            _events.Add("property",     new List<Event>());
-            _events.Add("recv_action",  new List<Event>());
-            _events.Add("recv_msg",     new List<Event>());
-            _events.Add("recv_join",    new List<Event>());
-            _events.Add("recv_part",    new List<Event>());
-            _events.Add("recv_admin",   new List<Event>());
-            _events.Add("recv_kicked",  new List<Event>());
-            _events.Add("recv_privchg", new List<Event>());
+            // dAmn events
+            AddEventType("dAmnServer");
+            AddEventType("disconnect");
+            AddEventType("get");
+            AddEventType("join");
+            AddEventType("kick");
+            AddEventType("kicked");
+            AddEventType("kill");
+            AddEventType("login");
+            AddEventType("on_connect");
+            AddEventType("part");
+            AddEventType("ping");
+            AddEventType("property");
+            AddEventType("recv_action");
+            AddEventType("recv_admin");
+            AddEventType("recv_join");
+            AddEventType("recv_kicked");
+            AddEventType("recv_msg");
+            AddEventType("recv_part");
+            AddEventType("recv_privchg");
+            AddEventType("send");
+            AddEventType("set");
+            AddEventType("whois");
 
-            /// TODO: Maybe add some bot-related events for use later?
+            // non dAmn events
+
+            AddEventType("log_msg");
 
             ConIO.Write(String.Format("Initialized {0} events.", _events.Count));
+        }
+
+        /// <summary>
+        /// Adds a new event list for the specified event name.
+        /// </summary>
+        /// <param name="event_name">Event name. i.e. recv_msg, do_something</param>
+        private static void AddEventType(String event_name)
+        {
+            if (!_events.ContainsKey(event_name))
+                _events.Add(event_name, new List<Event>());
         }
 
         /// <summary>
@@ -72,6 +85,7 @@ namespace lulzbot
         /// Calls all the events bound to the specified event name
         /// </summary>
         /// <param name="event_name">event name</param>
+        /// <param name="packet">dAmnPacket object</param>
         public static void CallEvent(String event_name, dAmnPacket packet)
         {
             if (_events.ContainsKey(event_name))
@@ -84,6 +98,27 @@ namespace lulzbot
             else
             {
                 ConIO.Write("Unknown event: " + event_name, "Events");
+            }
+        }
+
+        /// <summary>
+        /// Calls all the events bound to the specified event name
+        /// (For non dAmn events)
+        /// </summary>
+        /// <param name="event_name">event name</param>
+        /// <param name="parameters">list of parameters to be passed to the events</param>
+        public static void CallSpecialEvent(String event_name, object[] parameters)
+        {
+            if (_events.ContainsKey(event_name))
+            {
+                foreach (Event callback in _events[event_name])
+                {
+                    callback.Method.Invoke(callback.Class, parameters);
+                }
+            }
+            else
+            {
+                ConIO.Write("Unknown special event: " + event_name, "Events");
             }
         }
 
@@ -112,8 +147,21 @@ namespace lulzbot
         {
             if (_commands.ContainsKey(cmd_name))
             {
+                // Replace with a user check later
+                int my_privs = 25;
                 Command callback = _commands[cmd_name];
-                callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet.Parameter, packet.Body, packet });
+                String from = String.Empty;
+                if (packet.Arguments.ContainsKey("from"))
+                    from = packet.Arguments["from"];
+
+                if (from.ToLower() == Program.Bot.Config.Owner.ToLower())
+                    my_privs = 100;
+
+                // Access denied
+                if (callback.MinimumPrivs > my_privs)
+                    return;
+
+                callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet.Parameter, packet.Body, from, packet });
             }
             else
             {
@@ -130,6 +178,26 @@ namespace lulzbot
             {
                 _events[event_name].Clear();
             }
+        }
+
+        /// <summary>
+        /// Returns a list of all commands accessable to privlevel minimum_priv_level
+        /// </summary>
+        /// <param name="minimum_priv_level">Minimum privilege level</param>
+        /// <returns>Sorted list of command names</returns>
+        public static List<String> GetAvailableCommands(int minimum_priv_level)
+        {
+            List<String> list = new List<string>();
+
+            foreach (KeyValuePair<String, Command> KVP in _commands)
+            {
+                if (KVP.Value.MinimumPrivs <= minimum_priv_level)
+                    list.Add(KVP.Key);
+            }
+
+            list.Sort();
+
+            return list;
         }
     }
 

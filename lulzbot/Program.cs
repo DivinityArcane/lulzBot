@@ -19,8 +19,14 @@ namespace lulzbot
         // This boolean controls whether or not the bot is allowed to run.
         public static bool Running = true;
 
+        // Are we in debug mode?
+        public static bool Debug = false;
+
         // This is our configuration.
         private static Config Config = new Config();
+
+        // Our OS string
+        public static String OS = Environment.OSVersion.ToString();
 
         // This is our bot object.
         public static Bot Bot = null;
@@ -55,6 +61,21 @@ namespace lulzbot
             // Just a bit of a simple title.
             ConIO.Write(String.Format("{0}, version {1}", BotName, Version));
             ConIO.Write("Authors: DivinityArcane, OrrinFox.");
+
+            // Check for debug mode!
+            if (args.Length >= 1)
+            {
+                if (args[0] == "--debug")
+                {
+                    ConIO.Write("Debug mode is enabled!");
+                    Debug = true;
+                }
+                else if (args[0] == "--help")
+                {
+                    ConIO.Write("To enable debug mode use the command line switch --debug");
+                    Environment.Exit(0);
+                }
+            }
 
             // First things first: We need a config file! If we don't have one, make one.
             if (!File.Exists("Config.dat"))

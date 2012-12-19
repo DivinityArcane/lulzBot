@@ -33,6 +33,10 @@ namespace lulzbot
                 Console.ResetColor();
                 Console.WriteLine(output);
             }
+
+            // Log output event
+            if (ns.StartsWith("#") && ns.ToLower() != "#datashare")
+                Events.CallSpecialEvent("log_msg", new object[] { Program.Bot, ns, output });
         }
         
         /// <summary>

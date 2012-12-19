@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("lulzbot")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("lulzBot")]
+[assembly: AssemblyDescription("A fast and full featured bot for dAmn.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Hewlett-Packard")]
-[assembly: AssemblyProduct("lulzbot")]
-[assembly: AssemblyCopyright("Copyright © Hewlett-Packard 2012")]
+[assembly: AssemblyCompany("DivinityArcane, OrrinFox")]
+[assembly: AssemblyProduct("lulzBot")]
+[assembly: AssemblyCopyright("Copyright © Justin Eittreim 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

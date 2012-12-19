@@ -119,6 +119,9 @@ namespace lulzbot
             // Initialize events system
             Events.InitEvents();
 
+            // Initialize the tablump parser
+            Tools.InitLumps();
+
             // Initialize the wait event
             wait_event = new ManualResetEvent(true);
 

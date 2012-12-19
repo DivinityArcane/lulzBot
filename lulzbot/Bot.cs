@@ -20,8 +20,12 @@ namespace lulzbot
         // This is our config.
         public Config Config;
 
-        // Core extension
+        // Basic vars that will be saved later
+        public bool AutoReJoin = true;
+
+        // Core extensions
         public static Core Core;
+        public static BDS BDS;
 
         // Whether or not we can loop
         private bool can_loop = false;
@@ -88,8 +92,9 @@ namespace lulzbot
                 }
             }
 
-            // Initialize the Core extension
+            // Initialize the Core extensions
             Core = new Core();
+            BDS = new BDS();
 
             // Now, let's initialize the socket.
             Socket = new SocketWrapper();

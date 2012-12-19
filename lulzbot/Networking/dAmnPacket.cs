@@ -57,7 +57,8 @@ namespace lulzbot.Networking
                 if (data.Contains("\n\n"))
                 {
                     pos  = data.IndexOf("\n\n");
-                    Body = data.Substring(pos + 2);
+                    // We'll parse tablumps here
+                    Body = Tools.ParseTablumps(data.Substring(pos + 2));
                     data = data.Substring(0, pos);
                 }
                 foreach (String chunk in data.Split('\n'))
@@ -94,6 +95,31 @@ namespace lulzbot.Networking
                             // Shouldn't happen
                         }
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Some packets contain arguments in the body. This function pulls them and adds them to Arguments.
+        /// </summary>
+        public void PullBodyArguments()
+        {
+            if (!Body.Contains("\n") || !Body.Contains(Separator))
+                return;
+
+            foreach (String chunk in Body.Split('\n'))
+            {
+                if (String.IsNullOrWhiteSpace(chunk))
+                {
+                    // Don't bother with empty chunks!
+                    continue;
+                }
+                if (chunk.Contains(Separator))
+                {
+                    String argument = chunk.Substring(0, chunk.IndexOf(Separator));
+                    String value = chunk.Substring(chunk.IndexOf(Separator) + 1);
+
+                    Arguments.Add(argument, value);
                 }
             }
         }

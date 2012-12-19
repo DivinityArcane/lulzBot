@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 
 namespace lulzbot.Networking
@@ -20,6 +22,9 @@ namespace lulzbot.Networking
         public static String Grab(String username, String password)
         {
             // This should really be replaced with an OAuth method, or the likes.
+
+            // Make sure we can bypass certificate checks on Linux machines.
+            ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback(ValidateRemoteCertificate);
 
             // Initialize the request and variables.
             String page_content         = String.Empty;
@@ -70,6 +75,14 @@ namespace lulzbot.Networking
                 return Regex.Replace(match.Value, _regex, "$1");
             } // Otherwise, return null
             else return null;
+        }
+
+        /// <summary>
+        /// Bypass certificate checks on Linux.
+        /// </summary>
+        private static bool ValidateRemoteCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors policyErrors)
+        {
+            return true;
         }
     }
 }

@@ -46,6 +46,7 @@
     <Compile Include="Bot.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Events.cs" />
+    <Compile Include="Extensions\BDS.cs" />
     <Compile Include="Extensions\Core.cs" />
     <Compile Include="Networking\AuthToken.cs" />
     <Compile Include="Networking\dAmnPacket.cs" />

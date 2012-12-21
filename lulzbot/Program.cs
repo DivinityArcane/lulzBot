@@ -7,7 +7,6 @@
  * Desc.: The main purpose of this bot is to teach the basics of C#.
  */
 
-using lulzbot.Extensions;
 using System;
 using System.IO;
 using System.Threading;
@@ -40,7 +39,7 @@ namespace lulzbot
 
         // Bot related globals.
         public const String BotName = "lulzBot";
-        public const String Version = "0.1a";
+        public const String Version = "0.2a";
 
         static void Main(string[] args)
         {

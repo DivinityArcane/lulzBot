@@ -1,9 +1,6 @@
 ﻿using lulzbot.Extensions;
 using lulzbot.Networking;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace lulzbot
@@ -60,6 +57,19 @@ namespace lulzbot
         }
 
         /// <summary>
+        /// Seconds since the unix epoch
+        /// </summary>
+        public static int EpochTimestamp
+        {
+            get
+            {
+                return Convert.ToInt32((DateTime.UtcNow - _epoch).TotalSeconds);
+            }
+
+            set { }
+        }
+
+        /// <summary>
         /// Ticks when we were pinged.
         /// </summary>
         public int _pinged = 0;
@@ -96,10 +106,13 @@ namespace lulzbot
                 }
             }
 
+            // Make sure events are clear.
+            Events.ClearEvents();
+
             // Initialize the Core extensions
-            Core = new Core();
-            BDS = new BDS();
-            Logger = new Logger();
+            Core    = new Core();
+            BDS     = new BDS();
+            Logger  = new Logger();
 
             // Now, let's initialize the socket.
             Socket = new SocketWrapper();
@@ -155,7 +168,8 @@ namespace lulzbot
             if (Quitting)
                 return;
 
-            Events.ClearEvents();
+            // No reason to call this now. It might cause issues.
+            //Events.ClearEvents();
 
             ConIO.Write("Reconnecting in 5 seconds!");
 

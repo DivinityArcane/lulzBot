@@ -88,16 +88,19 @@ namespace lulzbot
         /// <param name="packet">dAmnPacket object</param>
         public static void CallEvent(String event_name, dAmnPacket packet)
         {
-            if (_events.ContainsKey(event_name))
+            lock (_events)
             {
-                foreach (Event callback in _events[event_name])
+                if (_events.ContainsKey(event_name))
                 {
-                    callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet });
+                    foreach (Event callback in _events[event_name])
+                    {
+                        callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet });
+                    }
                 }
-            }
-            else
-            {
-                ConIO.Write("Unknown event: " + event_name, "Events");
+                else
+                {
+                    ConIO.Write("Unknown event: " + event_name, "Events");
+                }
             }
         }
 
@@ -109,16 +112,19 @@ namespace lulzbot
         /// <param name="parameters">list of parameters to be passed to the events</param>
         public static void CallSpecialEvent(String event_name, object[] parameters)
         {
-            if (_events.ContainsKey(event_name))
+            lock (_events)
             {
-                foreach (Event callback in _events[event_name])
+                if (_events.ContainsKey(event_name))
                 {
-                    callback.Method.Invoke(callback.Class, parameters);
+                    foreach (Event callback in _events[event_name])
+                    {
+                        callback.Method.Invoke(callback.Class, parameters);
+                    }
                 }
-            }
-            else
-            {
-                ConIO.Write("Unknown special event: " + event_name, "Events");
+                else
+                {
+                    ConIO.Write("Unknown special event: " + event_name, "Events");
+                }
             }
         }
 
@@ -157,11 +163,19 @@ namespace lulzbot
                 if (from.ToLower() == Program.Bot.Config.Owner.ToLower())
                     my_privs = 100;
 
+                String[] cmd_args;
+                String msg = packet.Body.Substring(Program.Bot.Config.Trigger.Length);
+
+                if (packet.Body.Contains(" "))
+                    cmd_args = msg.Split(' ');
+                else
+                    cmd_args = new String[1] { msg };
+
                 // Access denied
                 if (callback.MinimumPrivs > my_privs)
                     return;
 
-                callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet.Parameter, packet.Body, from, packet });
+                callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet.Parameter, cmd_args, msg, from, packet });
             }
             else
             {
@@ -174,9 +188,12 @@ namespace lulzbot
         /// </summary>
         public static void ClearEvents()
         {
-            foreach (String event_name in _events.Keys)
+            lock (_events)
             {
-                _events[event_name].Clear();
+                foreach (String event_name in _events.Keys)
+                {
+                    _events[event_name].Clear();
+                }
             }
         }
 
@@ -189,10 +206,13 @@ namespace lulzbot
         {
             List<String> list = new List<string>();
 
-            foreach (KeyValuePair<String, Command> KVP in _commands)
+            lock (_commands)
             {
-                if (KVP.Value.MinimumPrivs <= minimum_priv_level)
-                    list.Add(KVP.Key);
+                foreach (KeyValuePair<String, Command> KVP in _commands)
+                {
+                    if (KVP.Value.MinimumPrivs <= minimum_priv_level)
+                        list.Add(KVP.Key);
+                }
             }
 
             list.Sort();

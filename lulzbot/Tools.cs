@@ -273,5 +273,56 @@ namespace lulzbot
             }
             return output.ToString();
         }
+
+        /// <summary>
+        /// Formats a specified amount of seconds into a human readable string.
+        /// i.e. 3669 becomes:
+        /// 1 hour, 1 minute, 9 seconds.
+        /// </summary>
+        /// <param name="seconds">Amount of seconds</param>
+        /// <returns>Human readable string</returns>
+        public static String FormatTime(int seconds)
+        {
+            String output = String.Empty;
+
+            if (seconds == 0)
+                return "0 seconds.";
+
+            int days = 0, hours = 0, minutes = 0;
+
+            while (seconds >= 86400)
+            {
+                ++days;
+                seconds -= 86400;
+            }
+
+            while (seconds >= 3600)
+            {
+                ++hours;
+                seconds -= 3600;
+            }
+
+            while (seconds >= 60)
+            {
+                ++minutes;
+                seconds -= 60;
+            }
+
+            if (days > 0)
+                output += days + " day" + (days == 1 ? "" : "s") + ", ";
+
+            if (hours > 0)
+                output += hours + " hour" + (hours == 1 ? "" : "s") + ", ";
+
+            if (minutes > 0)
+                output += minutes + " minute" + (minutes == 1 ? "" : "s") + ", ";
+
+            if (seconds > 0)
+                output += seconds + " second" + (seconds == 1 ? "" : "s") + ".";
+            else if (output.Length > 0)
+                output = output.Substring(0, output.Length - 2) + ".";
+
+            return output;
+        }
     }
 }

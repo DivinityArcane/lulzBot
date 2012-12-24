@@ -334,7 +334,7 @@ namespace lulzbot
         /// <param name="append">append to the end or overwrite the file</param>
         public static void WriteFile(String filename, String content, bool append = false)
         {
-            if (!filename.Contains("/") || filename.Contains("..") || filename.Contains("~"))
+            if (!filename.Contains("/") || filename.Contains("..") || filename.Contains("~") || filename.StartsWith(@"\") || filename.StartsWith("/"))
             {
                 ConIO.Warning("Tools.WriteFile", "Cannot write to (or below) bot's root directory.");
                 return;

@@ -124,6 +124,7 @@ namespace lulzbot.Extensions
                             output += String.Format("<b>Bot owner:</b> :dev{0}:<br/>", info.Owner);
                             output += String.Format("<b>Bot trigger:</b> <b><code>{0}</code></b><br/>", info.Trigger.Replace("&", "&amp;"));
                             output += String.Format("<b>BDS version:</b> {0}<br/>", info.BDSVersion);
+                            output += String.Format("<b>Last modified:</b> {0} ago", Tools.FormatTime(Bot.EpochTimestamp - info.Modified).TrimEnd('.'));
                             bot.Say(ns, output);
                         }
                         else

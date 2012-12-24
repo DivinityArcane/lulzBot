@@ -9,6 +9,11 @@ namespace lulzbot.Extensions
         public static Dictionary<String, Types.ChatData> ChannelData = new Dictionary<String, Types.ChatData>();
 
         /// <summary>
+        /// Keeps track of which channels certain commands were sent from.
+        /// </summary>
+        public static Dictionary<String, List<String>> CommandChannels = new Dictionary<String, List<String>>();
+
+        /// <summary>
         /// Constructor. Add basic events.
         /// </summary>
         public Core()
@@ -47,10 +52,19 @@ namespace lulzbot.Extensions
             // minimum_privs = minimum privilege level. 25 = guests, 50 = members, 75 = opers, 99 = admins, 100 = owner.
             Events.AddCommand("about",      new Command(this, "cmd_about", "DivinityArcane", "No help.", 25, "Displays information about the bot."));
             Events.AddCommand("commands",   new Command(this, "cmd_commands", "DivinityArcane", "No help", 25, "Displays commands available to the user."));
-            Events.AddCommand("get",        new Command(this, "cmd_get", "DivinityArcane", "No help", 50, "Gets the specified data for the specified channel."));
+            Events.AddCommand("get",        new Command(this, "cmd_get", "DivinityArcane", "{trig}get #someChannel [title|topic|members|privclasses]", 50, "Gets the specified data for the specified channel."));
+            Events.AddCommand("join",       new Command(this, "cmd_join", "DivinityArcane", "{trig}join #someChannel", 75, "Makes the bot join the specified channel."));
+            Events.AddCommand("part",       new Command(this, "cmd_part", "DivinityArcane", "{trig}part #someChannel", 75, "Makes the bot leave the specified channel."));
             Events.AddCommand("ping",       new Command(this, "cmd_ping", "DivinityArcane", "No help.", 25, "Tests the latency between the bot and the server."));
             Events.AddCommand("quit",       new Command(this, "cmd_quit", "DivinityArcane", "No help", 100, "Closes the bot down gracefully."));
             Events.AddCommand("uptime",     new Command(this, "cmd_uptime", "DivinityArcane", "No help.", 25, "Returns how long the bot has been running."));
+
+            // Initialize CommandsChannels
+            String[] c_types = new String[] { "join", "part", "say", "set", "kick", "kill", "promote", "demote", "admin" };
+            CommandChannels.Clear();
+
+            foreach (String c_type in c_types)
+                CommandChannels.Add(c_type, new List<String>());
         }
 
         #region Commands
@@ -199,6 +213,50 @@ namespace lulzbot.Extensions
         }
 
         /// <summary>
+        /// Join command!
+        /// </summary>
+        public void cmd_join(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        {
+            if (args.Length != 2)
+            {
+                bot.Say(ns, String.Format("<b>&raquo; Usage:</b> {0}join #channel", bot.Config.Trigger));
+            }
+            else
+            {
+                if (!args[1].StartsWith("#"))
+                {
+                    bot.Say(ns, "<b>&raquo; Invalid channel!</b> Channels should start with a #");
+                    return;
+                }
+
+                CommandChannels["join"].Add(ns);
+                bot.Join(args[1]);
+            }
+        }
+
+        /// <summary>
+        /// Part command!
+        /// </summary>
+        public void cmd_part(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        {
+            if (args.Length != 2)
+            {
+                bot.Say(ns, String.Format("<b>&raquo; Usage:</b> {0}part #channel", bot.Config.Trigger));
+            }
+            else
+            {
+                if (!args[1].StartsWith("#"))
+                {
+                    bot.Say(ns, "<b>&raquo; Invalid channel!</b> Channels should start with a #");
+                    return;
+                }
+
+                CommandChannels["part"].Add(ns);
+                bot.Part(args[1]);
+            }
+        }
+
+        /// <summary>
         /// Ping command!
         /// </summary>
         public void cmd_ping(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
@@ -291,10 +349,28 @@ namespace lulzbot.Extensions
                     ChannelData.Add(packet.Parameter.ToLower(), new Types.ChatData());
                     ChannelData[packet.Parameter.ToLower()].Name = packet.Parameter;
                 }
+
+                if (CommandChannels["join"].Count != 0)
+                {
+                    String chan = CommandChannels["join"][0];
+
+                    bot.Say(chan, String.Format("<b>&raquo; Joined {0} [ok]</b>", Tools.FormatChat(packet.Parameter)));
+
+                    CommandChannels["join"].RemoveAt(0);
+                }
             }
             else
             {
                 ConIO.Write(String.Format("** Failed to join [{0}]", packet.Arguments["e"]), Tools.FormatChat(packet.Parameter));
+
+                if (CommandChannels["join"].Count != 0)
+                {
+                    String chan = CommandChannels["join"][0];
+
+                    bot.Say(chan, String.Format("<b>&raquo; Failed to join {0} [{1}]</b>", Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
+
+                    CommandChannels["join"].RemoveAt(0);
+                }
             }
         }
 
@@ -314,6 +390,7 @@ namespace lulzbot.Extensions
                     ConIO.Write(String.Format("** Left [{0}] ({1})", packet.Arguments["e"], packet.Arguments["r"]), Tools.FormatChat(packet.Parameter));
                     // If we parted with a reason, that means we disconnected or timed out!
                     bot.Reconnect();
+                    return;
                 }
                 else
                 {
@@ -323,10 +400,28 @@ namespace lulzbot.Extensions
                 // Remove channel data
                 if (ChannelData.ContainsKey(packet.Parameter.ToLower()))
                     ChannelData.Remove(packet.Parameter.ToLower());
+
+                if (CommandChannels["part"].Count != 0)
+                {
+                    String chan = CommandChannels["part"][0];
+
+                    bot.Say(chan, String.Format("<b>&raquo; Left {0} [ok]</b>", Tools.FormatChat(packet.Parameter)));
+
+                    CommandChannels["part"].RemoveAt(0);
+                }
             }
             else
             {
                 ConIO.Write(String.Format("** Failed to leave [{0}]", packet.Arguments["e"]), Tools.FormatChat(packet.Parameter));
+
+                if (CommandChannels["part"].Count != 0)
+                {
+                    String chan = CommandChannels["part"][0];
+
+                    bot.Say(chan, String.Format("<b>&raquo; Failed to leave {0} [{1}]</b>", Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
+
+                    CommandChannels["part"].RemoveAt(0);
+                }
             }
         }
 

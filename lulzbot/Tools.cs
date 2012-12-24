@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -323,6 +324,41 @@ namespace lulzbot
                 output = output.Substring(0, output.Length - 2) + ".";
 
             return output;
+        }
+
+        /// <summary>
+        /// Writes or appends text to a file
+        /// </summary>
+        /// <param name="filename">filename with path</param>
+        /// <param name="content">content to write</param>
+        /// <param name="append">append to the end or overwrite the file</param>
+        public static void WriteFile(String filename, String content, bool append = false)
+        {
+            if (!filename.Contains("/") || filename.Contains("..") || filename.Contains("~"))
+            {
+                ConIO.Warning("Tools.WriteFile", "Cannot write to (or below) bot's root directory.");
+                return;
+            }
+
+            String dir = Path.GetDirectoryName(filename);
+
+            try
+            {
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
+                if (!File.Exists(filename) || !append)
+                    File.Create(filename).Close();
+
+                using (StreamWriter writer = File.AppendText(filename))
+                {
+                    writer.Write(content);
+                }
+            }
+            catch (Exception E)
+            {
+                ConIO.Warning("Tools.WriteFile", "Caught Exception: " + E.ToString());
+            }
         }
     }
 }

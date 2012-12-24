@@ -38,6 +38,24 @@ namespace lulzbot
             if (ns.StartsWith("#") && ns.ToLower() != "#datashare")
                 Events.CallSpecialEvent("log_msg", new object[] { Program.Bot, ns, output });
         }
+
+        /// <summary>
+        /// Outputs a warning.
+        /// </summary>
+        /// <param name="where">What file/function triggered this warning.</param>
+        /// <param name="output">warning message</param>
+        public static void Warning(String where, String output)
+        {
+            lock (OutputLock)
+            {
+                Console.ForegroundColor = TimestampColor;
+                Console.Write("{0} ", Timestamp());
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("[WARNING] ({0}) ", where);
+                Console.ResetColor();
+                Console.WriteLine(output);
+            }
+        }
         
         /// <summary>
         /// Static method for prompting the user for input and returning it.

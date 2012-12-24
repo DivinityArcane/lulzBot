@@ -76,6 +76,10 @@ namespace lulzbot
                 }
             }
 
+            // If in debug mode, output CWD
+            if (Debug)
+                ConIO.Write("Running in directory: " + Environment.CurrentDirectory, "Debug");
+
             // First things first: We need a config file! If we don't have one, make one.
             if (!File.Exists("./Config.dat"))
             {
@@ -123,6 +127,16 @@ namespace lulzbot
                 ConIO.Write("Configuration exists, loading it...");
                 if (Config.Load("./Config.dat"))
                 {
+                    if (String.IsNullOrWhiteSpace(Config.Username) || String.IsNullOrWhiteSpace(Config.Password) || String.IsNullOrWhiteSpace(Config.Owner) || String.IsNullOrWhiteSpace(Config.Trigger))
+                    {
+                        ConIO.Write("Config data was null. Clearing the config file. Please restart the bot and reconfigure it.");
+                        File.Delete("./Config.dat");
+
+                        // Exit the app.
+                        ConIO.Read("Press return/enter to close this window...");
+                        Environment.Exit(-1);
+                    }
+
                     ConIO.Write("Config loaded for: " + Config.Username);
                 }
                 else

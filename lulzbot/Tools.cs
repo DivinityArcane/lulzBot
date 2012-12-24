@@ -134,7 +134,7 @@ namespace lulzbot
             String lump   = String.Empty;
 
             // Assign some basic values for reuse
-            int index = 0, last_index = 0, amp_pos = 0, length = message.Length;
+            int index = 0, last_index = 0, amp_pos = 0;
 
             // Loop through each bit of the string
             for (int p = 0; p < bits.Length; p++)

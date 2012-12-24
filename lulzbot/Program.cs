@@ -77,7 +77,7 @@ namespace lulzbot
             }
 
             // First things first: We need a config file! If we don't have one, make one.
-            if (!File.Exists("Config.dat"))
+            if (!File.Exists("./Config.dat"))
             {
                 ConIO.Write("Looks like you don't have a config file. Let's make one!");
                 ConIO.Write("I'm going to need some basic details about you and the bot.");
@@ -116,12 +116,12 @@ namespace lulzbot
                 }
 
                 ConIO.Write("That'll do it! Saving the config and continuing.");
-                Config.Save("Config.dat");
+                Config.Save("./Config.dat");
             }
             else
             {
                 ConIO.Write("Configuration exists, loading it...");
-                if (Config.Load("Config.dat"))
+                if (Config.Load("./Config.dat"))
                 {
                     ConIO.Write("Config loaded for: " + Config.Username);
                 }

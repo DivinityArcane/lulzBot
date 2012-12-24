@@ -230,7 +230,7 @@ namespace lulzbot.Extensions
                         if (!Double.TryParse(versions[1], out bdsver))
                             bdsver = 0.2;
 
-                        Types.BotInfo bot_info = new Types.BotInfo(from, data[1], data[2], versions[0], trig, bdsver, Bot.EpochTimestamp);
+                        Types.BotInfo bot_info = new Types.BotInfo(from, data[1], data[2], botver, trig, bdsver, Bot.EpochTimestamp);
 
                         String hashkey = Tools.md5((trig + data[0] + from).ToLower()).ToLower();
 
@@ -302,7 +302,7 @@ namespace lulzbot.Extensions
                         if (!Double.TryParse(versions[1], out bdsver))
                             bdsver = 0.2;
 
-                        Types.BotInfo bot_info = new Types.BotInfo(data[0], data[3], data[1], versions[0], trig, bdsver, Bot.EpochTimestamp);
+                        Types.BotInfo bot_info = new Types.BotInfo(data[0], data[3], data[1], botver, trig, bdsver, Bot.EpochTimestamp);
 
                         if (_botinfo_database.ContainsKey(data[0].ToLower()))
                         {

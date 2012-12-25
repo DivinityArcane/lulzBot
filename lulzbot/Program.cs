@@ -41,9 +41,9 @@ namespace lulzbot
         public const String BotName = "lulzBot";
         public const String Version = "0.2a";
 
-        static void Main(string[] args)
-        {
-            /* Well, first off, the bot is _not_ going to be in the main file.
+        static void Main (string[] args)
+		{
+			/* Well, first off, the bot is _not_ going to be in the main file.
              * Why? That's silly. I don't like doing that. OOP, man. OOP.
              * Anyway, the Bot will be a separate class, and hence, object.
              * 
@@ -57,9 +57,19 @@ namespace lulzbot
              * 
              * Maybe that's just me though. -DivinityArcane */
 
-            // Just a bit of a simple title.
-            ConIO.Write(String.Format("{0}, version {1}", BotName, Version));
-            ConIO.Write("Authors: DivinityArcane, OrrinFox.");
+			// Just a bit of a simple title.
+			ConIO.Write (String.Format ("{0}, version {1}", BotName, Version));
+			ConIO.Write ("Authors: DivinityArcane, OrrinFox.");
+
+			Type _monotype = Type.GetType ("Mono.Runtime");
+			if (null != _monotype)
+			{
+				System.Reflection.MethodInfo _mono_dsp_name = _monotype.GetMethod("GetDisplayName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+				if (null != _mono_dsp_name)
+					OS += String.Format (" (Running in Mono {0})", _mono_dsp_name.Invoke(null, null));
+				else
+					OS += " (Running in Mono)";
+			}
 
             // Check for debug mode!
             if (args.Length >= 1)

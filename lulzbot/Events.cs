@@ -167,16 +167,16 @@ namespace lulzbot
                 int my_privs = 25;
                 Command callback = _commands[cmd_name];
 
-                // Access denied
-                if (callback.MinimumPrivs > my_privs)
-                    return;
-
                 String from = String.Empty;
                 if (packet.Arguments.ContainsKey("from"))
                     from = packet.Arguments["from"];
 
                 if (from.ToLower() == Program.Bot.Config.Owner.ToLower())
                     my_privs = 100;
+
+                // Access denied
+                if (callback.MinimumPrivs > my_privs)
+                    return;
 
                 String[] cmd_args;
                 String msg = packet.Body.Substring(Program.Bot.Config.Trigger.Length);

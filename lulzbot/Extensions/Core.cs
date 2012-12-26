@@ -139,74 +139,77 @@ namespace lulzbot.Extensions
                     return;
                 }
 
-                Types.ChatData data = ChannelData[chan];
+                lock (ChannelData[chan])
+                {
+                    Types.ChatData data = ChannelData[chan];
 
-                // Correct capitalization and #
-                String friendly_name = Tools.FormatChat(data.Name);
+                    // Correct capitalization and #
+                    String friendly_name = Tools.FormatChat(data.Name);
 
-                if (prop == "title")
-                {
-                    if (data.Title.Length < 1)
-                        bot.Say(ns, String.Format("<b>&raquo; Title for {0} is empty.</b>", friendly_name));
-                    else
-                        bot.Say(ns, String.Format("<b>&raquo; Title for {0}:</b><br/>{1}", friendly_name, data.Title));
-                }
-                else if (prop == "topic")
-                {
-                    if (data.Topic.Length < 1)
-                        bot.Say(ns, String.Format("<b>&raquo; Topic for {0} is empty.</b>", friendly_name));
-                    else
-                        bot.Say(ns, String.Format("<b>&raquo; Topic for {0}:</b><br/>{1}", friendly_name, data.Topic));
-                }
-                else if (prop == "members")
-                {
-                    if (data.Members.Count < 1)
-                        bot.Say(ns, String.Format("<b>&raquo; No members for {0}.</b>", friendly_name));
-                    else
+                    if (prop == "title")
                     {
-                        String members = String.Empty;
-
-                        Dictionary<String, List<String>> ordered_list = new Dictionary<String, List<String>>();
-
-                        foreach (Types.ChatMember member in data.Members.Values)
+                        if (data.Title.Length < 1)
+                            bot.Say(ns, String.Format("<b>&raquo; Title for {0} is empty.</b>", friendly_name));
+                        else
+                            bot.Say(ns, String.Format("<b>&raquo; Title for {0}:</b><br/>{1}", friendly_name, data.Title));
+                    }
+                    else if (prop == "topic")
+                    {
+                        if (data.Topic.Length < 1)
+                            bot.Say(ns, String.Format("<b>&raquo; Topic for {0} is empty.</b>", friendly_name));
+                        else
+                            bot.Say(ns, String.Format("<b>&raquo; Topic for {0}:</b><br/>{1}", friendly_name, data.Topic));
+                    }
+                    else if (prop == "members")
+                    {
+                        if (data.Members.Count < 1)
+                            bot.Say(ns, String.Format("<b>&raquo; No members for {0}.</b>", friendly_name));
+                        else
                         {
-                            if (!ordered_list.ContainsKey(member.Privclass))
-                                ordered_list.Add(member.Privclass, new List<String>());
+                            String members = String.Empty;
 
-                            // We split the names to stop it from tabbing people
-                            ordered_list[member.Privclass].Add(member.Name.Substring(0, 1) + "<i></i>" + member.Name.Substring(1));
-                        }
+                            Dictionary<String, List<String>> ordered_list = new Dictionary<String, List<String>>();
 
-                        foreach (Types.Privclass privclass in data.Privclasses.Values)
-                        {
-                            if (!ordered_list.ContainsKey(privclass.Name))
+                            foreach (Types.ChatMember member in data.Members.Values)
                             {
-                                members += String.Format("<br/><b>{0}</b>: None.", privclass.Name);
-                                continue;
+                                if (!ordered_list.ContainsKey(member.Privclass))
+                                    ordered_list.Add(member.Privclass, new List<String>());
+
+                                // We split the names to stop it from tabbing people
+                                ordered_list[member.Privclass].Add(member.Name.Substring(0, 1) + "<i></i>" + member.Name.Substring(1));
                             }
 
-                            ordered_list[privclass.Name].Sort();
+                            foreach (Types.Privclass privclass in data.Privclasses.Values)
+                            {
+                                if (!ordered_list.ContainsKey(privclass.Name))
+                                {
+                                    members += String.Format("<br/><b>{0}</b>: None.", privclass.Name);
+                                    continue;
+                                }
 
-                            members += String.Format("<br/><b>{0}</b>: <b>[</b>{1}<b>]</b>", privclass.Name, String.Join("<b>], [</b>", ordered_list[privclass.Name]));
+                                ordered_list[privclass.Name].Sort();
+
+                                members += String.Format("<br/><b>{0}</b>: <b>[</b>{1}<b>]</b>", privclass.Name, String.Join("<b>], [</b>", ordered_list[privclass.Name]));
+                            }
+
+                            bot.Say(ns, String.Format("<b>&raquo; {0} member(s) in {1}:</b>{2}", data.Members.Count, friendly_name, members));
                         }
-
-                        bot.Say(ns, String.Format("<b>&raquo; {0} member(s) in {1}:</b>{2}", data.Members.Count, friendly_name, members));
                     }
-                }
-                else if (prop == "privclasses")
-                {
-                    if (data.Privclasses.Count < 1)
-                        bot.Say(ns, String.Format("<b>&raquo; No privclasses for {0}.</b>", friendly_name));
-                    else
+                    else if (prop == "privclasses")
                     {
-                        String privclasses = String.Empty;
-
-                        foreach (Types.Privclass pc in data.Privclasses.Values)
+                        if (data.Privclasses.Count < 1)
+                            bot.Say(ns, String.Format("<b>&raquo; No privclasses for {0}.</b>", friendly_name));
+                        else
                         {
-                            privclasses += String.Format("<br/>&raquo; {0}: {1}", pc.Order, pc.Name);
-                        }
+                            String privclasses = String.Empty;
 
-                        bot.Say(ns, String.Format("<b>&raquo; Privclasses in {0}:</b>{1}", friendly_name, privclasses));
+                            foreach (Types.Privclass pc in data.Privclasses.Values)
+                            {
+                                privclasses += String.Format("<br/>&raquo; {0}: {1}", pc.Order, pc.Name);
+                            }
+
+                            bot.Say(ns, String.Format("<b>&raquo; Privclasses in {0}:</b>{1}", friendly_name, privclasses));
+                        }
                     }
                 }
             }
@@ -229,7 +232,11 @@ namespace lulzbot.Extensions
                     return;
                 }
 
-                CommandChannels["join"].Add(ns);
+                lock (CommandChannels["join"])
+                {
+                    CommandChannels["join"].Add(ns);
+                }
+
                 bot.Join(args[1]);
             }
         }
@@ -251,7 +258,11 @@ namespace lulzbot.Extensions
                     return;
                 }
 
-                CommandChannels["part"].Add(ns);
+                lock (CommandChannels["part"])
+                {
+                    CommandChannels["part"].Add(ns);
+                }
+
                 bot.Part(args[1]);
             }
         }
@@ -344,32 +355,41 @@ namespace lulzbot.Extensions
                 ConIO.Write(String.Format("** Joined [{0}]", packet.Arguments["e"]), Tools.FormatChat(packet.Parameter));
 
                 // Initialize channel data
-                if (!ChannelData.ContainsKey(packet.Parameter.ToLower()))
+                lock (ChannelData)
                 {
-                    ChannelData.Add(packet.Parameter.ToLower(), new Types.ChatData());
-                    ChannelData[packet.Parameter.ToLower()].Name = packet.Parameter;
+                    if (!ChannelData.ContainsKey(packet.Parameter.ToLower()))
+                    {
+                        ChannelData.Add(packet.Parameter.ToLower(), new Types.ChatData());
+                        ChannelData[packet.Parameter.ToLower()].Name = packet.Parameter;
+                    }
                 }
 
-                if (CommandChannels["join"].Count != 0)
+                lock (CommandChannels["join"])
                 {
-                    String chan = CommandChannels["join"][0];
+                    if (CommandChannels["join"].Count != 0)
+                    {
+                        String chan = CommandChannels["join"][0];
 
-                    bot.Say(chan, String.Format("<b>&raquo; Joined {0} [ok]</b>", Tools.FormatChat(packet.Parameter)));
+                        bot.Say(chan, String.Format("<b>&raquo; Joined {0} [ok]</b>", Tools.FormatChat(packet.Parameter)));
 
-                    CommandChannels["join"].RemoveAt(0);
+                        CommandChannels["join"].RemoveAt(0);
+                    }
                 }
             }
             else
             {
                 ConIO.Write(String.Format("** Failed to join [{0}]", packet.Arguments["e"]), Tools.FormatChat(packet.Parameter));
 
-                if (CommandChannels["join"].Count != 0)
+                lock (CommandChannels["join"])
                 {
-                    String chan = CommandChannels["join"][0];
+                    if (CommandChannels["join"].Count != 0)
+                    {
+                        String chan = CommandChannels["join"][0];
 
-                    bot.Say(chan, String.Format("<b>&raquo; Failed to join {0} [{1}]</b>", Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
+                        bot.Say(chan, String.Format("<b>&raquo; Failed to join {0} [{1}]</b>", Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
 
-                    CommandChannels["join"].RemoveAt(0);
+                        CommandChannels["join"].RemoveAt(0);
+                    }
                 }
             }
         }
@@ -398,29 +418,38 @@ namespace lulzbot.Extensions
                 }
 
                 // Remove channel data
-                if (ChannelData.ContainsKey(packet.Parameter.ToLower()))
-                    ChannelData.Remove(packet.Parameter.ToLower());
-
-                if (CommandChannels["part"].Count != 0)
+                lock (ChannelData)
                 {
-                    String chan = CommandChannels["part"][0];
+                    if (ChannelData.ContainsKey(packet.Parameter.ToLower()))
+                        ChannelData.Remove(packet.Parameter.ToLower());
+                }
 
-                    bot.Say(chan, String.Format("<b>&raquo; Left {0} [ok]</b>", Tools.FormatChat(packet.Parameter)));
+                lock (CommandChannels["part"])
+                {
+                    if (CommandChannels["part"].Count != 0)
+                    {
+                        String chan = CommandChannels["part"][0];
 
-                    CommandChannels["part"].RemoveAt(0);
+                        bot.Say(chan, String.Format("<b>&raquo; Left {0} [ok]</b>", Tools.FormatChat(packet.Parameter)));
+
+                        CommandChannels["part"].RemoveAt(0);
+                    }
                 }
             }
             else
             {
                 ConIO.Write(String.Format("** Failed to leave [{0}]", packet.Arguments["e"]), Tools.FormatChat(packet.Parameter));
 
-                if (CommandChannels["part"].Count != 0)
+                lock (CommandChannels["part"])
                 {
-                    String chan = CommandChannels["part"][0];
+                    if (CommandChannels["part"].Count != 0)
+                    {
+                        String chan = CommandChannels["part"][0];
 
-                    bot.Say(chan, String.Format("<b>&raquo; Failed to leave {0} [{1}]</b>", Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
+                        bot.Say(chan, String.Format("<b>&raquo; Failed to leave {0} [{1}]</b>", Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
 
-                    CommandChannels["part"].RemoveAt(0);
+                        CommandChannels["part"].RemoveAt(0);
+                    }
                 }
             }
         }
@@ -438,68 +467,74 @@ namespace lulzbot.Extensions
             String ns = packet.Parameter;
             String type = packet.Arguments["p"];
 
-            if (!ChannelData.ContainsKey(ns.ToLower()))
+            lock (ChannelData)
             {
-                ChannelData.Add(ns.ToLower(), new Types.ChatData());
-                ChannelData[ns.ToLower()].Name = ns;
-            }
-
-            if (type == "topic")
-                ChannelData[ns.ToLower()].Topic = packet.Body;
-            else if (type == "title")
-                ChannelData[ns.ToLower()].Title = packet.Body;
-            else if (type == "privclasses")
-            {
-                // Ensure we don't run into duplicates.
-                ChannelData[ns.ToLower()].Privclasses.Clear();
-
-                foreach (String pc in packet.Body.Split('\n'))
+                if (!ChannelData.ContainsKey(ns.ToLower()))
                 {
-                    if (pc.Length < 3 || !pc.Contains(":"))
-                        continue;
-
-                    Types.Privclass privclass = new Types.Privclass();
-
-                    privclass.Order = Convert.ToByte(pc.Split(':')[0]);
-                    privclass.Name = pc.Split(':')[1];
-
-                    ChannelData[ns.ToLower()].Privclasses.Add(privclass.Name.ToLower(), privclass);
+                    ChannelData.Add(ns.ToLower(), new Types.ChatData());
+                    ChannelData[ns.ToLower()].Name = ns;
                 }
             }
-            else if (type == "members")
+
+            lock (ChannelData[ns.ToLower()])
             {
-                // Ensure we don't run into duplicates.
-                ChannelData[ns.ToLower()].Members.Clear();
-
-                String[] data = packet.Body.Split('\n');
-
-                for (int x = 0; x < data.Length; x++)
+                if (type == "topic")
+                    ChannelData[ns.ToLower()].Topic = packet.Body;
+                else if (type == "title")
+                    ChannelData[ns.ToLower()].Title = packet.Body;
+                else if (type == "privclasses")
                 {
-                    if (data[x].Length < 3 || !data[x].StartsWith("member") || x + 6 >= data.Length)
-                        continue;
+                    // Ensure we don't run into duplicates.
+                    ChannelData[ns.ToLower()].Privclasses.Clear();
 
-                    Types.ChatMember member = new Types.ChatMember();
+                    foreach (String pc in packet.Body.Split('\n'))
+                    {
+                        if (pc.Length < 3 || !pc.Contains(":"))
+                            continue;
 
-                    member.Name         = data[x].Substring(7);
+                        Types.Privclass privclass = new Types.Privclass();
 
-                    // We get duplicates on multiple connections.
-                    if (ChannelData[ns.ToLower()].Members.ContainsKey(member.Name.ToLower()))
-                        continue;
+                        privclass.Order = Convert.ToByte(pc.Split(':')[0]);
+                        privclass.Name = pc.Split(':')[1];
 
-                    member.Privclass    = data[++x].Substring(3);
+                        ChannelData[ns.ToLower()].Privclasses.Add(privclass.Name.ToLower(), privclass);
+                    }
+                }
+                else if (type == "members")
+                {
+                    // Ensure we don't run into duplicates.
+                    ChannelData[ns.ToLower()].Members.Clear();
 
-                    // We don't store the user icon. It's useless to us. Increment x anyway.
-                    ++x;
+                    String[] data = packet.Body.Split('\n');
 
-                    member.Symbol   = data[++x].Substring(7);
-                    member.RealName = data[++x].Substring(9);
-                    member.TypeName = data[++x].Substring(9);
-                    member.GPC      = data[++x].Substring(4);
+                    for (int x = 0; x < data.Length; x++)
+                    {
+                        if (data[x].Length < 3 || !data[x].StartsWith("member") || x + 6 >= data.Length)
+                            continue;
 
-                    ChannelData[ns.ToLower()].Members.Add(member.Name.ToLower(), member);
+                        Types.ChatMember member = new Types.ChatMember();
 
-                    // Increment x for the blank line.
-                    x++;
+                        member.Name = data[x].Substring(7);
+
+                        // We get duplicates on multiple connections.
+                        if (ChannelData[ns.ToLower()].Members.ContainsKey(member.Name.ToLower()))
+                            continue;
+
+                        member.Privclass = data[++x].Substring(3);
+
+                        // We don't store the user icon. It's useless to us. Increment x anyway.
+                        ++x;
+
+                        member.Symbol = data[++x].Substring(7);
+                        member.RealName = data[++x].Substring(9);
+                        member.TypeName = data[++x].Substring(9);
+                        member.GPC = data[++x].Substring(4);
+
+                        ChannelData[ns.ToLower()].Members.Add(member.Name.ToLower(), member);
+
+                        // Increment x for the blank line.
+                        x++;
+                    }
                 }
             }
         }
@@ -572,18 +607,21 @@ namespace lulzbot.Extensions
                     ConIO.Write(String.Format("** {0}{1} joined.", packet.Arguments["symbol"], packet.SubParameter), Tools.FormatChat(packet.Parameter));
 
             // Update channel data
-            if (!ChannelData[packet.Parameter.ToLower()].Members.ContainsKey(packet.SubParameter.ToLower()))
+            lock (ChannelData[packet.Parameter.ToLower()])
             {
-                Types.ChatMember member = new Types.ChatMember();
+                if (!ChannelData[packet.Parameter.ToLower()].Members.ContainsKey(packet.SubParameter.ToLower()))
+                {
+                    Types.ChatMember member = new Types.ChatMember();
 
-                member.Name         = packet.SubParameter;
-                member.Privclass    = packet.Arguments["pc"];
-                member.RealName     = packet.Arguments["realname"];
-                member.TypeName     = packet.Arguments["typename"];
-                member.Symbol       = packet.Arguments["symbol"];
-                member.GPC          = packet.Arguments["gpc"];
+                    member.Name = packet.SubParameter;
+                    member.Privclass = packet.Arguments["pc"];
+                    member.RealName = packet.Arguments["realname"];
+                    member.TypeName = packet.Arguments["typename"];
+                    member.Symbol = packet.Arguments["symbol"];
+                    member.GPC = packet.Arguments["gpc"];
 
-                ChannelData[packet.Parameter.ToLower()].Members.Add(member.Name.ToLower(), member);
+                    ChannelData[packet.Parameter.ToLower()].Members.Add(member.Name.ToLower(), member);
+                }
             }
         }
 
@@ -597,9 +635,12 @@ namespace lulzbot.Extensions
                 ConIO.Write(String.Format("** {0} left.", packet.SubParameter), Tools.FormatChat(packet.Parameter));
 
             // Update channel data
-            if (ChannelData[packet.Parameter.ToLower()].Members.ContainsKey(packet.SubParameter.ToLower()))
+            lock (ChannelData[packet.Parameter.ToLower()])
             {
-                ChannelData[packet.Parameter.ToLower()].Members.Remove(packet.SubParameter.ToLower());
+                if (ChannelData[packet.Parameter.ToLower()].Members.ContainsKey(packet.SubParameter.ToLower()))
+                {
+                    ChannelData[packet.Parameter.ToLower()].Members.Remove(packet.SubParameter.ToLower());
+                }
             }
         }
 
@@ -613,9 +654,12 @@ namespace lulzbot.Extensions
                 ConIO.Write(String.Format("*** {0} has been made a member of {1} by {2}", packet.SubParameter, packet.Arguments["pc"], packet.Arguments["by"]), Tools.FormatChat(packet.Parameter));
 
             // Update channel data
-            if (ChannelData[packet.Parameter.ToLower()].Members.ContainsKey(packet.SubParameter.ToLower()))
+            lock (ChannelData[packet.Parameter.ToLower()])
             {
-                ChannelData[packet.Parameter.ToLower()].Members[packet.SubParameter.ToLower()].Privclass = packet.Arguments["pc"];
+                if (ChannelData[packet.Parameter.ToLower()].Members.ContainsKey(packet.SubParameter.ToLower()))
+                {
+                    ChannelData[packet.Parameter.ToLower()].Members[packet.SubParameter.ToLower()].Privclass = packet.Arguments["pc"];
+                }
             }
         }
 
@@ -632,9 +676,12 @@ namespace lulzbot.Extensions
                     ConIO.Write(String.Format("*** {0} has been kicked by {1}", packet.SubParameter, packet.Arguments["by"]), Tools.FormatChat(packet.Parameter));
 
             // Update channel data
-            if (ChannelData[packet.Parameter.ToLower()].Members.ContainsKey(packet.SubParameter.ToLower()))
+            lock (ChannelData[packet.Parameter.ToLower()])
             {
-                ChannelData[packet.Parameter.ToLower()].Members.Remove(packet.SubParameter.ToLower());
+                if (ChannelData[packet.Parameter.ToLower()].Members.ContainsKey(packet.SubParameter.ToLower()))
+                {
+                    ChannelData[packet.Parameter.ToLower()].Members.Remove(packet.SubParameter.ToLower());
+                }
             }
         }
 
@@ -643,95 +690,97 @@ namespace lulzbot.Extensions
         /// </summary>
         public void evt_recv_admin(Bot bot, dAmnPacket packet)
         {
-            if (packet.SubParameter == "create")
+            lock (ChannelData[packet.Parameter.ToLower()])
             {
-                // Don't display DataShare messages.
-                if (packet.Parameter.ToLower() != "chat:datashare")
-                    ConIO.Write(String.Format("*** {0} created privclass {1} with: {2}", packet.Arguments["by"], packet.Arguments["name"], packet.Arguments["privs"]), Tools.FormatChat(packet.Parameter));
-
-                // Update channel data
-                if (!ChannelData[packet.Parameter.ToLower()].Privclasses.ContainsKey(packet.Arguments["name"].ToLower()))
+                if (packet.SubParameter == "create")
                 {
-                    Types.Privclass privclass = new Types.Privclass();
-                    privclass.Name = packet.Arguments["name"];
+                    // Don't display DataShare messages.
+                    if (packet.Parameter.ToLower() != "chat:datashare")
+                        ConIO.Write(String.Format("*** {0} created privclass {1} with: {2}", packet.Arguments["by"], packet.Arguments["name"], packet.Arguments["privs"]), Tools.FormatChat(packet.Parameter));
 
-                    // Gotta extract the order!
-                    int order_pos = packet.Arguments["privs"].IndexOf("order=") + 6;
-                    int sp_pos = packet.Arguments["privs"].IndexOf(' ', order_pos);
+                    // Update channel data
+                    if (!ChannelData[packet.Parameter.ToLower()].Privclasses.ContainsKey(packet.Arguments["name"].ToLower()))
+                    {
+                        Types.Privclass privclass = new Types.Privclass();
+                        privclass.Name = packet.Arguments["name"];
 
-                    // No space? It was only the order then
-                    if (sp_pos == -1)
-                        sp_pos = packet.Arguments["privs"].Length - (order_pos - 6);
-                    
-                    privclass.Order = Convert.ToByte(packet.Arguments["privs"].Substring(order_pos, sp_pos - order_pos));
-                    
-                    ChannelData[packet.Parameter.ToLower()].Privclasses.Add(privclass.Name.ToLower(), privclass);
+                        // Gotta extract the order!
+                        int order_pos = packet.Arguments["privs"].IndexOf("order=") + 6;
+                        int sp_pos = packet.Arguments["privs"].IndexOf(' ', order_pos);
+
+                        // No space? It was only the order then
+                        if (sp_pos == -1)
+                            sp_pos = packet.Arguments["privs"].Length - (order_pos - 6);
+
+                        privclass.Order = Convert.ToByte(packet.Arguments["privs"].Substring(order_pos, sp_pos - order_pos));
+
+                        ChannelData[packet.Parameter.ToLower()].Privclasses.Add(privclass.Name.ToLower(), privclass);
+                    }
                 }
-            }
-            else if (packet.SubParameter == "update")
-            {
-                // Don't display DataShare messages.
-                if (packet.Parameter.ToLower() != "chat:datashare")
-                    ConIO.Write(String.Format("*** {0} created privclass {1} with: {2}", packet.Arguments["by"], packet.Arguments["name"], packet.Arguments["privs"]), Tools.FormatChat(packet.Parameter));
-
-                // Update channel data
-                if (ChannelData[packet.Parameter.ToLower()].Privclasses.ContainsKey(packet.Arguments["name"].ToLower()))
+                else if (packet.SubParameter == "update")
                 {
-                    // Gotta extract the order!
-                    int order_pos = packet.Arguments["privs"].IndexOf("order=") + 6;
-                    int sp_pos = packet.Arguments["privs"].IndexOf(' ', order_pos);
+                    // Don't display DataShare messages.
+                    if (packet.Parameter.ToLower() != "chat:datashare")
+                        ConIO.Write(String.Format("*** {0} created privclass {1} with: {2}", packet.Arguments["by"], packet.Arguments["name"], packet.Arguments["privs"]), Tools.FormatChat(packet.Parameter));
 
-                    // No space? It was only the order then
-                    if (sp_pos == -1)
-                        sp_pos = packet.Arguments["privs"].Length - (order_pos - 6);
+                    // Update channel data
+                    if (ChannelData[packet.Parameter.ToLower()].Privclasses.ContainsKey(packet.Arguments["name"].ToLower()))
+                    {
+                        // Gotta extract the order!
+                        int order_pos = packet.Arguments["privs"].IndexOf("order=") + 6;
+                        int sp_pos = packet.Arguments["privs"].IndexOf(' ', order_pos);
 
-                    ChannelData[packet.Parameter.ToLower()].Privclasses[packet.Arguments["name"].ToLower()].Order = Convert.ToByte(packet.Arguments["privs"].Substring(order_pos, sp_pos - order_pos));
+                        // No space? It was only the order then
+                        if (sp_pos == -1)
+                            sp_pos = packet.Arguments["privs"].Length - (order_pos - 6);
+
+                        ChannelData[packet.Parameter.ToLower()].Privclasses[packet.Arguments["name"].ToLower()].Order = Convert.ToByte(packet.Arguments["privs"].Substring(order_pos, sp_pos - order_pos));
+                    }
                 }
-            }
-            else if (packet.SubParameter == "rename")
-            {
-                // Don't display DataShare messages.
-                if (packet.Parameter.ToLower() != "chat:datashare")
-                    ConIO.Write(String.Format("*** {0} renamed privclass {1} to {2}", packet.Arguments["by"], packet.Arguments["prev"], packet.Arguments["name"]), Tools.FormatChat(packet.Parameter));
-
-                // Update channel data
-                if (ChannelData[packet.Parameter.ToLower()].Privclasses.ContainsKey(packet.Arguments["prev"].ToLower()))
+                else if (packet.SubParameter == "rename")
                 {
-                    Types.Privclass privclass = ChannelData[packet.Parameter.ToLower()].Privclasses[packet.Arguments["prev"].ToLower()];
+                    // Don't display DataShare messages.
+                    if (packet.Parameter.ToLower() != "chat:datashare")
+                        ConIO.Write(String.Format("*** {0} renamed privclass {1} to {2}", packet.Arguments["by"], packet.Arguments["prev"], packet.Arguments["name"]), Tools.FormatChat(packet.Parameter));
 
-                    privclass.Name = packet.Arguments["name"];
+                    // Update channel data
+                    if (ChannelData[packet.Parameter.ToLower()].Privclasses.ContainsKey(packet.Arguments["prev"].ToLower()))
+                    {
+                        Types.Privclass privclass = ChannelData[packet.Parameter.ToLower()].Privclasses[packet.Arguments["prev"].ToLower()];
 
-                    ChannelData[packet.Parameter.ToLower()].Privclasses.Add(privclass.Name.ToLower(), privclass);
-                    ChannelData[packet.Parameter.ToLower()].Privclasses.Remove(packet.Arguments["prev"].ToLower());
+                        privclass.Name = packet.Arguments["name"];
+
+                        ChannelData[packet.Parameter.ToLower()].Privclasses.Add(privclass.Name.ToLower(), privclass);
+                        ChannelData[packet.Parameter.ToLower()].Privclasses.Remove(packet.Arguments["prev"].ToLower());
+                    }
                 }
-            }
-            else if (packet.SubParameter == "move")
-            {
-                // Don't display DataShare messages.
-                if (packet.Parameter.ToLower() != "chat:datashare")
-                    ConIO.Write(String.Format("*** {0} moved all users of privclass {1} to {2}. {3} user(s) were affected", packet.Arguments["by"], packet.Arguments["prev"], packet.Arguments["name"], packet.Arguments["n"]), Tools.FormatChat(packet.Parameter));
-            }
-            else if (packet.SubParameter == "remove")
-            {
-                // Don't display DataShare messages.
-                if (packet.Parameter.ToLower() != "chat:datashare")
-                    ConIO.Write(String.Format("*** {0} removed privclass {1}. {2} user(s) were affected", packet.Arguments["by"], packet.Arguments["name"], packet.Arguments["n"]), Tools.FormatChat(packet.Parameter));
-
-                // Update channel data
-                if (ChannelData[packet.Parameter.ToLower()].Privclasses.ContainsKey(packet.Arguments["name"].ToLower()))
+                else if (packet.SubParameter == "move")
                 {
-                    ChannelData[packet.Parameter.ToLower()].Privclasses.Remove(packet.Arguments["name"].ToLower());
+                    // Don't display DataShare messages.
+                    if (packet.Parameter.ToLower() != "chat:datashare")
+                        ConIO.Write(String.Format("*** {0} moved all users of privclass {1} to {2}. {3} user(s) were affected", packet.Arguments["by"], packet.Arguments["prev"], packet.Arguments["name"], packet.Arguments["n"]), Tools.FormatChat(packet.Parameter));
                 }
-            }
-            else if (packet.SubParameter == "privclass")
-            {
-                // Don't display DataShare messages.
-                if (packet.Parameter.ToLower() != "chat:datashare")
-                    ConIO.Write(String.Format("*** Failed to {0} privclass: {1}", packet.Arguments["p"], packet.Arguments["p"]), Tools.FormatChat(packet.Parameter));
+                else if (packet.SubParameter == "remove")
+                {
+                    // Don't display DataShare messages.
+                    if (packet.Parameter.ToLower() != "chat:datashare")
+                        ConIO.Write(String.Format("*** {0} removed privclass {1}. {2} user(s) were affected", packet.Arguments["by"], packet.Arguments["name"], packet.Arguments["n"]), Tools.FormatChat(packet.Parameter));
+
+                    // Update channel data
+                    if (ChannelData[packet.Parameter.ToLower()].Privclasses.ContainsKey(packet.Arguments["name"].ToLower()))
+                    {
+                        ChannelData[packet.Parameter.ToLower()].Privclasses.Remove(packet.Arguments["name"].ToLower());
+                    }
+                }
+                else if (packet.SubParameter == "privclass")
+                {
+                    // Don't display DataShare messages.
+                    if (packet.Parameter.ToLower() != "chat:datashare")
+                        ConIO.Write(String.Format("*** Failed to {0} privclass: {1}", packet.Arguments["p"], packet.Arguments["p"]), Tools.FormatChat(packet.Parameter));
+                }
             }
 
             // We don't need output for SHOW
-
         }
 
         /// <summary>
@@ -749,8 +798,11 @@ namespace lulzbot.Extensions
             }
 
             // In the event that we cannot (or will not) rejoin, remove channel data.
-            if (ChannelData.ContainsKey(packet.Parameter.ToLower()))
-                ChannelData.Remove(packet.Parameter.ToLower());
+            lock (ChannelData)
+            {
+                if (ChannelData.ContainsKey(packet.Parameter.ToLower()))
+                    ChannelData.Remove(packet.Parameter.ToLower());
+            }
             
             // Rejoin!
             if (bot.AutoReJoin)

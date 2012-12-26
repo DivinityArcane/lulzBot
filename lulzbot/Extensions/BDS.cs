@@ -43,13 +43,13 @@ namespace lulzbot.Extensions
                 _clientinfo_database = new Dictionary<string, Types.ClientInfo>();
 
             if (Program.Debug)
-                ConIO.Write(String.Format("Loaded databases. Got {0} BotDEF entries, {1} BotINFO entries, and {2} ClientINFO entries.", _botdef_database.Count, _botinfo_database.Count, _clientinfo_database.Count));
+                ConIO.Write(String.Format("Loaded databases. Got {0} BotDEF entries, {1} BotINFO entries, and {2} ClientINFO entries.", _botdef_database.Count, _botinfo_database.Count, _clientinfo_database.Count), "BDS");
 
             // We will save on a timer. 
             if (AutoSave)
             {
-                // Saves once per minute.
-                Timer save_timer = new Timer(60000);
+                // Saves once per five minutes.
+                Timer save_timer = new Timer(300000);
 
                 save_timer.Elapsed += delegate { if (BDS.AutoSave) BDS.Save(); };
 
@@ -84,16 +84,19 @@ namespace lulzbot.Extensions
         /// Checks whether the specified username is a policebot
         /// </summary>
         /// <param name="username">Username to check</param>
+        /// <param name="channel">Channel to check. Default: #DataShare</param>
         /// <returns>true if PoliceBot, false otherwise.</returns>
-        private static bool IsPoliceBot(String username)
+        private static bool IsPoliceBot(String username, String channel = "chat:datashare")
         {
-            if (!Core.ChannelData.ContainsKey("chat:datashare"))
+            channel = channel.ToLower();
+
+            if (!Core.ChannelData.ContainsKey(channel))
                 return false;
 
-            if (!Core.ChannelData["chat:datashare"].Members.ContainsKey(username.ToLower()))
+            if (!Core.ChannelData[channel].Members.ContainsKey(username.ToLower()))
                 return false;
 
-            if (Core.ChannelData["chat:datashare"].Members[username.ToLower()].Privclass.ToLower() == "policebot")
+            if (Core.ChannelData[channel].Members[username.ToLower()].Privclass.ToLower() == "policebot")
                 return true;
             else
                 return false;
@@ -107,7 +110,7 @@ namespace lulzbot.Extensions
             // First arg is the command
             if (args.Length == 1)
             {
-                bot.Say(ns, "Usage message goes here.");
+                bot.Say(ns, String.Format("<b>&raquo; Usage:</b><br/>&raquo; {0}bot info [username]<br/>&raquo; {0}bot count", bot.Config.Trigger));
             }
             else
             {
@@ -129,7 +132,11 @@ namespace lulzbot.Extensions
                         }
                         else
                         {
-                            _info_requests.Add(args[2].ToLower(), ns);
+                            lock (_info_requests)
+                            {
+                                _info_requests.Add(args[2].ToLower(), ns);
+                            }
+
                             bot.NPSay("chat:datashare", "BDS:BOTCHECK:REQUEST:" + args[2]);
                             bot.Say(ns, String.Format("{0}: {1} isn't in my database yet. Requesting information, please stand by...", from, args[2]));
                         }
@@ -161,15 +168,15 @@ namespace lulzbot.Extensions
             if (!packet.Body.Contains(":"))
                 return;
 
-            String msg = packet.Body;
-            String[] bits = msg.Split(':');
-            String ns = packet.Parameter;
-            String from = packet.Arguments["from"];
+            String msg      = packet.Body;
+            String[] bits   = msg.Split(':');
+            String ns       = packet.Parameter;
+            String from     = packet.Arguments["from"];
             String username = bot.Config.Username;
-            String trigger = bot.Config.Trigger;
-            String owner = bot.Config.Owner;
+            String trigger  = bot.Config.Trigger;
+            String owner    = bot.Config.Owner;
 
-            bool from_policebot = IsPoliceBot(from);
+            bool from_policebot = IsPoliceBot(from, packet.Parameter);
 
             if (bits[0] == "BDS")
             {
@@ -243,19 +250,22 @@ namespace lulzbot.Extensions
                         }
                         else
                         {
-                            if (_botinfo_database.ContainsKey(from.ToLower()))
+                            lock (_botinfo_database)
                             {
-                                _botinfo_database[from.ToLower()] = bot_info;
+                                if (_botinfo_database.ContainsKey(from.ToLower()))
+                                {
+                                    _botinfo_database[from.ToLower()] = bot_info;
 
-                                if (Program.Debug)
-                                    ConIO.Write("Updated database for bot: " + from, "BDS");
-                            }
-                            else
-                            {
-                                _botinfo_database.Add(from.ToLower(), bot_info);
+                                    if (Program.Debug)
+                                        ConIO.Write("Updated database for bot: " + from, "BDS");
+                                }
+                                else
+                                {
+                                    _botinfo_database.Add(from.ToLower(), bot_info);
 
-                                if (Program.Debug)
-                                    ConIO.Write("Added bot to database: " + from, "BDS");
+                                    if (Program.Debug)
+                                        ConIO.Write("Added bot to database: " + from, "BDS");
+                                }
                             }
                         }
 
@@ -305,33 +315,39 @@ namespace lulzbot.Extensions
 
                         Types.BotInfo bot_info = new Types.BotInfo(data[0], data[3], data[1], botver, trig, bdsver, Bot.EpochTimestamp);
 
-                        if (_botinfo_database.ContainsKey(data[0].ToLower()))
+                        lock (_botinfo_database)
                         {
-                            _botinfo_database[data[0].ToLower()] = bot_info;
+                            if (_botinfo_database.ContainsKey(data[0].ToLower()))
+                            {
+                                _botinfo_database[data[0].ToLower()] = bot_info;
 
-                            if (Program.Debug)
-                                ConIO.Write("Updated database for bot: " + data[0], "BDS");
+                                if (Program.Debug)
+                                    ConIO.Write("Updated database for bot: " + data[0], "BDS");
+                            }
+                            else
+                            {
+                                _botinfo_database.Add(data[0].ToLower(), bot_info);
+
+                                if (Program.Debug)
+                                    ConIO.Write("Added bot to database: " + data[0], "BDS");
+                            }
                         }
-                        else
+
+                        lock (_info_requests)
                         {
-                            _botinfo_database.Add(data[0].ToLower(), bot_info);
+                            if (_info_requests.ContainsKey(data[0].ToLower()))
+                            {
+                                String chan = _info_requests[data[0].ToLower()];
+                                _info_requests.Remove(data[0].ToLower());
 
-                            if (Program.Debug)
-                                ConIO.Write("Added bot to database: " + data[0], "BDS");
-                        }
-
-                        if (_info_requests.ContainsKey(data[0].ToLower()))
-                        {
-                            String chan = _info_requests[data[0].ToLower()];
-                            _info_requests.Remove(data[0].ToLower());
-
-                            String output = String.Format("<b>&raquo; Information on :dev{0}:</b><br/>", bot_info.Name);
-                            output += String.Format("<b>Bot type:</b> {0}<br/>", bot_info.Type);
-                            output += String.Format("<b>Bot version:</b> {0}<br/>", bot_info.Version);
-                            output += String.Format("<b>Bot owner:</b> :dev{0}:<br/>", bot_info.Owner);
-                            output += String.Format("<b>Bot trigger:</b> <b><code>{0}</code></b><br/>", bot_info.Trigger.Replace("&", "&amp;"));
-                            output += String.Format("<b>BDS version:</b> {0}<br/>", bot_info.BDSVersion);
-                            bot.Say(chan, output);
+                                String output = String.Format("<b>&raquo; Information on :dev{0}:</b><br/>", bot_info.Name);
+                                output += String.Format("<b>Bot type:</b> {0}<br/>", bot_info.Type);
+                                output += String.Format("<b>Bot version:</b> {0}<br/>", bot_info.Version);
+                                output += String.Format("<b>Bot owner:</b> :dev{0}:<br/>", bot_info.Owner);
+                                output += String.Format("<b>Bot trigger:</b> <b><code>{0}</code></b><br/>", bot_info.Trigger.Replace("&", "&amp;"));
+                                output += String.Format("<b>BDS version:</b> {0}<br/>", bot_info.BDSVersion);
+                                bot.Say(chan, output);
+                            }
                         }
                     }
                     else if (bits.Length >= 4 && bits[2] == "NODATA")
@@ -340,11 +356,14 @@ namespace lulzbot.Extensions
                         if (!from_policebot)
                             return;
 
-                        if (_info_requests.ContainsKey(bits[3].ToLower()))
+                        lock (_info_requests)
                         {
-                            String chan = _info_requests[bits[3].ToLower()];
-                            _info_requests.Remove(bits[3].ToLower());
-                            bot.Say(chan, "<b>&raquo; Bot doesn't exist:</b> " + bits[3]);
+                            if (_info_requests.ContainsKey(bits[3].ToLower()))
+                            {
+                                String chan = _info_requests[bits[3].ToLower()];
+                                _info_requests.Remove(bits[3].ToLower());
+                                bot.Say(chan, "<b>&raquo; Bot doesn't exist:</b> " + bits[3]);
+                            }
                         }
                     }
                     else if (bits.Length >= 4 && bits[2] == "BADBOT")
@@ -358,11 +377,14 @@ namespace lulzbot.Extensions
 
                         String[] data = bits[3].Split(',');
 
-                        if (_info_requests.ContainsKey(data[0].ToLower()))
+                        lock (_info_requests)
                         {
-                            String chan = _info_requests[data[0].ToLower()];
-                            _info_requests.Remove(data[0].ToLower());
-                            bot.Say(chan, "<b>&raquo; Bot is banned:</b> " + data[0]);
+                            if (_info_requests.ContainsKey(data[0].ToLower()))
+                            {
+                                String chan = _info_requests[data[0].ToLower()];
+                                _info_requests.Remove(data[0].ToLower());
+                                bot.Say(chan, "<b>&raquo; Bot is banned:</b> " + data[0]);
+                            }
                         }
 
                         // Maybe store this later.

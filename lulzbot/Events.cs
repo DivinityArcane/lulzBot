@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 
 namespace lulzbot
 {
@@ -60,8 +61,11 @@ namespace lulzbot
         /// <param name="event_name">Event name. i.e. recv_msg, do_something</param>
         private static void AddEventType(String event_name)
         {
-            if (!_events.ContainsKey(event_name))
-                _events.Add(event_name, new List<Event>());
+            lock (_events)
+            {
+                if (!_events.ContainsKey(event_name))
+                    _events.Add(event_name, new List<Event>());
+            }
         }
 
         /// <summary>
@@ -71,13 +75,16 @@ namespace lulzbot
         /// <param name="callback">Event object</param>
         public static void AddEvent(String event_name, Event callback)
         {
-            if (_events.ContainsKey(event_name))
+            lock (_events)
             {
-                _events[event_name].Add(callback);
-            }
-            else
-            {
-                ConIO.Write("Invalid event: " + event_name, "Events");
+                if (_events.ContainsKey(event_name))
+                {
+                    _events[event_name].Add(callback);
+                }
+                else
+                {
+                    ConIO.Write("Invalid event: " + event_name, "Events");
+                }
             }
         }
 
@@ -94,7 +101,7 @@ namespace lulzbot
                 {
                     foreach (Event callback in _events[event_name])
                     {
-                        callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet });
+                        new Thread(new ThreadStart(delegate { callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet }); })).Start();
                     }
                 }
                 else
@@ -118,7 +125,7 @@ namespace lulzbot
                 {
                     foreach (Event callback in _events[event_name])
                     {
-                        callback.Method.Invoke(callback.Class, parameters);
+                        new Thread(new ThreadStart(delegate { callback.Method.Invoke(callback.Class, parameters); })).Start();
                     }
                 }
                 else
@@ -135,13 +142,16 @@ namespace lulzbot
         /// <param name="callback">Command object</param>
         public static void AddCommand(String cmd_name, Command callback)
         {
-            if (!_commands.ContainsKey(cmd_name))
+            lock (_commands)
             {
-                _commands[cmd_name] = callback;
-            }
-            else
-            {
-                ConIO.Write("Duplicate command: " + cmd_name, "Events");
+                if (!_commands.ContainsKey(cmd_name))
+                {
+                    _commands[cmd_name] = callback;
+                }
+                else
+                {
+                    ConIO.Write("Duplicate command: " + cmd_name, "Events");
+                }
             }
         }
 
@@ -156,6 +166,11 @@ namespace lulzbot
                 // Replace with a user check later
                 int my_privs = 25;
                 Command callback = _commands[cmd_name];
+
+                // Access denied
+                if (callback.MinimumPrivs > my_privs)
+                    return;
+
                 String from = String.Empty;
                 if (packet.Arguments.ContainsKey("from"))
                     from = packet.Arguments["from"];
@@ -171,11 +186,7 @@ namespace lulzbot
                 else
                     cmd_args = new String[1] { msg };
 
-                // Access denied
-                if (callback.MinimumPrivs > my_privs)
-                    return;
-
-                callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet.Parameter, cmd_args, msg, from, packet });
+                new Thread(new ThreadStart(delegate{ callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet.Parameter, cmd_args, msg, from, packet }); })).Start();
             }
             else
             {

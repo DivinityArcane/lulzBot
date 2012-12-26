@@ -1,4 +1,0 @@
-lulzBot
-=======
-
-Operation #LulzSec

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -359,6 +360,46 @@ namespace lulzbot
             {
                 ConIO.Warning("Tools.WriteFile", "Caught Exception: " + E.ToString());
             }
+        }
+
+        /// <summary>
+        /// strftime implementation
+        /// </summary>
+        /// <param name="format">format string</param>
+        /// <returns>formatted time string</returns>
+        public static String strftime(String format)
+        {
+            // I haven't extensively tested this, but it should work OK. - Justin
+
+            String final = format;
+            DateTime now = DateTime.Now;
+            GregorianCalendar cal = new GregorianCalendar(GregorianCalendarTypes.Localized);
+
+            final = final.Replace("%a", now.ToString("ddd"));
+            final = final.Replace("%A", now.ToString("dddd"));
+            final = final.Replace("%b", now.ToString("MMM"));
+            final = final.Replace("%B", now.ToString("MMMM"));
+            final = final.Replace("%B", now.ToString("MMMM"));
+            final = final.Replace("%c", now.ToString("ddd MMM dd hh:mm:ss yyyy"));
+            final = final.Replace("%d", now.ToString("dd"));
+            final = final.Replace("%H", now.ToString("HH"));
+            final = final.Replace("%I", now.ToString("hh"));
+            final = final.Replace("%j", now.DayOfYear.ToString().PadLeft(3, '0'));
+            final = final.Replace("%m", now.ToString("MM"));
+            final = final.Replace("%M", now.ToString("mm"));
+            final = final.Replace("%p", now.ToString("tt"));
+            final = final.Replace("%S", now.ToString("ss"));
+            final = final.Replace("%U", cal.GetWeekOfYear(now, CalendarWeekRule.FirstDay, DayOfWeek.Sunday).ToString().PadLeft(2, '0'));
+            final = final.Replace("%w", ((Types.DayOfWeek)now.DayOfWeek).ToString().PadLeft(2, '0'));
+            final = final.Replace("%W", cal.GetWeekOfYear(now, CalendarWeekRule.FirstDay, DayOfWeek.Monday).ToString().PadLeft(2, '0'));
+            final = final.Replace("%x", now.ToString("MM/dd/yy"));
+            final = final.Replace("%X", now.ToString("HH:mm:ss"));
+            final = final.Replace("%y", now.ToString("yy"));
+            final = final.Replace("%Y", now.ToString("yyyy"));
+            final = final.Replace("%z", now.ToString("zz"));
+            final = final.Replace("%Z", now.ToString("zzz"));
+
+            return final;
         }
     }
 }

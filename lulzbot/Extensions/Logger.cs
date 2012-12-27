@@ -20,7 +20,8 @@ namespace lulzbot.Extensions
             String day = Tools.strftime("%B %d %Y");
             String month = Tools.strftime("%Y-%m %B");
             String path = String.Format("Storage/Logs/{0}/{1}/{2}.txt", ns, month, day);
-            String content = String.Format("[{0}] {1}{2}", ns, msg, Environment.NewLine);
+            String ts = Tools.strftime("%H:%M:%S %p");
+            String content = String.Format("[{0}] {1}{2}", ts, msg, Environment.NewLine);
             Tools.WriteFile(path, content, true);
         }
     }

@@ -52,6 +52,7 @@ namespace lulzbot.Extensions
             // minimum_privs = minimum privilege level. 25 = guests, 50 = members, 75 = opers, 99 = admins, 100 = owner.
             Events.AddCommand("about",      new Command(this, "cmd_about", "DivinityArcane", "No help.", 25, "Displays information about the bot."));
             Events.AddCommand("commands",   new Command(this, "cmd_commands", "DivinityArcane", "No help", 25, "Displays commands available to the user."));
+            Events.AddCommand("event",      new Command(this, "cmd_event", "DivinityArcane", "{trig}event [info|hitcount|list]", 25, "Gets information on the events system."));
             Events.AddCommand("get",        new Command(this, "cmd_get", "DivinityArcane", "{trig}get #someChannel [title|topic|members|privclasses]", 50, "Gets the specified data for the specified channel."));
             Events.AddCommand("join",       new Command(this, "cmd_join", "DivinityArcane", "{trig}join #someChannel", 75, "Makes the bot join the specified channel."));
             Events.AddCommand("part",       new Command(this, "cmd_part", "DivinityArcane", "{trig}part #someChannel", 75, "Makes the bot leave the specified channel."));
@@ -103,6 +104,77 @@ namespace lulzbot.Extensions
             else
             {
                 bot.Say(ns, String.Format("<b>&raquo; {0} command(s) available for :dev{1}::<br/>&raquo;</b> {2}", commands.Count, from, String.Join(", ", commands)));
+            }
+        }
+
+        /// <summary>
+        /// Event information command!
+        /// </summary>
+        public void cmd_event(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        {
+            if (args.Length == 1 || (args[1] != "hitcount" && args[1] != "list" && (args[1] != "info" || args.Length != 3)))
+            {
+                bot.Say(ns, String.Format("<b>&raquo; Usage</b><br/>&raquo; {0}event hitcount<br/>&raquo; {0}event list<br/>&raquo; {0}event info [event]", bot.Config.Trigger));
+            }
+            else
+            {
+                if (args[1] == "hitcount")
+                {
+                    Dictionary<String, UInt32> hitcounts = Events.HitCounts;
+                    List<String> keys = new List<String>(hitcounts.Keys);
+                    uint total = 0;
+
+                    String output = String.Empty;
+
+                    keys.Sort();
+
+                    foreach (String key in keys)
+                    {
+                        uint value = hitcounts[key];
+                        if (value <= 0)
+                            continue;
+                        output += String.Format("\n&raquo; {0}: {1} hit{2}", key.PadRight(15, ' '), value, (value == 1 ? "" : "s"));
+                        total += value;
+                    }
+
+                    bot.Say(ns, String.Format("<b>&raquo; {0} event hits:</b><bcode>{1}</bcode><i>&raquo; Events with 0 hits are not displayed.</i>", total, output));
+                }
+                else if (args[1] == "list")
+                {
+                    List<String> keys = new List<String>(Events.GetEvents().Keys);
+
+                    String output = String.Empty;
+
+                    keys.Sort();
+
+                    foreach (String key in keys)
+                    {
+                        output += String.Format("<br/>&raquo; <b>{0}</b>", key);
+                    }
+
+                    bot.Say(ns, String.Format("<b>&raquo; {0} events:</b>{1}", keys.Count, output));
+                }
+                else if (args[1] == "info")
+                {
+                    Dictionary<String, List<Event>> events = Events.GetEvents();
+
+                    if (!events.ContainsKey(args[2]))
+                    {
+                        bot.Say(ns, "<b>&raquo; That event is not valid.</b> Events are case sensitive.");
+                        return;
+                    }
+
+                    String output = String.Empty;
+                    int bound_count = 0;
+
+                    foreach (Event evt in events[args[2]])
+                    {
+                        bound_count++;
+                        output += String.Format("\nCallback {0}\n\tClass: {1}\n\tMethod: {2}\n\tDescription: {3}\n", bound_count, evt.Class.ToString(), evt.Method.Name, evt.Description); 
+                    }
+
+                    bot.Say(ns, String.Format("<b>&raquo; {0} callbacks bound to event '{1}':</b><bcode>{2}</bcode>", bound_count, args[2], output));
+                }
             }
         }
 
@@ -601,10 +673,7 @@ namespace lulzbot.Extensions
 
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() != "chat:datashare")
-                if (packet.Arguments["realname"].Length > 0)
-                    ConIO.Write(String.Format("** {0}{1} ({2}) joined.", packet.Arguments["symbol"], packet.SubParameter, packet.Arguments["realname"]), Tools.FormatChat(packet.Parameter));
-                else
-                    ConIO.Write(String.Format("** {0}{1} joined.", packet.Arguments["symbol"], packet.SubParameter), Tools.FormatChat(packet.Parameter));
+                ConIO.Write(String.Format("** {0}{1} joined. [{2}]", packet.Arguments["symbol"], packet.SubParameter, packet.Arguments["pc"]), Tools.FormatChat(packet.Parameter));
 
             // Update channel data
             lock (ChannelData[packet.Parameter.ToLower()])
@@ -632,7 +701,10 @@ namespace lulzbot.Extensions
         {
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() != "chat:datashare")
-                ConIO.Write(String.Format("** {0} left.", packet.SubParameter), Tools.FormatChat(packet.Parameter));
+                if (packet.Arguments.ContainsKey("r"))
+                    ConIO.Write(String.Format("** {0} left. [{1}]", packet.SubParameter, packet.Arguments["r"]), Tools.FormatChat(packet.Parameter));
+                else
+                    ConIO.Write(String.Format("** {0} left.", packet.SubParameter), Tools.FormatChat(packet.Parameter));
 
             // Update channel data
             lock (ChannelData[packet.Parameter.ToLower()])

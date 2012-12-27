@@ -16,6 +16,7 @@ namespace lulzbot
         /// </summary>
         private static Dictionary<String, List<Event>> _events = new Dictionary<string, List<Event>>();
         private static Dictionary<String, Command> _commands = new Dictionary<string, Command>();
+        public static Dictionary<String, UInt32> HitCounts = new Dictionary<string, uint>();
 
         /// <summary>
         /// Adds the default event names and lists.
@@ -56,6 +57,15 @@ namespace lulzbot
         }
 
         /// <summary>
+        /// Returns the events dict.
+        /// </summary>
+        /// <returns>events dictionary</returns>
+        public static Dictionary<String, List<Event>> GetEvents()
+        {
+            return _events;
+        }
+
+        /// <summary>
         /// Adds a new event list for the specified event name.
         /// </summary>
         /// <param name="event_name">Event name. i.e. recv_msg, do_something</param>
@@ -64,7 +74,10 @@ namespace lulzbot
             lock (_events)
             {
                 if (!_events.ContainsKey(event_name))
+                {
                     _events.Add(event_name, new List<Event>());
+                    HitCounts.Add(event_name, 0);
+                }
             }
         }
 
@@ -99,9 +112,10 @@ namespace lulzbot
             {
                 if (_events.ContainsKey(event_name))
                 {
+                    HitCounts[event_name]++;
                     foreach (Event callback in _events[event_name])
                     {
-                        new Thread(new ThreadStart(delegate { callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet }); })).Start();
+                        callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet });
                     }
                 }
                 else
@@ -123,9 +137,10 @@ namespace lulzbot
             {
                 if (_events.ContainsKey(event_name))
                 {
+                    HitCounts[event_name]++;
                     foreach (Event callback in _events[event_name])
                     {
-                        new Thread(new ThreadStart(delegate { callback.Method.Invoke(callback.Class, parameters); })).Start();
+                        callback.Method.Invoke(callback.Class, parameters);
                     }
                 }
                 else
@@ -186,7 +201,7 @@ namespace lulzbot
                 else
                     cmd_args = new String[1] { msg };
 
-                new Thread(new ThreadStart(delegate{ callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet.Parameter, cmd_args, msg, from, packet }); })).Start();
+                callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet.Parameter, cmd_args, msg, from, packet });
             }
             else
             {

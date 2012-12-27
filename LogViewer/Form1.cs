@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace LogViewer
@@ -23,7 +18,6 @@ namespace LogViewer
         private static String _selected_channel = String.Empty;
         private static String _selected_month = String.Empty;
         private static String _selected_day = String.Empty;
-        private static Point _scroll_pos = new Point(0, 0);
 
         public Form1()
         {

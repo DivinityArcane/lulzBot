@@ -28,6 +28,7 @@ namespace lulzbot
         public static BDS BDS;
         public static Logger Logger;
         public static ExtensionContainer Extensions;
+        public static Users Users;
 
         // Whether or not we can loop
         private bool can_loop = false;
@@ -110,6 +111,7 @@ namespace lulzbot
             BDS         = new BDS();
             Logger      = new Logger();
             Extensions  = new ExtensionContainer();
+            Users       = new Users(this.Config.Owner);
 
             // Now, let's initialize the socket.
             Socket = new SocketWrapper();

@@ -68,29 +68,29 @@ namespace lulzbot.Networking
 
         public void Connect(String host, int port)
         {
-            // Store the host and port
-            _host = host;
-            _port = port;
-
-            // Empty the buffer and allocate it
-            _buffer = new byte[_buffer_length];
-
-            // Initialize the packet queue
-            _packet_queue = new Queue<dAmnPacket>();
-
-            // Get the IP of the host
-            _ip = Dns.GetHostEntry(_host).AddressList[0];
-
-            // Create the endpoint we will connect to.
-            _endpoint = new IPEndPoint(_ip, _port);
-
-            // Init the timeout timer
-            timeout_timer = new Timer(1000);
-            timeout_timer.Elapsed += TimerTick;
-            timeout_timer.Start();
-
             try
             {
+                // Store the host and port
+                _host = host;
+                _port = port;
+
+                // Empty the buffer and allocate it
+                _buffer = new byte[_buffer_length];
+
+                // Initialize the packet queue
+                _packet_queue = new Queue<dAmnPacket>();
+
+                // Get the IP of the host
+                _ip = Dns.GetHostEntry(_host).AddressList[0];
+
+                // Create the endpoint we will connect to.
+                _endpoint = new IPEndPoint(_ip, _port);
+
+                // Init the timeout timer
+                timeout_timer = new Timer(1000);
+                timeout_timer.Elapsed += TimerTick;
+                timeout_timer.Start();
+
                 // Initialize the socket
                 // We could use normal sockets, but I like asynchronous sockets.
                 _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

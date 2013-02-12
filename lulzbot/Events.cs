@@ -1,4 +1,5 @@
-﻿using lulzbot.Networking;
+﻿using lulzbot.Extensions;
+using lulzbot.Networking;
 using lulzbot.Types;
 using System;
 using System.Collections.Generic;
@@ -297,16 +298,11 @@ namespace lulzbot
         {
             bool a = false, b = false;
             if ((a = _commands.ContainsKey (cmd_name.ToLower ())) || (b = _external_commands.ContainsKey (cmd_name.ToLower ()))) {
-                // Replace with a user check later
-                int my_privs = 25;
                 Command callback = null;
 
                 String from = String.Empty;
                 if (packet.Arguments.ContainsKey ("from"))
                     from = packet.Arguments ["from"];
-
-                if (from.ToLower () == Program.Bot.Config.Owner.ToLower ())
-                    my_privs = 100;
 
                 String[] cmd_args;
                 String msg = packet.Body.Substring (Program.Bot.Config.Trigger.Length);
@@ -321,7 +317,7 @@ namespace lulzbot
                     callback = _commands [cmd_name.ToLower ()];
 
                     // Access denied
-                    if (callback.MinimumPrivs > my_privs)
+                    if (!Users.CanAccess(from, callback.MinimumPrivs))
                         return;
 
                     try
@@ -353,15 +349,10 @@ namespace lulzbot
         {
             if (_external_commands.ContainsKey(cmd_name.ToLower()))
             {
-                // Replace with a user check later
-                int my_privs = 25;
                 Command callback = _external_commands[cmd_name.ToLower()];
 
-                if (from.ToLower() == Program.Bot.Config.Owner.ToLower())
-                    my_privs = 100;
-
                 // Access denied
-                if (callback.MinimumPrivs > my_privs)
+                if (!Users.CanAccess(from, callback.MinimumPrivs))
                     return;
 
                 try

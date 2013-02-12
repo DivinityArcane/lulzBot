@@ -146,11 +146,13 @@
     <Compile Include="Extensions\Commands\Core\Set.cs" />
     <Compile Include="Extensions\Commands\Core\Sudo.cs" />
     <Compile Include="Extensions\Commands\Core\Unban.cs" />
+    <Compile Include="Extensions\Commands\Users\Users.cs" />
     <Compile Include="Extensions\Core.cs" />
     <Compile Include="Extensions\Events\Core\Reload.cs" />
     <Compile Include="Extensions\Extension.cs" />
     <Compile Include="Extensions\HTTPD.cs" />
     <Compile Include="Extensions\Logger.cs" />
+    <Compile Include="Extensions\Users.cs" />
     <Compile Include="Networking\AuthToken.cs" />
     <Compile Include="Networking\dAmnPacket.cs" />
     <Compile Include="Networking\Packets\Chats.cs" />

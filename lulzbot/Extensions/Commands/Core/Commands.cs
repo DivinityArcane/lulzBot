@@ -9,13 +9,7 @@ namespace lulzbot.Extensions
     {
         public static void cmd_commands(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
-            // To be replaced later when the user system is added
-            int my_privs = 25;
-
-            if (from.ToLower() == bot.Config.Owner.ToLower())
-                my_privs = 100;
-
-            List<String> commands = Events.GetAvailableCommands(my_privs);
+            List<String> commands = Events.GetAvailableCommands(Users.GetPrivs(from));
 
             if (commands.Count <= 0)
             {

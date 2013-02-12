@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using lulzbot.Networking;
+using System.Runtime.InteropServices;
 
 namespace lulzbot.Types
 {
@@ -297,9 +298,18 @@ namespace lulzbot.Extensions
         }
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 0)]
+    public struct UserData
+    {
+        public String Name;
+        public int PrivLevel;
+        public List<String> Access;
+        public List<String> Banned;
+    }
+
     public enum Privs : int
     {
-        //Banned    = 0,
+        Banned    = 0,
         Guest     = 25,
         Members   = 50,
         Operators = 75,

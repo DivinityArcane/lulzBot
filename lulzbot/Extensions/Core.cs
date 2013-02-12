@@ -19,11 +19,6 @@ namespace lulzbot.Extensions
         /// </summary>
         public Core()
         {
-            // Format is simple:
-            // Events.AddEvent("event_name", event_obj);
-            // Where event_obj is:
-            //  new Event(this, "function_name")
-            // To keep things clean, start function names for events with evt_
             Events.AddEvent("on_connect",   new Event(this, "evt_connect"));
             Events.AddEvent("dAmnServer",   new Event(this, "evt_preauth"));
             Events.AddEvent("login",        new Event(this, "evt_login"));
@@ -46,12 +41,7 @@ namespace lulzbot.Extensions
             Events.AddEvent("kill",         new Event(this, "evt_kill_error"));
             Events.AddEvent("ping",         new Event(this, "evt_ping"));
 
-            // Again, simple format:
-            // Events.AddCommand("command_name", cmd_obj);
-            // Where cmd_obj is:
-            //  new Command(this, "function_name", "Your_dA_username", "A simple help msg.", minimum_privs, "Description")
-            // minimum_privs = minimum privilege level. 25 = guests, 50 = members, 75 = opers, 99 = admins, 100 = owner.
-            Events.AddCommand("about",      new Command(this, "cmd_about",            "DivinityArcane", 25,     "Displays information about the bot."));
+            Events.AddCommand("about",      new Command(this, "cmd_about",            "DivinityArcane", 25,      "Displays information about the bot."));
             Events.AddCommand("act",        new Command(this, "cmd_act",              "DivinityArcane", 75,     "Makes the bot say the specified message to the specified channel."));
             Events.AddCommand("admin",      new Command(this, "cmd_admin",            "DivinityArcane", 75,     "Makes the bot send the specified admin command to the specified channel."));
             Events.AddCommand("ban",        new Command(this, "cmd_ban",              "DivinityArcane", 75,     "Bans the specified user in the specified channel."));
@@ -76,7 +66,6 @@ namespace lulzbot.Extensions
             Events.AddCommand("unban",      new Command(this, "cmd_unban",            "DivinityArcane", 75,     "Un-bans the specified user in the specified channel."));
             Events.AddCommand("uptime",     new Command(this, "cmd_uptime",           "DivinityArcane", 25,     "Returns how long the bot has been running."));
 
-            // Initialize CommandsChannels
             String[] c_types = new String[] { "join", "part", "send", "set", "kick", "kill", "promote", "demote", "admin" };
             CommandChannels.Clear();
 

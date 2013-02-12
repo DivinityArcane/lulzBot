@@ -29,5 +29,10 @@ namespace lulzbot.Networking
         {
             return Encoding.ASCII.GetBytes(String.Format("send {0}\n\naction main\n\n{1}\n\0", channel, message));
         }
+
+        public static byte[] Admin(String channel, String command)
+        {
+            return Encoding.ASCII.GetBytes(String.Format("send {0}\n\nadmin\n\n{1}\0", channel, command));
+        }
     }
 }

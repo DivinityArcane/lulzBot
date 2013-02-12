@@ -27,6 +27,7 @@ namespace lulzbot
         public static Core Core;
         public static BDS BDS;
         public static Logger Logger;
+        public static ExtensionContainer Extensions;
 
         // Whether or not we can loop
         private bool can_loop = false;
@@ -39,18 +40,13 @@ namespace lulzbot
         private static readonly DateTime _epoch = new DateTime(1970, 1, 1, 0, 0, 0);
 
         /// <summary>
-        /// Timestamp of the time the bot started.
-        /// </summary>
-        private DateTime _started = DateTime.UtcNow;
-
-        /// <summary>
         /// Bot uptime in seconds.
         /// </summary>
         public int uptime
         {
             get
             {
-                return Convert.ToInt32((DateTime.UtcNow - _started).TotalSeconds);
+                return Convert.ToInt32((DateTime.UtcNow - Program.StartTime).TotalSeconds);
             }
 
             set { }
@@ -110,9 +106,10 @@ namespace lulzbot
             Events.ClearEvents();
 
             // Initialize the Core extensions
-            Core    = new Core();
-            BDS     = new BDS();
-            Logger  = new Logger();
+            Core        = new Core();
+            BDS         = new BDS();
+            Logger      = new Logger();
+            Extensions  = new ExtensionContainer();
 
             // Now, let's initialize the socket.
             Socket = new SocketWrapper();
@@ -208,7 +205,8 @@ namespace lulzbot
             {
                 channel = String.Format("chat:{0}", channel.Substring(1));
             }
-            Send(dAmnPackets.Part(channel));
+            if (channel.ToLower() != "chat:datashare")
+                Send(dAmnPackets.Part(channel));
         }
 
         /// <summary>
@@ -251,6 +249,65 @@ namespace lulzbot
                 channel = String.Format("chat:{0}", channel.Substring(1));
             }
             Send(dAmnPackets.Action(channel, message));
+        }
+
+        public void Kick(String channel, String who, String reason)
+        {
+            if (channel.StartsWith("#"))
+            {
+                channel = String.Format("chat:{0}", channel.Substring(1));
+            }
+            Send(dAmnPackets.Kick(channel, who, reason));
+        }
+
+        public void Ban(String channel, String who)
+        {
+            if (channel.StartsWith("#"))
+            {
+                channel = String.Format("chat:{0}", channel.Substring(1));
+            }
+            Send(dAmnPackets.Ban(channel, who));
+        }
+
+        public void UnBan(String channel, String who)
+        {
+            if (channel.StartsWith("#"))
+            {
+                channel = String.Format("chat:{0}", channel.Substring(1));
+            }
+            Send(dAmnPackets.UnBan(channel, who));
+        }
+
+        public void Admin(String channel, String command)
+        {
+            if (channel.StartsWith("#"))
+            {
+                channel = String.Format("chat:{0}", channel.Substring(1));
+            }
+            Send(dAmnPackets.Admin(channel, command));
+        }
+
+        public void Kill(String who, String reason)
+        {
+            Send(dAmnPackets.Kill(who, reason));
+        }
+
+        public void Promote(String channel, String who, String privclass)
+        {
+            if (channel.StartsWith("#"))
+            {
+                channel = String.Format("chat:{0}", channel.Substring(1));
+            }
+            Send(dAmnPackets.Promote(channel, who, privclass));
+        }
+
+        public void Demote(String channel, String who, String privclass)
+        {
+            if (channel.StartsWith("#"))
+            {
+                channel = String.Format("chat:{0}", channel.Substring(1));
+            }
+            Send(dAmnPackets.Demote(channel, who, privclass));
         }
 
         /// <summary>

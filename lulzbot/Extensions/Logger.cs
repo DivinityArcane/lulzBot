@@ -1,4 +1,5 @@
-﻿using System;
+﻿using lulzbot.Types;
+using System;
 
 namespace lulzbot.Extensions
 {

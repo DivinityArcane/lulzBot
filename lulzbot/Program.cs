@@ -8,8 +8,12 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace lulzbot
 {
@@ -35,15 +39,21 @@ namespace lulzbot
 
         // Our bot thread!
         private static Thread _thread;
+
+        // Wait event. Helps keep certain events in order.
         public static ManualResetEvent wait_event;
 
         // Bot related globals.
+        public static DateTime StartTime = DateTime.UtcNow;
+        public static int Disconnects = 0;
+        public static ulong bytes_sent = 0, bytes_received = 0;
+        public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations" };
         public const String BotName = "lulzBot";
-        public const String Version = "0.2a";
+        public const String Version = "0.5a";
 
         static void Main (string[] args)
         {
-            /* Well, first off, the bot is _not_ going to be in the main file.
+             /* Well, first off, the bot is _not_ going to be in the main file.
              * Why? That's silly. I don't like doing that. OOP, man. OOP.
              * Anyway, the Bot will be a separate class, and hence, object.
              * 
@@ -57,7 +67,8 @@ namespace lulzbot
              * 
              * Maybe that's just me though. -DivinityArcane */
 
-			// Just a bit of a simple title.
+            ///TODO: Fix the damn botinfo, make it request on old info.
+            // Just a bit of a simple title.
             ConIO.Write (String.Format ("{0}, version {1}", BotName, Version));
             ConIO.Write ("Authors: DivinityArcane, OrrinFox.");
             
@@ -74,15 +85,18 @@ namespace lulzbot
             // Check for debug mode!
             if (args.Length >= 1)
             {
-                if (args[0] == "--debug")
+                foreach (String arg in args)
                 {
-                    ConIO.Write("Debug mode is enabled!");
-                    Debug = true;
-                }
-                else if (args[0] == "--help")
-                {
-                    ConIO.Write("To enable debug mode use the command line switch --debug");
-                    Environment.Exit(0);
+                    if (arg == "--debug")
+                    {
+                        ConIO.Write("Debug mode is enabled!");
+                        Debug = true;
+                    }
+                    else if (arg == "--help")
+                    {
+                        ConIO.Write("To enable debug mode use the command line switch --debug");
+                        Environment.Exit(0);
+                    }
                 }
             }
 
@@ -188,7 +202,9 @@ namespace lulzbot
                 if (ForceReconnect)
                 {
                     ForceReconnect = false;
-                    _thread.Join();
+                    _thread.Abort();
+                    if (!Running)
+                        break;
                     _thread = new Thread(new ThreadStart(Start));
                     _thread.IsBackground = false;
                     _thread.Start();

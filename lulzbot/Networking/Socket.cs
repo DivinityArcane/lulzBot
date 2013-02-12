@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Timers;
 
 /// <summary>
 /// This is still in the main namespace, but the sub-namespace is "Networking".
@@ -30,11 +31,26 @@ namespace lulzbot.Networking
         // This is our buffer length
         private int _buffer_length = 8192;
         // This is our receive buffer. There's no reason for this to be public.
-        private byte[] _buffer;
+        private byte[] _buffer, temp = new byte[1];
         private String _packet = String.Empty;
 
         // Close override
-        private bool Closed = false;
+        private bool Closed = true;
+        private bool IsConnected
+        {
+            get
+            {
+                try
+                {
+                    return !(_socket.Poll(1, SelectMode.SelectRead) && _socket.Available == 0);
+                }
+                catch { return false; }
+            }
+        }
+
+        // We need to check for timeouts.
+        private Timer timeout_timer;
+        private int LastPacket = Environment.TickCount;
 
         // Our server variables
         private String _host;
@@ -68,23 +84,68 @@ namespace lulzbot.Networking
             // Create the endpoint we will connect to.
             _endpoint = new IPEndPoint(_ip, _port);
 
-            // Initialize the socket
-            // We could use normal sockets, but I like asynchronous sockets.
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            _socket.BeginConnect(_endpoint, new AsyncCallback(on_connect), null);
+            // Init the timeout timer
+            timeout_timer = new Timer(1000);
+            timeout_timer.Elapsed += TimerTick;
+            timeout_timer.Start();
 
-            ConIO.Write("Attempting to connect to the server...");
+            try
+            {
+                // Initialize the socket
+                // We could use normal sockets, but I like asynchronous sockets.
+                _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                _socket.Blocking = false;
+                _socket.BeginConnect(_endpoint, new AsyncCallback(on_connect), null);
+
+                ConIO.Write("Attempting to connect to the server...");
+            }
+            catch (Exception E)
+            {
+                ConIO.Warning("Socket", "Failed to connect: " + E.ToString());
+            }
+        }
+
+        private void TimerTick(object sender, ElapsedEventArgs e)
+        {
+            if ((!IsConnected && !Closed) || Environment.TickCount - LastPacket >= 90000)
+            {
+                Closed = true;
+                on_disconnect();
+            }
+            else
+            {
+                try
+                {
+                    _socket.Send(temp, 0, SocketFlags.None);
+                }
+                catch
+                {
+                    Closed = true;
+                    on_disconnect();
+                }
+            }
+        }
+
+        private void on_disconnect()
+        {
+            ConIO.Warning("Socket", "Disconnected! Reconnecting...");
+
+            _socket.Dispose();
+            timeout_timer.Dispose();
+            _packet_queue.Clear();
+
+            Program.Disconnects++;
+            Program.ForceReconnect = true;
+            Program.wait_event.Set();
         }
 
         private void on_connect(IAsyncResult result)
         {
             try
             {
-                if (Closed)
-                    return;
-
                 // We got a connection!
                 _socket.EndConnect(result);
+                Closed = false;
 
                 // Announce ourselves
                 Events.CallEvent("on_connect", null);
@@ -105,7 +166,8 @@ namespace lulzbot.Networking
                 if (Closed)
                     return;
 
-                _socket.EndSend(result);
+                int bytes = _socket.EndSend(result);
+                Program.bytes_sent += (ulong)bytes;
             }
             catch (Exception E)
             {
@@ -122,6 +184,16 @@ namespace lulzbot.Networking
 
                 // End the receive, and get the number of bytes that are data.
                 int received_bytes = _socket.EndSend(result);
+
+                if (received_bytes <= 0)
+                {
+                    on_disconnect();
+                    return;
+                }
+
+                Program.bytes_received += (ulong)received_bytes;
+
+                LastPacket = Environment.TickCount;
 
                 // Create a temporary buffer, and get only the amount of bytes from the buffer that
                 //  are actual data, and not null chars used for padding (which would screw up our
@@ -159,6 +231,7 @@ namespace lulzbot.Networking
             catch (SocketException)
             {
                 // Socket was closed by the remote host, most likely. We handle this elsewhere.
+                on_disconnect();
             }
             catch (Exception E)
             {
@@ -192,6 +265,7 @@ namespace lulzbot.Networking
             catch (SocketException)
             {
                 // Socket was closed by the remote host, most likely. We handle this elsewhere.
+                on_disconnect();
             }
             catch (Exception E)
             {
@@ -242,7 +316,7 @@ namespace lulzbot.Networking
                 _socket.Disconnect(false);
                 _socket.Close();
             }
-            catch (Exception) { }
+            catch { }
             _buffer = null;
             _packet = null;
             _socket = null;

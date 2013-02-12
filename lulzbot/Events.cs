@@ -1,4 +1,5 @@
 ﻿using lulzbot.Networking;
+using lulzbot.Types;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -14,9 +15,11 @@ namespace lulzbot
         /// <summary>
         /// This is the events dictionary. Each event is a list of Event objects.
         /// </summary>
-        private static Dictionary<String, List<Event>> _events = new Dictionary<string, List<Event>>();
-        private static Dictionary<String, Command> _commands = new Dictionary<string, Command>();
-        public static Dictionary<String, UInt32> HitCounts = new Dictionary<string, uint>();
+        private static Dictionary<String, List<Event>> _events          = new Dictionary<string, List<Event>>();
+        private static Dictionary<String, List<Event>> _external_events = new Dictionary<string, List<Event>>();
+        private static Dictionary<String, Command> _commands            = new Dictionary<string, Command>();
+        private static Dictionary<String, Command> _external_commands   = new Dictionary<string, Command>();
+        public static Dictionary<String, UInt32> HitCounts              = new Dictionary<string, uint>();
 
         /// <summary>
         /// Adds the default event names and lists.
@@ -60,9 +63,18 @@ namespace lulzbot
         /// Returns the events dict.
         /// </summary>
         /// <returns>events dictionary</returns>
-        public static Dictionary<String, List<Event>> GetEvents()
+        public static Dictionary<String, List<Types.Event>> GetEvents()
         {
             return _events;
+        }
+
+        /// <summary>
+        /// Returns the external events dict.
+        /// </summary>
+        /// <returns>external events dictionary</returns>
+        public static Dictionary<String, List<Types.Event>> GetExternalEvents()
+        {
+            return _external_events;
         }
 
         /// <summary>
@@ -76,9 +88,20 @@ namespace lulzbot
                 if (!_events.ContainsKey(event_name))
                 {
                     _events.Add(event_name, new List<Event>());
+                    _external_events.Add(event_name, new List<Event>());
                     HitCounts.Add(event_name, 0);
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks whether or not an event of the specified name exists
+        /// </summary>
+        /// <param name="event_name">Event name</param>
+        /// <returns>true or false</returns>
+        public static bool ValidateName(String event_name)
+        {
+            return _events.ContainsKey(event_name);
         }
 
         /// <summary>
@@ -102,6 +125,26 @@ namespace lulzbot
         }
 
         /// <summary>
+        /// Adds an event for external extensions
+        /// </summary>
+        /// <param name="event_name">event name</param>
+        /// <param name="callback">callback object</param>
+        public static void AddExternalEvent(String event_name, Event callback)
+        {
+            lock (_external_events)
+            {
+                if (_external_events.ContainsKey(event_name))
+                {
+                    _external_events[event_name].Add(callback);
+                }
+                else
+                {
+                    ConIO.Write("Invalid event: " + event_name, "Events");
+                }
+            }
+        }
+
+        /// <summary>
         /// Calls all the events bound to the specified event name
         /// </summary>
         /// <param name="event_name">event name</param>
@@ -115,12 +158,58 @@ namespace lulzbot
                     HitCounts[event_name]++;
                     foreach (Event callback in _events[event_name])
                     {
-                        callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet });
+                        try
+                        {
+                            callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet });
+                        }
+                        catch (Exception E)
+                        {
+                            ConIO.Warning("Extension", String.Format("Failed to call event {0}.{1}: {2}", callback.ClassName, callback.Method.Name, E.ToString()));
+                        }
                     }
+
+                    // External events can't have anything to do with datashare
+                    if (packet != null && packet.Parameter.ToLower() != "chat:datashare")
+                        CallExternalEvent(event_name, packet);
                 }
                 else
                 {
                     ConIO.Write("Unknown event: " + event_name, "Events");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Calls an external event. Only to be called from CallEvent()
+        /// </summary>
+        /// <param name="event_name"></param>
+        /// <param name="packet"></param>
+        private static void CallExternalEvent(String event_name, dAmnPacket packet)
+        {
+            // We will not let it see its own messages! This avoids infinite loops.
+            if (event_name == "recv_msg" && packet.Arguments["from"].ToLower() == Program.Bot.Config.Username.ToLower())
+                return;
+
+            lock (_external_events)
+            {
+                // We shouldn't have to go through the shenanigans of re-checking, but for safety sake..
+                if (_external_events.ContainsKey(event_name))
+                {
+                    foreach (Event callback in _external_events[event_name])
+                    {
+                        try
+                        {
+                            callback.Method.Invoke(callback.Class, new object[] { packet });
+                        }
+                        catch (Exception E)
+                        {
+                            ConIO.Warning("Extension", String.Format("Extension bound to event [{0}] threw exception: {1}", event_name, E.ToString()));
+                        }
+                    }
+                }
+                else
+                {
+                    ConIO.Write("Unknown external event: " + event_name, "Events");
                 }
             }
         }
@@ -159,32 +248,114 @@ namespace lulzbot
         {
             lock (_commands)
             {
-                if (!_commands.ContainsKey(cmd_name))
+                if (!CommandExists(cmd_name.ToLower()))
                 {
-                    _commands[cmd_name] = callback;
+                    _commands[cmd_name.ToLower()] = callback;
                 }
                 else
                 {
-                    ConIO.Write("Duplicate command: " + cmd_name, "Events");
+                    ConIO.Write("Duplicate command: " + cmd_name.ToLower(), "Events");
                 }
             }
+        }
+
+        /// <summary>
+        /// Adds an external command
+        /// </summary>
+        /// <param name="cmd_name">name of the command</param>
+        /// <param name="callback">callback object</param>
+        public static void AddExternalCommand(String cmd_name, Command callback)
+        {
+            lock (_external_commands)
+            {
+                if (!CommandExists(cmd_name.ToLower()))
+                {
+                    _external_commands[cmd_name.ToLower()] = callback;
+                }
+                else
+                {
+                    ConIO.Write("Duplicate external command: " + cmd_name.ToLower(), "Events");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks whether or not a command name is taken already
+        /// </summary>
+        /// <param name="cmd_name">command name</param>
+        /// <returns>true or false</returns>
+        public static bool CommandExists(String cmd_name)
+        {
+            return _commands.ContainsKey(cmd_name.ToLower()) || _external_commands.ContainsKey(cmd_name.ToLower());
         }
 
         /// <summary>
         /// Calls the command bound to the specified command name
         /// </summary>
         /// <param name="cmd_name">command name</param>
-        public static void CallCommand(String cmd_name, dAmnPacket packet)
+        public static void CallCommand (String cmd_name, dAmnPacket packet)
         {
-            if (_commands.ContainsKey(cmd_name))
+            bool a = false, b = false;
+            if ((a = _commands.ContainsKey (cmd_name.ToLower ())) || (b = _external_commands.ContainsKey (cmd_name.ToLower ()))) {
+                // Replace with a user check later
+                int my_privs = 25;
+                Command callback = null;
+
+                String from = String.Empty;
+                if (packet.Arguments.ContainsKey ("from"))
+                    from = packet.Arguments ["from"];
+
+                if (from.ToLower () == Program.Bot.Config.Owner.ToLower ())
+                    my_privs = 100;
+
+                String[] cmd_args;
+                String msg = packet.Body.Substring (Program.Bot.Config.Trigger.Length);
+
+                if (packet.Body.Contains (" "))
+                    cmd_args = msg.Split (' ');
+                else
+                    cmd_args = new String[1] { msg };
+               
+                if (a)
+                {
+                    callback = _commands [cmd_name.ToLower ()];
+
+                    // Access denied
+                    if (callback.MinimumPrivs > my_privs)
+                        return;
+
+                    try
+                    {
+                        callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet.Parameter, cmd_args, msg, from, packet });
+                    }
+                    catch (Exception E)
+                    {
+                        ConIO.Warning("Extension", String.Format("Failed to call command {0} ({1}): {2}", callback.Method.Name, callback.Description, E.ToString()));
+                    }
+                }
+
+                if (b)
+                    CallExternalCommand (cmd_name, Tools.FormatChat (packet.Parameter), msg, cmd_args, from);
+            } else {
+                ConIO.Write ("Unknown command: " + cmd_name.ToLower (), "Events");
+            }
+        }
+
+        /// <summary>
+        /// Call an external command
+        /// </summary>
+        /// <param name="cmd_name">command name</param>
+        /// <param name="chan">channel the command originated from</param>
+        /// <param name="msg">message the person spoke</param>
+        /// <param name="args">message arguments</param>
+        /// <param name="from">person who initiated the command</param>
+        public static void CallExternalCommand(String cmd_name, String chan, String msg, String[] args, String from)
+        {
+            if (_external_commands.ContainsKey(cmd_name.ToLower()))
             {
                 // Replace with a user check later
                 int my_privs = 25;
-                Command callback = _commands[cmd_name];
-
-                String from = String.Empty;
-                if (packet.Arguments.ContainsKey("from"))
-                    from = packet.Arguments["from"];
+                Command callback = _external_commands[cmd_name.ToLower()];
 
                 if (from.ToLower() == Program.Bot.Config.Owner.ToLower())
                     my_privs = 100;
@@ -193,24 +364,23 @@ namespace lulzbot
                 if (callback.MinimumPrivs > my_privs)
                     return;
 
-                String[] cmd_args;
-                String msg = packet.Body.Substring(Program.Bot.Config.Trigger.Length);
-
-                if (packet.Body.Contains(" "))
-                    cmd_args = msg.Split(' ');
-                else
-                    cmd_args = new String[1] { msg };
-
-                callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet.Parameter, cmd_args, msg, from, packet });
+                try
+                {
+                    callback.Method.Invoke(callback.Class, new object[] { chan, msg, args, from });
+                }
+                catch (Exception E)
+                {
+                    ConIO.Warning("Extension", String.Format("Failed to call command {0} ({1}): {2}", callback.Method.Name, callback.Description, E.ToString()));
+                }
             }
             else
             {
-                ConIO.Write("Unknown command: " + cmd_name, "Events");
+                ConIO.Write("Unknown command: " + cmd_name.ToLower(), "Events");
             }
         }
 
         /// <summary>
-        /// Clears all the events.
+        /// Clears all the events and commands.
         /// </summary>
         public static void ClearEvents()
         {
@@ -220,6 +390,30 @@ namespace lulzbot
                 {
                     _events[event_name].Clear();
                 }
+
+                foreach (String event_name in _external_events.Keys)
+                {
+                    _external_events[event_name].Clear();
+                }
+
+                _commands.Clear();
+                _external_commands.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Clears all the events and commands.
+        /// </summary>
+        public static void ClearExternalEvents()
+        {
+            lock (_events)
+            {
+                foreach (String event_name in _external_events.Keys)
+                {
+                    _external_events[event_name].Clear();
+                }
+
+                _external_commands.Clear();
             }
         }
 
@@ -241,97 +435,18 @@ namespace lulzbot
                 }
             }
 
+            lock (_external_commands)
+            {
+                foreach (KeyValuePair<String, Command> KVP in _external_commands)
+                {
+                    if (KVP.Value.MinimumPrivs <= minimum_priv_level)
+                        list.Add(KVP.Key);
+                }
+            }
+
             list.Sort();
 
             return list;
-        }
-    }
-
-    /// <summary>
-    /// Event object
-    /// </summary>
-    public class Event 
-    {
-        /// <summary>
-        /// Class's "this" object
-        /// </summary>
-        public object Class;
-
-        /// <summary>
-        /// Info on the method we will call
-        /// </summary>
-        public MethodInfo Method;
-
-        /// <summary>
-        /// Description of the event
-        /// </summary>
-        public String Description = String.Empty;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="class_obj">Class pointer (i.e. "this")</param>
-        /// <param name="method_name">Callback method name</param>
-        /// <param name="desc">Description</param>
-        public Event(object class_obj, String method_name, String desc = "")
-        {
-            Class = class_obj;
-            Method = Class.GetType().GetMethod(method_name);
-            Description = desc;
-        }
-    }
-
-
-    /// <summary>
-    /// Command object
-    /// </summary>
-    public class Command
-    {
-        /// <summary>
-        /// Class's "this" object
-        /// </summary>
-        public object Class;
-
-        /// <summary>
-        /// Information on the method we will call.
-        /// </summary>
-        public MethodInfo Method;
-
-        /// <summary>
-        /// Description of the command.
-        /// </summary>
-        public String Description = String.Empty;
-
-        /// <summary>
-        /// Default help message. {trig} is replaced by the bot's trigger.
-        /// </summary>
-        public String Help = String.Empty;
-
-        /// <summary>
-        /// Author's dA username
-        /// </summary>
-        public String Author = String.Empty;
-
-        /// <summary>
-        /// Minimum privilege level. Default: 25 (Owner: 100, Admins: 99, Operators: 75, Members: 50, Guests: 25)
-        /// </summary>
-        public int MinimumPrivs = 25;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="class_obj">Class pointer (i.e. "this")</param>
-        /// <param name="method_name">Callback method name</param>
-        /// <param name="desc">Description</param>
-        public Command(object class_obj, String method_name, 
-            String author = "", String help = "", int privs = 25, String desc = "")
-        {
-            Class = class_obj;
-            Method = Class.GetType().GetMethod(method_name);
-            Author = author;
-            Help = help;
-            Description = desc;
-            MinimumPrivs = privs;
         }
     }
 }

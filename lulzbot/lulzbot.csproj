@@ -10,8 +10,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>lulzbot</RootNamespace>
     <AssemblyName>lulzbot</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -35,12 +33,9 @@
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -59,6 +54,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -68,6 +64,8 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -77,6 +75,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == '64bit|x64'">
     <OutputPath>bin\x64\64bit\</OutputPath>
@@ -86,35 +85,79 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>lulzbot.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputPath>bin\Release\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == '64bit|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputPath>bin\64bit\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Net.Http.2.0.20710.0\lib\net40\System.Net.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Net.Http.2.0.20710.0\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bot.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Extensions\BDS.cs" />
+    <Compile Include="Extensions\Commands\Core\Act.cs" />
+    <Compile Include="Extensions\Commands\Core\Admin.cs" />
+    <Compile Include="Extensions\Commands\Core\Ban.cs" />
+    <Compile Include="Extensions\Commands\Core\Demote.cs" />
+    <Compile Include="Extensions\Commands\Core\Kick.cs" />
+    <Compile Include="Extensions\Commands\Core\Kill.cs" />
+    <Compile Include="Extensions\Commands\Core\NetInfo.cs" />
+    <Compile Include="Extensions\Commands\Core\NpSay.cs" />
+    <Compile Include="Extensions\Commands\Core\Promote.cs" />
+    <Compile Include="Extensions\Commands\Core\Say.cs" />
+    <Compile Include="Extensions\Commands\Core\Set.cs" />
+    <Compile Include="Extensions\Commands\Core\Sudo.cs" />
+    <Compile Include="Extensions\Commands\Core\Unban.cs" />
     <Compile Include="Extensions\Core.cs" />
+    <Compile Include="Extensions\Events\Core\Reload.cs" />
+    <Compile Include="Extensions\Extension.cs" />
+    <Compile Include="Extensions\HTTPD.cs" />
     <Compile Include="Extensions\Logger.cs" />
     <Compile Include="Networking\AuthToken.cs" />
     <Compile Include="Networking\dAmnPacket.cs" />
     <Compile Include="Networking\Packets\Chats.cs" />
     <Compile Include="Networking\Packets\dAmnClient.cs" />
+    <Compile Include="Networking\Packets\Kick.cs" />
+    <Compile Include="Networking\Packets\Kill.cs" />
     <Compile Include="Networking\Packets\Login.cs" />
+    <Compile Include="Networking\Packets\Promotion.cs" />
+    <Compile Include="Networking\Packets\Set.cs" />
     <Compile Include="Networking\Socket.cs" />
     <Compile Include="ConIO.cs" />
     <Compile Include="Program.cs" />
@@ -127,6 +170,26 @@
     <Compile Include="Storage.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="Types.cs" />
+    <Compile Include="Extensions\Commands\Core\About.cs" />
+    <Compile Include="Extensions\Commands\Core\Commands.cs" />
+    <Compile Include="Extensions\Commands\Core\Events.cs" />
+    <Compile Include="Extensions\Commands\Core\Get.cs" />
+    <Compile Include="Extensions\Commands\Core\Join.cs" />
+    <Compile Include="Extensions\Commands\Core\Part.cs" />
+    <Compile Include="Extensions\Commands\Core\Ping.cs" />
+    <Compile Include="Extensions\Commands\Core\Quit.cs" />
+    <Compile Include="Extensions\Commands\Core\Uptime.cs" />
+    <Compile Include="Extensions\Events\Core\Connect.cs" />
+    <Compile Include="Extensions\Events\Core\PreAuth.cs" />
+    <Compile Include="Extensions\Events\Core\Join.cs" />
+    <Compile Include="Extensions\Events\Core\Part.cs" />
+    <Compile Include="Extensions\Events\Core\Property.cs" />
+    <Compile Include="Extensions\Events\Core\Login.cs" />
+    <Compile Include="Extensions\Events\Core\Recv.cs" />
+    <Compile Include="Extensions\Events\Core\Kicked.cs" />
+    <Compile Include="Extensions\Events\Core\Disconnect.cs" />
+    <Compile Include="Extensions\Events\Core\Errors.cs" />
+    <Compile Include="Extensions\Events\Core\Ping.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="favicon.ico" />
@@ -167,4 +230,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

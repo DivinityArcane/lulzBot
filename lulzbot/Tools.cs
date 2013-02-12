@@ -1,8 +1,13 @@
-﻿using System;
+﻿using lulzbot.Extensions;
+using lulzbot.Types;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Net;
+using System.Net.Security;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace lulzbot
@@ -14,7 +19,7 @@ namespace lulzbot
     {
         // This will keep track of how many arguments each tablump uses.
         private static Dictionary<String, int> lump_arg_count = new Dictionary<string,int>();
-
+        private static DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0);
 
         /// <summary>
         /// Initialize the tablumps lists
@@ -276,6 +281,14 @@ namespace lulzbot
             return output.ToString();
         }
 
+        public static int Timestamp(bool milliseconds = false)
+        {
+            if (milliseconds)
+                return (int)((DateTime.UtcNow - epoch).TotalMilliseconds);
+            else
+                return (int)((DateTime.UtcNow - epoch).TotalSeconds);
+        }
+
         /// <summary>
         /// Formats a specified amount of seconds into a human readable string.
         /// i.e. 3669 becomes:
@@ -328,6 +341,65 @@ namespace lulzbot
         }
 
         /// <summary>
+        /// Formats a specified amount of bytes into a human readable string.
+        /// i.e. 1026 becomes:
+        /// 1kB, 2B.
+        /// </summary>
+        /// <returns>Human readable string</returns>
+        public static String FormatBytes(ulong bytes, bool verbose = false)
+        {
+            String output = String.Empty;
+
+            if (bytes == 0)
+                return (verbose ? "0 Bytes" : "0B");
+
+            int tb = 0, gb = 0, mb = 0, kb = 0;
+
+            while (bytes >= (ulong)ByteCounts.GigaByte)
+            {
+                ++gb;
+                bytes -= (ulong)ByteCounts.GigaByte;
+            }
+
+            while (gb >= 1024)
+            {
+                ++tb;
+                gb -= 1024;
+            }
+
+            while (bytes >= (ulong)ByteCounts.MegaByte)
+            {
+                ++mb;
+                bytes -= (ulong)ByteCounts.MegaByte;
+            }
+
+            while (bytes >= (ulong)ByteCounts.KiloByte)
+            {
+                ++kb;
+                bytes -= (ulong)ByteCounts.KiloByte;
+            }
+
+            if (tb > 0)
+                output += tb + (verbose ? " TeraByte" + (tb == 1 ? "" : "s") : "TB") + ", ";
+
+            if (gb > 0)
+                output += gb + (verbose ? " GigaByte" + (gb == 1 ? "" : "s") : "GB") + ", ";
+
+            if (mb > 0)
+                output += mb + (verbose ? " MegaByte" + (mb == 1 ? "" : "s") : "MB") + ", ";
+
+            if (kb > 0)
+                output += kb + (verbose ? " KiloByte" + (kb == 1 ? "" : "s") : "kB") + ", ";
+
+            if (bytes > 0)
+                output += bytes + (verbose ? " Byte" + (bytes == 1 ? "" : "s") : "B");
+            else if (output.Length > 0)
+                output = output.Substring(0, output.Length - 2);
+
+            return output;
+        }
+
+        /// <summary>
         /// Writes or appends text to a file
         /// </summary>
         /// <param name="filename">filename with path</param>
@@ -367,12 +439,12 @@ namespace lulzbot
         /// </summary>
         /// <param name="format">format string</param>
         /// <returns>formatted time string</returns>
-        public static String strftime(String format)
+        public static String strftime(String format, DateTime date)
         {
             // I haven't extensively tested this, but it should work OK. - Justin
 
             String final = format;
-            DateTime now = DateTime.Now;
+            DateTime now = date;
             GregorianCalendar cal = new GregorianCalendar(GregorianCalendarTypes.Localized);
 
             final = final.Replace("%a", now.ToString("ddd"));
@@ -389,9 +461,9 @@ namespace lulzbot
             final = final.Replace("%M", now.ToString("mm"));
             final = final.Replace("%p", now.ToString("tt"));
             final = final.Replace("%S", now.ToString("ss"));
-            final = final.Replace("%U", cal.GetWeekOfYear(now, CalendarWeekRule.FirstDay, DayOfWeek.Sunday).ToString().PadLeft(2, '0'));
+            final = final.Replace("%U", cal.GetWeekOfYear(now, CalendarWeekRule.FirstDay, System.DayOfWeek.Sunday).ToString().PadLeft(2, '0'));
             final = final.Replace("%w", ((Types.DayOfWeek)now.DayOfWeek).ToString().PadLeft(2, '0'));
-            final = final.Replace("%W", cal.GetWeekOfYear(now, CalendarWeekRule.FirstDay, DayOfWeek.Monday).ToString().PadLeft(2, '0'));
+            final = final.Replace("%W", cal.GetWeekOfYear(now, CalendarWeekRule.FirstDay, System.DayOfWeek.Monday).ToString().PadLeft(2, '0'));
             final = final.Replace("%x", now.ToString("MM/dd/yy"));
             final = final.Replace("%X", now.ToString("HH:mm:ss"));
             final = final.Replace("%y", now.ToString("yy"));
@@ -400,6 +472,72 @@ namespace lulzbot
             final = final.Replace("%Z", now.ToString("zzz"));
 
             return final;
+        }
+
+        public static String strftime(String format, int timestamp)
+        {
+            DateTime then = epoch.Date.AddSeconds(timestamp);
+            return strftime(format, then);
+        }
+
+        public static String strftime(String format)
+        {
+            return strftime(format, DateTime.Now);
+        }
+
+        public static List<String> MutualChannels(String user)
+        {
+            List<String> chans = new List<String>();
+            String who = user.ToLower();
+
+            foreach (lulzbot.Types.ChatData data in Core.ChannelData.Values)
+            {
+                if (data.Members.ContainsKey(who) && data.Name.ToLower() != "chat:datashare")
+                {
+                    chans.Add(data.Name);
+                }
+            }
+
+            return chans;
+        }
+
+        public static T Json2Data<T>(String json)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
+            }
+            catch { return default(T); }
+        }
+
+        public static String GrabPage(String url)
+        {
+            try
+            {
+                ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback(ValidateRemoteCertificate);
+                String content = String.Empty;
+
+                HttpWebRequest page_request = (HttpWebRequest)HttpWebRequest.Create(url);
+
+                page_request.Method = "GET";
+                page_request.KeepAlive = false;
+                // :)
+                page_request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17";
+                page_request.Accept = "text/plain";
+
+                using (StreamReader reader = new StreamReader(page_request.GetResponse().GetResponseStream()))
+                {
+                    content = reader.ReadToEnd();
+                }
+
+                return content;
+            }
+            catch { return null; }
+        }
+
+        private static bool ValidateRemoteCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors policyErrors)
+        {
+            return true;
         }
     }
 }

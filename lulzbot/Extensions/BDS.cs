@@ -1,4 +1,5 @@
 ﻿using lulzbot.Networking;
+using lulzbot.Types;
 using System;
 using System.Collections.Generic;
 using System.Timers;
@@ -22,7 +23,7 @@ namespace lulzbot.Extensions
             Events.AddEvent("recv_msg",     new Event(this, "ParseBDS", "Parses BDS messages."));
             Events.AddEvent("join",         new Event(this, "evt_onjoin", "Handles BDS related actions on joining datashare."));
 
-            Events.AddCommand("bot", new Command(this, "cmd_bot", "DivinityArcane", "{trig}bot [info|count|online|def]", 25, "Gets information from the database."));
+            Events.AddCommand("bot",        new Command(this, "cmd_bot", "DivinityArcane", 25, "Gets information from the database."));
 
             if (Program.Debug)
                 ConIO.Write("Loading databases...", "BDS");
@@ -62,7 +63,7 @@ namespace lulzbot.Extensions
             if (packet.Parameter.ToLower() == "chat:datashare")
             {
                 // IDS-NOTE, XFER, BOTCHECK-SYNC ?
-                String[] caps = new String[] { "BOTCHECK", "BOTCHECK-EXT" };
+                String[] caps = new String[] { "BOTCHECK", "BOTCHECK-EXT", "LDS-UPDATE", "LDS-BOTCHECK" };
                 bot.Say(packet.Parameter, "BDS:PROVIDER:CAPS:" + String.Join(",", caps));
             }
         }
@@ -398,8 +399,56 @@ namespace lulzbot.Extensions
                         if (from_policebot)
                             return;
 
-                        String hashkey = Tools.md5((from + Program.BotName + "DivinityArcane;OrrinFox").ToLower());
-                        bot.NPSay(ns, String.Format("BDS:BOTDEF:RESPONSE:{0},{1},{2},{3},{4},{5}", from, Program.BotName, "C#", "DivinityArcane;OrrinFox", "http://botdom.com/wiki/User:Kyogo/lulzBot", hashkey));
+                        String hashkey = Tools.md5((from + Program.BotName + "DivinityArcane").ToLower());
+                        bot.NPSay(ns, String.Format("BDS:BOTDEF:RESPONSE:{0},{1},{2},{3},{4},{5}", from, Program.BotName, "C#", "DivinityArcane", "http://botdom.com/wiki/User:Kyogo/lulzBot", hashkey));
+                    }
+                }
+            }
+            else if (bits[0] == "LDS")
+            {
+                if (bits.Length >= 4 && bits[1] == "UPDATE")
+                {
+                    if (bits[2] == "PING" && bits[3].ToLower() == username.ToLower())
+                    {
+                        bot.NPSay(ns, String.Format("LDS:UPDATE:PONG:{0},{1},{2}", from, Program.BotName, Program.Version));
+                    }
+                    else if (bits[2] == "NOTIFY")
+                    {
+                        if (from_policebot || from.ToLower() == "divinityarcane")
+                        {
+                            if (bits[3].Contains(","))
+                            {
+                                String[] pars = bits[3].Split(new char[] {','});
+                                if (pars.Length == 3 && pars[0].ToLower() == username.ToLower())
+                                {
+                                    int secs = 0;
+                                    bool ok = int.TryParse(pars[2], out secs);
+                                    if (ok)
+                                    {
+                                        ConIO.Notice(String.Format("A new version of lulzBot is available: version {0} (Released {1} ago)", pars[1], Tools.FormatTime(Tools.Timestamp() - secs)));
+                                        //ConIO.Notice(String.Format("To update, use the update command."));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (bits.Length >= 3 && bits[1] == "BOTCHECK")
+                {
+                    if (bits[2] == "ALL")
+                    {
+                        if (from_policebot || from.ToLower() == "divinityarcane")
+                        {
+                            // from, owner, botname, botversion, uptime, disconnects, bytes_sent, bytes_received
+                            bot.NPSay(ns, String.Format("LDS:BOTCHECK:RESPONSE:{0},{1},{2},{3},{4},{5},{6},{7}",
+                                from, owner, Program.BotName, Program.Version, bot.uptime, Program.Disconnects, Program.bytes_sent, Program.bytes_received));
+                        }
+                    }
+                    else if (bits.Length >= 4 && bits[2] == "DIRECT" && bits[3].ToLower() == username.ToLower())
+                    {
+                        // from, owner, botname, botversion, uptime, disconnects, bytes_sent, bytes_received
+                        bot.NPSay(ns, String.Format("LDS:BOTCHECK:RESPONSE:{0},{1},{2},{3},{4},{5},{6},{7}",
+                            from, owner, Program.BotName, Program.Version, bot.uptime, Program.Disconnects, Program.bytes_sent, Program.bytes_received));
                     }
                 }
             }

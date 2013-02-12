@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace lulzbot.Networking
+namespace lulzbot
 {
     /// <summary>
     /// This will be our dAmnPacket class. It will basically be an object that we
@@ -33,10 +33,29 @@ namespace lulzbot.Networking
         public Dictionary<String, String> Arguments = new Dictionary<String, String>();
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="lulzbot.Networking.dAmnPacket"/> class.
+        /// </summary>
+        public dAmnPacket ()
+        {
+
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="lulzbot.Networking.dAmnPacket"/> class.
+        /// </summary>
+        /// <param name='data'>
+        /// Data.
+        /// </param>
+        public dAmnPacket (String data)
+        {
+            this.Parse (data);
+        }
+
+        /// <summary>
         /// Here, we'll parse the string data of a packet and create our object.
         /// </summary>
         /// <param name="data">The string data of a packet.</param>
-        public dAmnPacket(String data)
+        public void Parse(String data)
         {
             if (data.Contains("\n"))
             {

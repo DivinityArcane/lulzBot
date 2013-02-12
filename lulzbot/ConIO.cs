@@ -56,6 +56,23 @@ namespace lulzbot
                 Console.WriteLine(output);
             }
         }
+
+        /// <summary>
+        /// Outputs a notice.
+        /// </summary>
+        /// <param name="output">notice message</param>
+        public static void Notice(String output)
+        {
+            lock (OutputLock)
+            {
+                Console.ForegroundColor = TimestampColor;
+                Console.Write("{0} ", Timestamp());
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("*!* [NOTICE] ");
+                Console.ResetColor();
+                Console.WriteLine(output);
+            }
+        }
         
         /// <summary>
         /// Static method for prompting the user for input and returning it.

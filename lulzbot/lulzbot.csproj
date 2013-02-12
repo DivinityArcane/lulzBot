@@ -134,6 +134,7 @@
     <Compile Include="Extensions\Commands\Core\Act.cs" />
     <Compile Include="Extensions\Commands\Core\Admin.cs" />
     <Compile Include="Extensions\Commands\Core\Ban.cs" />
+    <Compile Include="Extensions\Commands\Core\CTrig.cs" />
     <Compile Include="Extensions\Commands\Core\Demote.cs" />
     <Compile Include="Extensions\Commands\Core\Kick.cs" />
     <Compile Include="Extensions\Commands\Core\Kill.cs" />
@@ -230,7 +231,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

@@ -113,6 +113,8 @@ namespace lulzbot
             // The basics
             parsed = parsed.Replace("&lt;", "<");
             parsed = parsed.Replace("&gt;", ">");
+            parsed = parsed.Replace("&raquo;", "»");
+            parsed = parsed.Replace("&laquo;", "«");
             
             //message = message.Replace("&amp;", "&");
             return parsed;
@@ -256,6 +258,13 @@ namespace lulzbot
                     // It's not a tablump, so throw it into the parsed string as-is
                     parsed += bit;
                 }
+            }
+
+            // Unfortunately, this has to be done.
+            int start;
+            if ((start = parsed.IndexOf("<abbr title=\"colors:")) != -1)
+            {
+                return parsed.Substring(0, start);
             }
 
             // Return the parsed message

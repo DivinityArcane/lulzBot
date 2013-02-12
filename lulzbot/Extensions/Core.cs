@@ -56,6 +56,7 @@ namespace lulzbot.Extensions
             Events.AddCommand("admin",      new Command(this, "cmd_admin",            "DivinityArcane", 75,     "Makes the bot send the specified admin command to the specified channel."));
             Events.AddCommand("ban",        new Command(this, "cmd_ban",              "DivinityArcane", 75,     "Bans the specified user in the specified channel."));
             Events.AddCommand("commands",   new Command(this, "cmd_commands",         "DivinityArcane", 25,     "Displays commands available to the user."));
+            Events.AddCommand("ctrig",      new Command(this, "cmd_ctrig",            "DivinityArcane", 100,    "Changes the bot's trigger."));
             Events.AddCommand("demote",     new Command(this, "cmd_demote",           "DivinityArcane", 75,     "Demotes the specified user in the specified channel."));
             Events.AddCommand("event",      new Command(this, "cmd_event",            "DivinityArcane", 25,     "Gets information on the events system."));
             Events.AddCommand("get",        new Command(this, "cmd_get",              "DivinityArcane", 50,     "Gets the specified data for the specified channel."));

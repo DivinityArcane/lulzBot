@@ -229,5 +229,13 @@ namespace lulzbot
             Program.Bot = null;
             Program.Bot = new Bot(Config);
         }
+
+        public static void Change_Trigger(String trig)
+        {
+            Config.Trigger = trig;
+            Config.Save("./Config.dat");
+            Program.Bot.Config.Trigger = trig;
+            Program.Bot.Config.Save("./Config.dat");
+        }
     }
 }

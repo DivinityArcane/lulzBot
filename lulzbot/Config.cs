@@ -37,7 +37,7 @@ namespace lulzbot
             {
                 using (StreamWriter file = new StreamWriter(stream))
                 {
-                    file.Write(buffer);
+                    file.Write(Encryption.Encrypt(buffer));
                 }
             }
 
@@ -67,7 +67,7 @@ namespace lulzbot
                 {
                     using (StreamReader file = new StreamReader(stream))
                     {
-                        buffer = file.ReadToEnd();
+                        buffer = Encryption.Decrypt(file.ReadToEnd());
                     }
                 }
 

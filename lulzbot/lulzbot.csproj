@@ -129,6 +129,7 @@
   <ItemGroup>
     <Compile Include="Bot.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="Encryption.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Extensions\BDS.cs" />
     <Compile Include="Extensions\Commands\Core\Act.cs" />

@@ -9,7 +9,7 @@ namespace lulzbot.Extensions
     {
         public static void cmd_commands(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
-            List<String> commands = Events.GetAvailableCommands(Users.GetPrivs(from));
+            List<String> commands = Events.GetAvailableCommands(from);
 
             if (commands.Count <= 0)
             {

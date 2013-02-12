@@ -146,6 +146,7 @@
     <Compile Include="Extensions\Commands\Core\Set.cs" />
     <Compile Include="Extensions\Commands\Core\Sudo.cs" />
     <Compile Include="Extensions\Commands\Core\Unban.cs" />
+    <Compile Include="Extensions\Commands\Users\Access.cs" />
     <Compile Include="Extensions\Commands\Users\Users.cs" />
     <Compile Include="Extensions\Core.cs" />
     <Compile Include="Extensions\Events\Core\Reload.cs" />

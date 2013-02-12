@@ -14,7 +14,8 @@ namespace lulzbot.Extensions
         /// </summary>
         public Users(String owner)
         {
-            Events.AddCommand("users", new Command(this, "cmd_users", "DivinityArcane", 75, "Manages bot users."));
+            Events.AddCommand("users",  new Command(this, "cmd_users",  "DivinityArcane", 75, "Manages bot users."));
+            Events.AddCommand("access", new Command(this, "cmd_access", "DivinityArcane", 75, "Manages individual command access."));
 
             userdata = Storage.Load<Dictionary<String, UserData>>("users");
 
@@ -32,10 +33,20 @@ namespace lulzbot.Extensions
             }
         }
 
-        public static bool CanAccess(String username, int privs)
+        public static bool CanAccess(String username, int privs, String cmd)
         {
             int pl = 25;
-            if (userdata.ContainsKey(username.ToLower())) pl = userdata[username.ToLower()].PrivLevel;
+            String who = username.ToLower();
+
+            if (userdata.ContainsKey(who))
+            {
+                pl = userdata[who].PrivLevel;
+
+                if (userdata[who].Access.Contains(cmd.ToLower())) return true;
+
+                if (userdata[who].Banned.Contains(cmd.ToLower())) return false;
+            }
+
             return pl >= privs;
         }
 

@@ -38,10 +38,10 @@ namespace lulzbot.Extensions
                     Banned.Sort();
 
                     Output += String.Format("<b>Owner:</b><br/><b>&raquo;</b> :dev{0}:<br/>", bot.Config.Owner);
-                    Output += String.Format("<br/><b>Admins:</b><br/><b>&raquo;</b> {0}<br/>", (Admins.Count > 0 ? String.Join(", ", Admins) : "None"));
-                    Output += String.Format("<br/><b>Operators:</b><br/><b>&raquo;</b> {0}<br/>", (Operators.Count > 0 ? String.Join(", ", Operators) : "None"));
-                    Output += String.Format("<br/><b>Members:</b><br/><b>&raquo;</b> {0}<br/>", (Members.Count > 0 ? String.Join(", ", Members) : "None"));
-                    Output += String.Format("<br/><b>Banned:</b><br/><b>&raquo;</b> {0}<br/>", (Banned.Count > 0 ? String.Join(", ", Banned) : "None"));
+                    Output += String.Format("<br/><b>Admins:</b><br/><b>&raquo;</b> {0}<br/>", (Admins.Count > 0 ? String.Join(":, :dev", Admins) : "None"));
+                    Output += String.Format("<br/><b>Operators:</b><br/><b>&raquo;</b> {0}<br/>", (Operators.Count > 0 ? String.Join(":, :dev", Operators) : "None"));
+                    Output += String.Format("<br/><b>Members:</b><br/><b>&raquo;</b> {0}<br/>", (Members.Count > 0 ? String.Join(":, :dev", Members) : "None"));
+                    Output += String.Format("<br/><b>Banned:</b><br/><b>&raquo;</b> {0}<br/>", (Banned.Count > 0 ? String.Join(":, :dev", Banned) : "None"));
 
                     bot.Say(ns, Output);
                 }
@@ -51,10 +51,17 @@ namespace lulzbot.Extensions
                     {
                         String who = args[2].ToLower();
 
-                        if (userdata.ContainsKey(who))
+                        if (userdata.ContainsKey(who) && userdata[who].PrivLevel != (int)Privs.Guest)
                         {
                             String realname = userdata[who].Name;
-                            userdata.Remove(who);
+                            if (userdata[who].Access.Count > 0 || userdata[who].Banned.Count > 0)
+                            {
+                                UserData data = userdata[who];
+                                data.PrivLevel = (int)Privs.Guest;
+                                userdata[who] = data;
+                                // Don't "remove" users who have special command access.
+                            }
+                            else userdata.Remove(who);
                             Storage.Save("users", userdata);
                             bot.Say(ns, String.Format("<b>&raquo; User removed:</b> :dev{0}:", realname));
                         }
@@ -67,11 +74,30 @@ namespace lulzbot.Extensions
                     {
                         String who = args[2].ToLower();
                         String privs = args[3].ToLower();
+                        int pl = 25;
+
+                        if (privs == "owner")
+                        {
+                            bot.Say(ns, "<b>&raquo; Adding other users as owners is not allowed!</b>");
+                            return;
+                        }
+                        else if (privs == "admins") pl = (int)Privs.Admins;
+                        else if (privs == "operators") pl = (int)Privs.Operators;
+                        else if (privs == "members") pl = (int)Privs.Members;
+                        else if (privs == "banned") pl = (int)Privs.Banned;
+                        else
+                        {
+                            bot.Say(ns, "<b>&raquo; Invalid privilege level! Correct values:</b> Admins, Operators, Members, Banned.</b>");
+                            return;
+                        }
 
                         if (userdata.ContainsKey(who))
                         {
                             String realname = userdata[who].Name;
-                            bot.Say(ns, String.Format("<b>&raquo; User already exists:</b> :dev{0}:", realname));
+                            UserData data = userdata[who];
+                            data.PrivLevel = pl;
+                            userdata[who] = data;
+                            bot.Say(ns, String.Format("<b>&raquo; Priv level updated for user:</b> :dev{0}:", realname));
                         }
                         else
                         {
@@ -82,26 +108,12 @@ namespace lulzbot.Extensions
                                 Banned = new List<String>()
                             };
 
-                            if (privs == "owner")
-                            {
-                                bot.Say(ns, "<b>&raquo; Adding other users as owners is not allowed!</b>");
-                                return;
-                            }
-                            else if (privs == "admins") data.PrivLevel = (int)Privs.Admins;
-                            else if (privs == "operators") data.PrivLevel = (int)Privs.Operators;
-                            else if (privs == "members") data.PrivLevel = (int)Privs.Members;
-                            else if (privs == "banned") data.PrivLevel = (int)Privs.Banned;
-                            else
-                            {
-                                bot.Say(ns, "<b>&raquo; Invalid privilege level! Correct values:</b> Admins, Operators, Members, Banned.</b>");
-                                return;
-                            }
-
                             userdata.Add(who, data);
-                            Storage.Save("users", userdata);
 
                             bot.Say(ns, String.Format("<b>&raquo; Added user:</b> :dev{0}:", who));
                         }
+
+                        Storage.Save("users", userdata);
                     }
                     else
                     {

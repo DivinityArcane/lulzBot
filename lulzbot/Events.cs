@@ -317,7 +317,7 @@ namespace lulzbot
                     callback = _commands [cmd_name.ToLower ()];
 
                     // Access denied
-                    if (!Users.CanAccess(from, callback.MinimumPrivs))
+                    if (!Users.CanAccess(from, callback.MinimumPrivs, cmd_name.ToLower()))
                         return;
 
                     try
@@ -352,7 +352,7 @@ namespace lulzbot
                 Command callback = _external_commands[cmd_name.ToLower()];
 
                 // Access denied
-                if (!Users.CanAccess(from, callback.MinimumPrivs))
+                if (!Users.CanAccess(from, callback.MinimumPrivs, cmd_name.ToLower()))
                     return;
 
                 try
@@ -413,15 +413,33 @@ namespace lulzbot
         /// </summary>
         /// <param name="minimum_priv_level">Minimum privilege level</param>
         /// <returns>Sorted list of command names</returns>
-        public static List<String> GetAvailableCommands(int minimum_priv_level)
+        public static List<String> GetAvailableCommands(String username)
         {
             List<String> list = new List<string>();
+
+            int pl = 25;
+            String who = username.ToLower();
+            List<String> whitelist = null, blacklist = null;
+
+            if (Users.userdata.ContainsKey(who))
+            {
+                pl        = Users.userdata[who].PrivLevel;
+                whitelist = Users.userdata[who].Access;
+                blacklist = Users.userdata[who].Banned;
+            }
+
+            if (whitelist == null)
+            {
+                whitelist = new List<String>();
+                blacklist = new List<String>();
+            }
 
             lock (_commands)
             {
                 foreach (KeyValuePair<String, Command> KVP in _commands)
                 {
-                    if (KVP.Value.MinimumPrivs <= minimum_priv_level)
+                    if (blacklist.Contains(KVP.Key)) continue;
+                    if (KVP.Value.MinimumPrivs <= pl || whitelist.Contains(KVP.Key))
                         list.Add(KVP.Key);
                 }
             }
@@ -430,7 +448,8 @@ namespace lulzbot
             {
                 foreach (KeyValuePair<String, Command> KVP in _external_commands)
                 {
-                    if (KVP.Value.MinimumPrivs <= minimum_priv_level)
+                    if (blacklist.Contains(KVP.Key)) continue;
+                    if (KVP.Value.MinimumPrivs <= pl || whitelist.Contains(KVP.Key))
                         list.Add(KVP.Key);
                 }
             }

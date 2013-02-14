@@ -305,7 +305,7 @@ namespace lulzbot
                     from = packet.Arguments ["from"];
 
                 String[] cmd_args;
-                String msg = packet.Body.Substring (Program.Bot.Config.Trigger.Length);
+                String msg = packet.Body.Substring (Program.Bot.Config.Trigger.Length).TrimEnd(new char[] {' '});
 
                 if (packet.Body.Contains (" "))
                     cmd_args = msg.Split (' ');

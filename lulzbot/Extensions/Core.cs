@@ -41,13 +41,15 @@ namespace lulzbot.Extensions
             Events.AddEvent("kill",         new Event(this, "evt_kill_error"));
             Events.AddEvent("ping",         new Event(this, "evt_ping"));
 
-            Events.AddCommand("about",      new Command(this, "cmd_about",            "DivinityArcane", 25,      "Displays information about the bot."));
+            Events.AddCommand("about",      new Command(this, "cmd_about",            "DivinityArcane", 25,     "Displays information about the bot."));
+            Events.AddCommand("autojoin",   new Command(this, "cmd_autojoin",         "DivinityArcane", 100,    "Manages the bots autojoined channels."));
             Events.AddCommand("act",        new Command(this, "cmd_act",              "DivinityArcane", 75,     "Makes the bot say the specified message to the specified channel."));
             Events.AddCommand("admin",      new Command(this, "cmd_admin",            "DivinityArcane", 75,     "Makes the bot send the specified admin command to the specified channel."));
             Events.AddCommand("ban",        new Command(this, "cmd_ban",              "DivinityArcane", 75,     "Bans the specified user in the specified channel."));
             Events.AddCommand("commands",   new Command(this, "cmd_commands",         "DivinityArcane", 25,     "Displays commands available to the user."));
             Events.AddCommand("ctrig",      new Command(this, "cmd_ctrig",            "DivinityArcane", 100,    "Changes the bot's trigger."));
             Events.AddCommand("demote",     new Command(this, "cmd_demote",           "DivinityArcane", 75,     "Demotes the specified user in the specified channel."));
+            Events.AddCommand("eval",       new Command(this, "cmd_eval",             "DivinityArcane", 100,    "Evaluates C# code."));
             Events.AddCommand("event",      new Command(this, "cmd_event",            "DivinityArcane", 25,     "Gets information on the events system."));
             Events.AddCommand("get",        new Command(this, "cmd_get",              "DivinityArcane", 50,     "Gets the specified data for the specified channel."));
             Events.AddCommand("join",       new Command(this, "cmd_join",             "DivinityArcane", 75,     "Makes the bot join the specified channel."));
@@ -65,8 +67,9 @@ namespace lulzbot.Extensions
             Events.AddCommand("sudo",       new Command(this, "cmd_sudo",             "DivinityArcane", 100,    "Runs a command as the specified user."));
             Events.AddCommand("unban",      new Command(this, "cmd_unban",            "DivinityArcane", 75,     "Un-bans the specified user in the specified channel."));
             Events.AddCommand("uptime",     new Command(this, "cmd_uptime",           "DivinityArcane", 25,     "Returns how long the bot has been running."));
+            Events.AddCommand("whois",      new Command(this, "cmd_whois",            "DivinityArcane", 25,     "Performs a whois on the specified user."));
 
-            String[] c_types = new String[] { "join", "part", "send", "set", "kick", "kill", "promote", "demote", "admin" };
+            String[] c_types = new String[] { "join", "part", "send", "set", "kick", "kill", "promote", "demote", "admin", "whois" };
             CommandChannels.Clear();
 
             foreach (String c_type in c_types)

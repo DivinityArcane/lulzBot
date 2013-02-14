@@ -44,7 +44,21 @@ namespace lulzbot.Extensions
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() == "chat:datashare") return;
 
-            ConIO.Write(String.Format("*** Failed to get {0} in {1} [{2}]", packet.Arguments["p"], Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
+            if (packet.Parameter.StartsWith("login:"))
+            {
+                lock (CommandChannels["whois"])
+                {
+                    if (CommandChannels["whois"].Count > 0)
+                    {
+                        String chan = CommandChannels["whois"][0];
+                        CommandChannels["whois"].RemoveAt(0);
+
+                        bot.Say(chan, String.Format("<b>&raquo; Failed to whois {0}:</b> {1}", packet.Parameter.Substring(6), packet.Arguments["e"]));
+                    }
+                }
+            }
+            else
+                ConIO.Write(String.Format("*** Failed to get {0} in {1} [{2}]", packet.Arguments["p"], Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
         }
 
         public static void evt_set_error(Bot bot, dAmnPacket packet)

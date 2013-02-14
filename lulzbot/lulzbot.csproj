@@ -134,9 +134,11 @@
     <Compile Include="Extensions\BDS.cs" />
     <Compile Include="Extensions\Commands\Core\Act.cs" />
     <Compile Include="Extensions\Commands\Core\Admin.cs" />
+    <Compile Include="Extensions\Commands\Core\Autojoin.cs" />
     <Compile Include="Extensions\Commands\Core\Ban.cs" />
     <Compile Include="Extensions\Commands\Core\CTrig.cs" />
     <Compile Include="Extensions\Commands\Core\Demote.cs" />
+    <Compile Include="Extensions\Commands\Core\Eval.cs" />
     <Compile Include="Extensions\Commands\Core\Kick.cs" />
     <Compile Include="Extensions\Commands\Core\Kill.cs" />
     <Compile Include="Extensions\Commands\Core\NetInfo.cs" />
@@ -146,6 +148,7 @@
     <Compile Include="Extensions\Commands\Core\Set.cs" />
     <Compile Include="Extensions\Commands\Core\Sudo.cs" />
     <Compile Include="Extensions\Commands\Core\Unban.cs" />
+    <Compile Include="Extensions\Commands\Core\Whois.cs" />
     <Compile Include="Extensions\Commands\Users\Access.cs" />
     <Compile Include="Extensions\Commands\Users\Users.cs" />
     <Compile Include="Extensions\Core.cs" />
@@ -163,6 +166,7 @@
     <Compile Include="Networking\Packets\Login.cs" />
     <Compile Include="Networking\Packets\Promotion.cs" />
     <Compile Include="Networking\Packets\Set.cs" />
+    <Compile Include="Networking\Packets\Whois.cs" />
     <Compile Include="Networking\Socket.cs" />
     <Compile Include="ConIO.cs" />
     <Compile Include="Program.cs" />

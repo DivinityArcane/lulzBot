@@ -115,6 +115,7 @@ namespace lulzbot
             parsed = parsed.Replace("&gt;", ">");
             parsed = parsed.Replace("&raquo;", "»");
             parsed = parsed.Replace("&laquo;", "«");
+            parsed = parsed.Replace("&middot;", "·");
             
             //message = message.Replace("&amp;", "&");
             return parsed;
@@ -519,27 +520,51 @@ namespace lulzbot
             catch { return default(T); }
         }
 
-        public static String GrabPage(String url)
+        public static String StripTags(String data)
+        {
+            char[] a = new char[data.Length];
+            int i = 0;
+            bool t = false;
+            for (int x = 0; x < data.Length; x++)
+            {
+                if (data[x] == '<') { t = true; continue; }
+                if (data[x] == '>') { t = false; continue; }
+                if (!t) { a[i] = data[x]; i++; }
+            }
+            return new String(a, 0, i);
+        }
+
+        public static String GrabPage(String url, bool strip_tags = false)
         {
             try
             {
                 ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback(ValidateRemoteCertificate);
                 String content = String.Empty;
+                Encoding enc = Encoding.GetEncoding("ASCII", new EncoderReplacementFallback(""), new DecoderReplacementFallback(""));
 
                 HttpWebRequest page_request = (HttpWebRequest)HttpWebRequest.Create(url);
 
-                page_request.Method = "GET";
-                page_request.KeepAlive = false;
+                page_request.Method      = "GET";
+                page_request.KeepAlive   = false;
+                page_request.Proxy       = null;
+                page_request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
                 // :)
-                page_request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17";
-                page_request.Accept = "text/plain";
+                page_request.UserAgent   = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17";
+                page_request.Accept      = "text/plain; gzip, deflate; en-us";
+                page_request.ContentType = "text/plain";
 
-                using (StreamReader reader = new StreamReader(page_request.GetResponse().GetResponseStream()))
+                using (WebResponse resp = page_request.GetResponse())
                 {
-                    content = reader.ReadToEnd();
+                    using (Stream s = resp.GetResponseStream())
+                    {
+                        using (StreamReader reader = new StreamReader(s, enc))
+                        {
+                            content = reader.ReadToEnd();
+                        }
+                    }
                 }
 
-                return content;
+                return strip_tags ? StripTags(content) : content;
             }
             catch { return null; }
         }

@@ -146,6 +146,22 @@ namespace lulzbot.Types
         KiloByte  = 1024,
     }
 
+    public class WhoisConnection
+    {
+        public int ConnectionID = 0, Online = 0, Idle = 0;
+        public List<String> Channels = new List<String>();
+    }
+
+    public class WhoisData
+    {
+        public String Name      = String.Empty;
+        public String Symbol    = String.Empty;
+        public String RealName  = String.Empty;
+        public String TypeName  = String.Empty;
+        public String GPC       = String.Empty;
+        public List<WhoisConnection> Connections = new List<WhoisConnection>();
+    }
+
     #region strftime
 
     public enum DayOfWeek : int

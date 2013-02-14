@@ -11,8 +11,6 @@ namespace lulzbot.Extensions
         {
             bot.Say(ns, String.Format("<b>&raquo; Quitting. [Uptime: {0}]</b>", Tools.FormatTime(bot.uptime)));
             bot.Quitting = true;
-            Program.Running = false;
-            Program.wait_event.Set();
             bot.Disconnect();
         }
     }

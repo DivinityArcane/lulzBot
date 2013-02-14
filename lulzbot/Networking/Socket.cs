@@ -80,6 +80,8 @@ namespace lulzbot.Networking
                 // Initialize the packet queue
                 _packet_queue = new Queue<dAmnPacket>();
 
+                ConIO.Write("Attempting to connect to the server...");
+
                 // Get the IP of the host
                 _ip = Dns.GetHostEntry(_host).AddressList[0];
 
@@ -94,20 +96,32 @@ namespace lulzbot.Networking
                 // Initialize the socket
                 // We could use normal sockets, but I like asynchronous sockets.
                 _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                if (_socket == null)
+                {
+                    ConIO.Warning("Socket", "Unable to connect to the internet. Check your connection.");
+                    Program.Running = false;
+                    Program.wait_event.Set();
+                    return;
+                }
+
                 _socket.Blocking = false;
                 _socket.BeginConnect(_endpoint, new AsyncCallback(on_connect), null);
-
-                ConIO.Write("Attempting to connect to the server...");
             }
-            catch (Exception E)
+            catch
             {
-                ConIO.Warning("Socket", "Failed to connect: " + E.ToString());
+                ConIO.Warning("Socket", "Unable to connect to the internet. Check your connection.");
+                Program.Running = false;
+                Program.wait_event.Set();
+                return;
             }
         }
 
         private void TimerTick(object sender, ElapsedEventArgs e)
         {
-            if ((!IsConnected && !Closed) || Environment.TickCount - LastPacket >= 90000)
+            if (_socket == null) return;
+
+            if ((!IsConnected && !Closed) || Environment.TickCount - LastPacket >= 96000)
             {
                 Closed = true;
                 on_disconnect();
@@ -143,6 +157,8 @@ namespace lulzbot.Networking
         {
             try
             {
+                if (_socket == null) return;
+
                 // We got a connection!
                 _socket.EndConnect(result);
                 Closed = false;
@@ -153,9 +169,12 @@ namespace lulzbot.Networking
                 // Wait for data
                 _socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(on_receive), null);
             }
-            catch (Exception E)
+            catch
             {
-                AnnounceError("on_connect", E);
+                ConIO.Warning("Socket", "Unable to connect to the internet. Check your connection.");
+                Program.Running = false;
+                Program.wait_event.Set();
+                return;
             }
         }
 
@@ -163,7 +182,7 @@ namespace lulzbot.Networking
         {
             try
             {
-                if (Closed)
+                if (_socket == null || Closed)
                     return;
 
                 int bytes = _socket.EndSend(result);
@@ -179,7 +198,7 @@ namespace lulzbot.Networking
         {
             try
             {
-                if (Closed)
+                if (_socket == null || Closed)
                     return;
 
                 // End the receive, and get the number of bytes that are data.
@@ -257,7 +276,7 @@ namespace lulzbot.Networking
         {
             try
             {
-                if (Closed)
+                if (_socket == null || Closed)
                     return;
 
                 _socket.BeginSend(packet, 0, packet.Length, SocketFlags.None, new AsyncCallback(on_sent), null);
@@ -281,6 +300,8 @@ namespace lulzbot.Networking
         {
             try
             {
+                if (_socket == null) return;
+
                 Send(Encoding.ASCII.GetBytes(packet));
             }
             catch (Exception E)

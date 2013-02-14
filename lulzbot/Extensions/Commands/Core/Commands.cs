@@ -17,7 +17,7 @@ namespace lulzbot.Extensions
             }
             else
             {
-                bot.Say(ns, String.Format("<b>&raquo; {0} command{1} available for :dev{2}::<br/>&raquo;</b> {3}", commands.Count, (commands.Count == 1 ? "" : "s"), from, String.Join(", ", commands)));
+                bot.Say(ns, String.Format("<b>&raquo; {0} command{1} available for :dev{2}::<br/>&raquo;</b> <b>[</b>{3}<b>]</b>", commands.Count, (commands.Count == 1 ? "" : "s"), from, String.Join("<b>] &middot; [</b>", commands)));
             }
         }
     }

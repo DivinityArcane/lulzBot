@@ -13,6 +13,8 @@ namespace lulzbot.Extensions
         private static Dictionary<String, Types.ClientInfo> _clientinfo_database    = new Dictionary<string, Types.ClientInfo>();
         private static Dictionary<String, String> _info_requests                    = new Dictionary<string, string>();
 
+        private const int UPDATE_TIME = 604800;
+
         /// <summary>
         /// Set this to false to overwrite automated saving of the database.
         /// </summary>
@@ -22,8 +24,9 @@ namespace lulzbot.Extensions
         {
             Events.AddEvent("recv_msg",     new Event(this, "ParseBDS", "Parses BDS messages."));
             Events.AddEvent("join",         new Event(this, "evt_onjoin", "Handles BDS related actions on joining datashare."));
-
+            
             Events.AddCommand("bot",        new Command(this, "cmd_bot", "DivinityArcane", 25, "Gets information from the database."));
+            Events.AddCommand("bds",        new Command(this, "cmd_bds", "DivinityArcane", 75, "Manage BDS database."));
 
             if (Program.Debug)
                 ConIO.Write("Loading databases...", "BDS");
@@ -122,13 +125,25 @@ namespace lulzbot.Extensions
                         if (_botinfo_database.ContainsKey(args[2].ToLower()))
                         {
                             Types.BotInfo info = _botinfo_database[args[2].ToLower()];
+                            int ts = Bot.EpochTimestamp - info.Modified;
+                            if (ts >= UPDATE_TIME) // 7 days
+                            {
+                                lock (_info_requests)
+                                {
+                                    _info_requests.Add(args[2].ToLower(), ns);
+                                }
+
+                                bot.NPSay("chat:datashare", "BDS:BOTCHECK:REQUEST:" + args[2]);
+                                bot.Say(ns, String.Format("{0}: Data for {1} is outdated, one second while I update it...", from, args[2]));
+                                return;
+                            }
                             String output = String.Format("<b>&raquo; Information on :dev{0}:</b><br/>", info.Name);
                             output += String.Format("<b>Bot type:</b> {0}<br/>", info.Type);
                             output += String.Format("<b>Bot version:</b> {0}<br/>", info.Version);
                             output += String.Format("<b>Bot owner:</b> :dev{0}:<br/>", info.Owner);
                             output += String.Format("<b>Bot trigger:</b> <b><code>{0}</code></b><br/>", info.Trigger.Replace("&", "&amp;"));
                             output += String.Format("<b>BDS version:</b> {0}<br/>", info.BDSVersion);
-                            output += String.Format("<b>Last modified:</b> {0} ago", Tools.FormatTime(Bot.EpochTimestamp - info.Modified).TrimEnd('.'));
+                            output += String.Format("<b>Last modified:</b> {0} ago", Tools.FormatTime(ts).TrimEnd('.'));
                             bot.Say(ns, output);
                         }
                         else
@@ -150,6 +165,56 @@ namespace lulzbot.Extensions
                 else if (args[1] == "count")
                 {
                     bot.Say(ns, String.Format("<b>&raquo;</b> There are {0} bot(s) in my local database.", _botinfo_database.Count));
+                }
+            }
+        }
+
+        /// <summary>
+        /// BDS command
+        /// </summary>
+        public void cmd_bds(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        {
+            // First arg is the command
+            if (args.Length == 1)
+            {
+                bot.Say(ns, String.Format("<b>&raquo; Usage:</b><br/>{0}bds save<br/>{0}bds update", " &middot; " + bot.Config.Trigger));
+            }
+            else
+            {
+                String arg = args[1].ToLower();
+
+                if (arg == "save")
+                {
+                    Save();
+                    bot.Say(ns, "<b>&raquo; Database has been saved to disk.</b>");
+                }
+                else if (arg == "update")
+                {
+                    List<String> bots = new List<String>();
+
+                    if (Core.ChannelData.ContainsKey("chat:datashare"))
+                    {
+                        ChatData cd = Core.ChannelData["chat:datashare"];
+
+                        foreach (ChatMember m in cd.Members.Values)
+                        {
+                            if (m.Privclass == "Bots")
+                            {
+                                if (!_botinfo_database.ContainsKey(m.Name.ToLower()) || Bot.EpochTimestamp - _botinfo_database[m.Name.ToLower()].Modified >= UPDATE_TIME)
+                                {
+                                    bots.Add(m.Name);
+                                }
+                            }
+                        }
+                    }
+
+                    if (bots.Count > 0)
+                    {
+                        bot.Say("chat:DataShare", "BDS:BOTCHECK:REQUEST:" + String.Join(",", bots));
+                        bot.Say(ns, String.Format("<b>&raquo; Requested data for {0} bot{1}.</b>", bots.Count, bots.Count == 1 ? "" : "s"));
+                    }
+                    else
+                        bot.Say(ns, "<b>&raquo; No data needs to be updated.</b>");
                 }
             }
         }
@@ -192,6 +257,20 @@ namespace lulzbot.Extensions
                         String hashkey = Tools.md5((trigger + from + username).ToLower());
                         bot.NPSay(ns, String.Format("BDS:BOTCHECK:RESPONSE:{0},{1},{2},{3}/0.3,{4},{5}", from, owner, Program.BotName, Program.Version, hashkey, trigger));
                     }
+                    else if (bits[2] == "DIRECT" && bits[3].ToLower().Contains(","))
+                    {
+                        List<String> bots = new List<String>(bits[3].ToLower().Split(new char[] { ',' }));
+
+                        if (bots.Contains(username.ToLower()))
+                        {
+                            // If it's not a police bot, return.
+                            if (!from_policebot)
+                                return;
+
+                            String hashkey = Tools.md5((trigger + from + username).ToLower());
+                            bot.NPSay(ns, String.Format("BDS:BOTCHECK:RESPONSE:{0},{1},{2},{3}/0.3,{4},{5}", from, owner, Program.BotName, Program.Version, hashkey, trigger));
+                        }
+                    }
                     else if (bits[2] == "RESPONSE" && bits.Length >= 4)
                     {
                         // Look for a valid string
@@ -217,11 +296,11 @@ namespace lulzbot.Extensions
                         if (data.Length < 6 || !data[3].Contains("/"))
                             return;
 
-                        String[] versions   = data[3].Split('/');
-                        String botver       = versions[0];
-                        String hash         = data[4];
-                        String trig         = data[5];
-                        double bdsver       = 0.0;
+                        String[] versions = data[3].Split('/');
+                        String botver = versions[0];
+                        String hash = data[4];
+                        String trig = data[5];
+                        double bdsver = 0.0;
 
                         // trigger contains a comma?
                         if (data.Length > 6)
@@ -293,10 +372,10 @@ namespace lulzbot.Extensions
                         if (data.Length < 5 || !data[2].Contains("/"))
                             return;
 
-                        String[] versions   = data[2].Split('/');
-                        String botver       = versions[0];
-                        String trig         = data[4];
-                        double bdsver       = 0.0;
+                        String[] versions = data[2].Split('/');
+                        String botver = versions[0];
+                        String trig = data[4];
+                        double bdsver = 0.0;
 
                         // trigger contains a comma?
                         if (data.Length > 5)

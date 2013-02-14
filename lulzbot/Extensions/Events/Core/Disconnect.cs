@@ -15,6 +15,8 @@ namespace lulzbot.Extensions
             if (bot.Quitting)
             {
                 bot.Close();
+                Program.Running = false;
+                Program.wait_event.Set();
             }
             else
                 bot.Reconnect();

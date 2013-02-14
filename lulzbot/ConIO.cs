@@ -21,6 +21,8 @@ namespace lulzbot
         /// <param name="ns">Namespace. Defaults to "Bot". Usually a #channel</param>
         public static void Write(String output, String ns = "Bot")
         {
+            if (!Program.Running) return; // No need to output any queued data after this.
+
             // We're going to use colors, because why not? Makes it look nice.
             // Of course, in a threaded environment, colors can get messed up and
             //  not display correctly. So, we lock output to keep the order correct.
@@ -46,6 +48,8 @@ namespace lulzbot
         /// <param name="output">warning message</param>
         public static void Warning(String where, String output)
         {
+            if (!Program.Running) return; // No need to output any queued data after this.
+
             lock (OutputLock)
             {
                 Console.ForegroundColor = TimestampColor;
@@ -63,6 +67,8 @@ namespace lulzbot
         /// <param name="output">notice message</param>
         public static void Notice(String output)
         {
+            if (!Program.Running) return; // No need to output any queued data after this.
+
             lock (OutputLock)
             {
                 Console.ForegroundColor = TimestampColor;

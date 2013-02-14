@@ -18,8 +18,15 @@ namespace lulzbot.Extensions
                 if (packet.Arguments.ContainsKey("r"))
                 {
                     ConIO.Write(String.Format("** Left [{0}] ({1})", packet.Arguments["e"], packet.Arguments["r"]), Tools.FormatChat(packet.Parameter));
+                    
                     // If we parted with a reason, that means we disconnected or timed out!
-                    bot.Reconnect();
+                    if (bot.Quitting)
+                    {
+                        bot.Close();
+                        Program.Running = false;
+                        Program.wait_event.Set();
+                    }
+                    else bot.Reconnect();
                     return;
                 }
                 else

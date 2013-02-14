@@ -17,7 +17,7 @@ using System.Windows.Forms;
 
 namespace lulzbot
 {
-    class Program
+    public class Program
     {
         // This boolean controls whether or not the bot is allowed to run.
         public static bool Running = true;
@@ -49,7 +49,7 @@ namespace lulzbot
         public static ulong bytes_sent = 0, bytes_received = 0;
         public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations" };
         public const String BotName = "lulzBot";
-        public const String Version = "0.5a";
+        public const String Version = "0.6b";
 
         static void Main (string[] args)
         {
@@ -234,8 +234,18 @@ namespace lulzbot
         {
             Config.Trigger = trig;
             Config.Save("./Config.dat");
-            Program.Bot.Config.Trigger = trig;
-            Program.Bot.Config.Save("./Config.dat");
+        }
+
+        public static void AddChannel(String chan)
+        {
+            Config.Channels.Add(chan);
+            Config.Save("./Config.dat");
+        }
+
+        public static void RemoveChannel(String chan)
+        {
+            Config.Channels.Remove(chan);
+            Config.Save("./Config.dat");
         }
     }
 }

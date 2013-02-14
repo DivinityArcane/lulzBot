@@ -95,7 +95,7 @@ namespace lulzbot
                     // Yep.
                     foreach (String chan in bits[5].Split(','))
                     {
-                        Channels.Add(chan);
+                        Channels.Add(chan.ToLower());
                     }
                 }
                 else

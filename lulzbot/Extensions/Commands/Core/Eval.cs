@@ -21,6 +21,9 @@ namespace lulzbot.Extensions
                 try
                 {
                     String code = "using System;\n" +
+                        "using System.Linq;\n" +
+                        "using System.Collections;\n" +
+                        "using System.Collections.Generic;\n" +
                         "using lulzbot;\n" +
                         "using lulzbot.Extensions;\n\n" +
                         "public class c_eval {\n\t#pragma warning disable 162\n\t" +

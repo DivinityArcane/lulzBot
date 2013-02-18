@@ -22,6 +22,7 @@ namespace lulzbot.Extensions
                 {
                     String code = "using System;\n" +
                         "using System.Linq;\n" +
+                        "using System.Linq.Expressions;\n" +
                         "using System.Collections;\n" +
                         "using System.Collections.Generic;\n" +
                         "using lulzbot;\n" +

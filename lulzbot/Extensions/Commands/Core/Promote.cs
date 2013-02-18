@@ -9,15 +9,31 @@ namespace lulzbot.Extensions
     {
         public static void cmd_promote(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
-            if (args.Length < 3)
+            String helpmsg = String.Format("<b>&raquo; Usage:</b> {0}promote <i>[#channel]</i> username <i>privclass</i>", bot.Config.Trigger);
+
+            if (args.Length < 2)
             {
-                bot.Say(ns, String.Format("<b>&raquo; Usage:</b> {0}promote #channel username <i>privclass</i>", bot.Config.Trigger));
+                bot.Say(ns, helpmsg);
             }
             else
             {
+                String chan, who, pc;
+
                 if (!args[1].StartsWith("#"))
                 {
-                    bot.Say(ns, "<b>&raquo; Invalid channel!</b> Channels should start with a #");
+                    chan = ns;
+                    who = args[1];
+                    pc = (args.Length >= 3 ? args[2] : null);
+                }
+                else if (args.Length >= 3)
+                {
+                    chan = args[1];
+                    who = args[2];
+                    pc = (args.Length >= 4 ? args[3] : null);
+                }
+                else
+                {
+                    bot.Say(ns, helpmsg);
                     return;
                 }
 
@@ -26,7 +42,7 @@ namespace lulzbot.Extensions
                     CommandChannels["send"].Add(ns);
                 }
 
-                bot.Promote(args[1], args[2], (args.Length >= 4 ? args[3] : null));
+                bot.Promote(chan, who, pc);
             }
         }
     }

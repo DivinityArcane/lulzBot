@@ -9,15 +9,31 @@ namespace lulzbot.Extensions
     {
         public static void cmd_kick(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
-            if (args.Length < 3)
+            String helpmsg = String.Format("<b>&raquo; Usage:</b> {0}kick <i>[#channel]</i> username <i>[reason]</i>", bot.Config.Trigger);
+
+            if (args.Length < 2)
             {
-                bot.Say(ns, String.Format("<b>&raquo; Usage:</b> {0}kick #channel username <i>reason</i>", bot.Config.Trigger));
+                bot.Say(ns, helpmsg);
             }
             else
             {
+                String chan, who, reason;
+
                 if (!args[1].StartsWith("#"))
                 {
-                    bot.Say(ns, "<b>&raquo; Invalid channel!</b> Channels should start with a #");
+                    chan = ns;
+                    who = args[1];
+                    reason = (args.Length >= 3 ? ": " + msg.Substring(6 + who.Length) : "");
+                }
+                else if (args.Length >= 3)
+                {
+                    chan = args[1];
+                    who = args[2];
+                    reason = (args.Length >= 4 ? ": " + msg.Substring(7 + who.Length + chan.Length) : "");
+                }
+                else
+                {
+                    bot.Say(ns, helpmsg);
                     return;
                 }
 
@@ -26,7 +42,7 @@ namespace lulzbot.Extensions
                     CommandChannels["kick"].Add(ns);
                 }
 
-                bot.Kick(args[1], args[2], "<b>"+from+"</b>"+(args.Length >= 4 ? ": "+msg.Substring(7+args[1].Length+args[2].Length) : ""));
+                bot.Kick(chan, who, "<b>"+from+"</b>"+reason);
             }
         }
     }

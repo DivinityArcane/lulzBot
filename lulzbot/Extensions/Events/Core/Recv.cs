@@ -291,9 +291,23 @@ namespace lulzbot.Extensions
                     if (cmdchan != String.Empty)
                         bot.Say(cmdchan, String.Format("<b>&raquo; Failed to {0} privclass:</b> {1}<br/><br/><b>Command was:</b> <bcode>'{2}'</bcode>", packet.Arguments["p"], packet.Arguments["e"], packet.Body));
                 }
-            }
+                else if (packet.SubParameter == "show")
+                {
+                    lock (CommandChannels["send"])
+                    {
+                        if (CommandChannels["send"].Count > 0)
+                        {
+                            cmdchan = CommandChannels["send"][0];
+                            CommandChannels["send"].RemoveAt(0);
+                        }
+                    }
 
-            // We don't need output for SHOW
+                    Events.CallEvent("evt_recv_admin_show", packet);
+
+                    if (cmdchan != String.Empty)
+                        bot.Say(cmdchan, String.Format("<b>&raquo; Showing {0} of {1}:</b><br/><code>'{2}'</code>", packet.Arguments["p"], Tools.FormatChat(packet.Parameter), packet.Body));
+                }
+            }
         }
     }
 }

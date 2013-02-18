@@ -62,6 +62,10 @@ namespace lulzbot.Extensions
                         bot.Say(ns, helpmsg);
                     }
                 }
+                else
+                {
+                    bot.Say(ns, helpmsg);
+                }
             }
         }
     }

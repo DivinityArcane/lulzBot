@@ -21,7 +21,7 @@ namespace lulzbot.Extensions
                 {
                     if (!userdata.ContainsKey(who))
                     {
-                        bot.Say(ns, "<b>&raquo; No such user exists.</b> Users must be banned of given access to at least one command, or their privlevel changed from guest to be displayed.");
+                        bot.Say(ns, "<b>&raquo; No such user exists.</b> Users must be banned or given access to at least one command, or their privlevel changed from guest to be displayed.");
                         return;
                     }
 
@@ -64,6 +64,18 @@ namespace lulzbot.Extensions
                     }
                     else if (arg == "add")
                     {
+                        if (!Events.ValidateCommandName(cmd))
+                        {
+                            bot.Say(ns, "<b>&raquo; The command must be a valid and existing command!</b>");
+                            return;
+                        }
+
+                        if (Events.GetCommandAccess(cmd) >= (int)Privs.Owner)
+                        {
+                            bot.Say(ns, "<b>&raquo; You cannot grant access to commands that require owner access.</b>");
+                            return;
+                        }
+
                         if (!userdata.ContainsKey(who))
                             userdata.Add(who, new UserData()
                             {
@@ -90,6 +102,12 @@ namespace lulzbot.Extensions
                     }
                     else if (arg == "ban")
                     {
+                        if (who == bot.Config.Owner.ToLower())
+                        {
+                            bot.Say(ns, "<b>&raquo; You cannot ban the bot's owner!</b>");
+                            return;
+                        }
+
                         if (!userdata.ContainsKey(who))
                             userdata.Add(who, new UserData()
                             {

@@ -111,10 +111,12 @@ namespace lulzbot.Extensions
         /// </summary>
         public void cmd_bot(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
+            String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>&raquo; {0}bot info [username]<br/>&raquo; {0}bot count", bot.Config.Trigger);
+            
             // First arg is the command
             if (args.Length == 1)
             {
-                bot.Say(ns, String.Format("<b>&raquo; Usage:</b><br/>&raquo; {0}bot info [username]<br/>&raquo; {0}bot count", bot.Config.Trigger));
+                bot.Say(ns, helpmsg);
             }
             else
             {
@@ -159,12 +161,12 @@ namespace lulzbot.Extensions
                     }
                     else
                     {
-                        bot.Say(ns, "Usage message goes here.");
+                        bot.Say(ns, helpmsg);
                     }
                 }
                 else if (args[1] == "count")
                 {
-                    bot.Say(ns, String.Format("<b>&raquo;</b> There are {0} bot(s) in my local database.", _botinfo_database.Count));
+                    bot.Say(ns, String.Format("<b>&raquo;</b> There are {0} bot{1} in my local database.", _botinfo_database.Count, _botinfo_database.Count == 1 ? "" : "s"));
                 }
             }
         }

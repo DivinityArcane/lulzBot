@@ -49,7 +49,7 @@ namespace lulzbot
         public static ulong bytes_sent = 0, bytes_received = 0;
         public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations" };
         public const String BotName = "lulzBot";
-        public const String Version = "0.6b";
+        public const String Version = "0.7b Preview";
 
         static void Main (string[] args)
         {
@@ -226,6 +226,7 @@ namespace lulzbot
         /// </summary>
         public static void Start()
         {
+            if (!Program.Running || (Program.Bot != null && Program.Bot.Quitting)) return;
             Program.Bot = null;
             Program.Bot = new Bot(Config);
         }

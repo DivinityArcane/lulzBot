@@ -9,16 +9,23 @@ namespace lulzbot.Extensions
     {
         public static void cmd_act(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
-            if (args.Length < 3)
+            if (args.Length < 2)
             {
-                bot.Say(ns, String.Format("<b>&raquo; Usage:</b> {0}act #channel <i>msg</i>", bot.Config.Trigger));
+                bot.Say(ns, String.Format("<b>&raquo; Usage:</b> {0}act <i>[#channel]</i> msg", bot.Config.Trigger));
             }
             else
             {
+                String chan, mesg;
+
                 if (!args[1].StartsWith("#"))
                 {
-                    bot.Say(ns, "<b>&raquo; Invalid channel!</b> Channels should start with a #");
-                    return;
+                    chan = ns;
+                    mesg = msg.Substring(4);
+                }
+                else
+                {
+                    chan = args[1];
+                    mesg = msg.Substring(5 + args[1].Length);
                 }
 
                 lock (CommandChannels["send"])
@@ -26,7 +33,7 @@ namespace lulzbot.Extensions
                     CommandChannels["send"].Add(ns);
                 }
 
-                bot.Act(args[1], msg.Substring(5 + args[1].Length));
+                bot.Act(chan, mesg);
             }
         }
     }

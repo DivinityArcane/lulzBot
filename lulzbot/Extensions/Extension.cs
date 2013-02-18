@@ -159,7 +159,7 @@ namespace lulzbot.Extensions
             if (ExtensionContainer.CurrentFile == String.Empty)
                 throw new Exception("Events must be bound in the Initialize() method!");
 
-            if (!Events.ValidateName(event_name))
+            if (!Events.ValidateEventName(event_name))
                 throw new Exception("Invalid event name: " + event_name);
 
             Event evt = new Event(class_ref, method_name, "External event bound to " + event_name, String.Format("Extension[{0}]", ExtensionContainer.CurrentFile));

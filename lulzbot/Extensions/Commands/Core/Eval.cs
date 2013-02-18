@@ -22,8 +22,8 @@ namespace lulzbot.Extensions
                 {
                     String code = "using System;\n" +
                         "using lulzbot;\n" +
-                        "using lulzbot.Extensions;\n\n" + 
-                        "public class c_eval {\n\t" +
+                        "using lulzbot.Extensions;\n\n" +
+                        "public class c_eval {\n\t#pragma warning disable 162\n\t" +
                         "public static object v_eval () {\n\t\t" +
                         msg.Substring(5) + "\n\t\treturn null;\n\t}\n}";
 

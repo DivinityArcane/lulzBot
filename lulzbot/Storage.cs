@@ -36,27 +36,35 @@ namespace lulzbot
         {
             ConfirmStorageDir();
 
-            filename = String.Format("./Storage/{0}.sto", Regex.Replace(filename, "[^a-zA-Z0-9_]", ""));
-
-            if (!File.Exists(filename))
+            try
             {
-                return default(T);
-            }
-            else
-            {
-                String buffer = String.Empty;
+                String n_filename = String.Format("./Storage/{0}.sto", Regex.Replace(filename, "[^a-zA-Z0-9_]", ""));
 
-                using (Stream stream = new FileStream(filename, FileMode.Open))
+                if (!File.Exists(n_filename))
                 {
-                    using (StreamReader file = new StreamReader(stream))
-                    {
-                        buffer = file.ReadToEnd();
-                    }
+                    return default(T);
                 }
+                else
+                {
+                    String buffer = String.Empty;
 
-                T obj = JsonConvert.DeserializeObject<T>(buffer);
+                    using (Stream stream = new FileStream(n_filename, FileMode.Open))
+                    {
+                        using (StreamReader file = new StreamReader(stream))
+                        {
+                            buffer = file.ReadToEnd();
+                        }
+                    }
 
-                return obj;
+                    T obj = JsonConvert.DeserializeObject<T>(buffer);
+
+                    return obj;
+                }
+            }
+            catch (Exception E)
+            {
+                ConIO.Warning("Storage", "Error while loading file[" + filename + "]: " + E.Message);
+                return default(T);
             }
         }
 

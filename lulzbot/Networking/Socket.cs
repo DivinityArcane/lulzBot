@@ -111,7 +111,9 @@ namespace lulzbot.Networking
             catch
             {
                 ConIO.Warning("Socket", "Unable to connect to the internet. Check your connection.");
-                Program.Running = false;
+                ConIO.Notice("Attempting to reconnect in 10 seconds...");
+                System.Threading.Thread.Sleep(10000);
+                Program.ForceReconnect = true;
                 Program.wait_event.Set();
                 return;
             }
@@ -121,7 +123,7 @@ namespace lulzbot.Networking
         {
             if (_socket == null) return;
 
-            if ((!IsConnected && !Closed) || Environment.TickCount - LastPacket >= 96000)
+            if ((!IsConnected && !Closed) || Environment.TickCount - LastPacket >= 120000)
             {
                 Closed = true;
                 on_disconnect();
@@ -172,7 +174,9 @@ namespace lulzbot.Networking
             catch
             {
                 ConIO.Warning("Socket", "Unable to connect to the internet. Check your connection.");
-                Program.Running = false;
+                ConIO.Notice("Attempting to reconnect in 10 seconds...");
+                System.Threading.Thread.Sleep(10000);
+                Program.ForceReconnect = true;
                 Program.wait_event.Set();
                 return;
             }

@@ -16,6 +16,12 @@ namespace lulzbot.Extensions
             else
             {
                 String trig = msg.Substring(6);
+                if (trig == bot.Config.Trigger)
+                {
+                    bot.Say(ns, "<b>&raquo; Cannot set trigger to current trigger.</b>");
+                    return;
+                }
+
                 bot.Say(ns, String.Format("<b>&raquo; Trigger changed:</b> from <b><code>{0}</code></b> to <b><code>{1}</code></b>", bot.Config.Trigger, trig));
                 Program.Change_Trigger(trig);
             }

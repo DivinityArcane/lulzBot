@@ -44,6 +44,7 @@ namespace lulzbot
             AddEventType("property");
             AddEventType("recv_action");
             AddEventType("recv_admin");
+            AddEventType("evt_recv_admin_show");
             AddEventType("recv_join");
             AddEventType("recv_kicked");
             AddEventType("recv_msg");
@@ -100,9 +101,33 @@ namespace lulzbot
         /// </summary>
         /// <param name="event_name">Event name</param>
         /// <returns>true or false</returns>
-        public static bool ValidateName(String event_name)
+        public static bool ValidateEventName(String event_name)
         {
-            return _events.ContainsKey(event_name);
+            return _events.ContainsKey(event_name) || _external_events.ContainsKey(event_name);
+        }
+
+        /// <summary>
+        /// Checks whether or not an event of the specified name exists
+        /// </summary>
+        /// <param name="cmd_name">Command name</param>
+        /// <returns>true or false</returns>
+        public static bool ValidateCommandName(String cmd_name)
+        {
+            return _commands.ContainsKey(cmd_name) || _external_commands.ContainsKey(cmd_name);
+        }
+
+        /// <summary>
+        /// Get the access level of a specific command
+        /// </summary>
+        /// <param name="cmd_name">Command name</param>
+        /// <returns>Priv level or -1</returns>
+        public static int GetCommandAccess(String cmd_name)
+        {
+            if (_commands.ContainsKey(cmd_name))
+                return _commands[cmd_name].MinimumPrivs;
+            else if (_external_commands.ContainsKey(cmd_name))
+                return _external_commands[cmd_name].MinimumPrivs;
+            else return -1;
         }
 
         /// <summary>

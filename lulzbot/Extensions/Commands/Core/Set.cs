@@ -9,20 +9,31 @@ namespace lulzbot.Extensions
     {
         public static void cmd_set(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
-            if (args.Length < 4)
+            String helpmsg = String.Format("<b>&raquo; Usage:</b> {0}set <i>[#channel]</i> [title|topic] [content]", bot.Config.Trigger);
+
+            if (args.Length < 2)
             {
-                bot.Say(ns, String.Format("<b>&raquo; Usage:</b> {0}set #channel [title|topic] [content]", bot.Config.Trigger));
+                bot.Say(ns, helpmsg);
             }
             else
             {
-                // We need it in chat:xxxx format
-                String chan = Tools.FormatChat(args[1]).ToLower();
-                String prop = args[2];
-                String body = msg.Substring(args[1].Length + args[2].Length + 5);
+                String chan, prop, body;
 
                 if (!args[1].StartsWith("#"))
                 {
-                    bot.Say(ns, "<b>&raquo; Invalid channel!</b> Channels should start with a #");
+                    chan = ns.ToLower(); ;
+                    prop = args[1];
+                    body = msg.Substring(prop.Length + 4);
+                }
+                else if (args.Length >= 3)
+                {
+                    chan = Tools.FormatChat(args[1]).ToLower();
+                    prop = args[2];
+                    body = msg.Substring(prop.Length + args[1].Length + 5);
+                }
+                else
+                {
+                    bot.Say(ns, helpmsg);
                     return;
                 }
 

@@ -178,10 +178,8 @@ namespace lulzbot
 
             Program.ForceReconnect = true;
             Socket.Close();
-            Socket = null;
             can_loop = false;
             Program.wait_event.Set();
-            _loop_thread.Join();
         }
 
         /// <summary>

@@ -38,10 +38,10 @@ namespace lulzbot.Extensions
                     Banned.Sort();
 
                     Output += String.Format("<b>Owner:</b><br/><b>&raquo;</b> :dev{0}:<br/>", bot.Config.Owner);
-                    Output += String.Format("<br/><b>Admins:</b><br/><b>&raquo;</b> :dev{0}:<br/>", (Admins.Count > 0 ? String.Join(":, :dev", Admins) : "None"));
-                    Output += String.Format("<br/><b>Operators:</b><br/><b>&raquo;</b> :dev{0}:<br/>", (Operators.Count > 0 ? String.Join(":, :dev", Operators) : "None"));
-                    Output += String.Format("<br/><b>Members:</b><br/><b>&raquo;</b> :dev{0}:<br/>", (Members.Count > 0 ? String.Join(":, :dev", Members) : "None"));
-                    Output += String.Format("<br/><b>Banned:</b><br/><b>&raquo;</b> :dev{0}:<br/>", (Banned.Count > 0 ? String.Join(":, :dev", Banned) : "None"));
+                    Output += String.Format("<br/><b>Admins:</b><br/><b>&raquo;</b> {0}<br/>", (Admins.Count > 0 ? ":dev" + String.Join(":, :dev", Admins) + ":" : "None"));
+                    Output += String.Format("<br/><b>Operators:</b><br/><b>&raquo;</b> {0}<br/>", (Operators.Count > 0 ? ":dev" + String.Join(":, :dev", Operators) + ":" : "None"));
+                    Output += String.Format("<br/><b>Members:</b><br/><b>&raquo;</b> {0}<br/>", (Members.Count > 0 ? ":dev" + String.Join(":, :dev", Members) + ":" : "None"));
+                    Output += String.Format("<br/><b>Banned:</b><br/><b>&raquo;</b> {0}<br/>", (Banned.Count > 0 ? ":dev" + String.Join(":, :dev", Banned) + ":" : "None"));
 
                     bot.Say(ns, Output);
                 }

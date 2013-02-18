@@ -49,7 +49,7 @@ namespace lulzbot
         public static ulong bytes_sent = 0, bytes_received = 0;
         public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations" };
         public const String BotName = "lulzBot";
-        public const String Version = "0.7b Preview";
+        public const String Version = "0.7b";
 
         static void Main (string[] args)
         {

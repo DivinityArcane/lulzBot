@@ -132,13 +132,17 @@
     <Compile Include="Encryption.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Extensions\BDS.cs" />
+    <Compile Include="Extensions\Colors.cs" />
     <Compile Include="Extensions\Commands\Core\Act.cs" />
     <Compile Include="Extensions\Commands\Core\Admin.cs" />
     <Compile Include="Extensions\Commands\Core\Autojoin.cs" />
     <Compile Include="Extensions\Commands\Core\Ban.cs" />
+    <Compile Include="Extensions\Commands\Core\Command.cs" />
     <Compile Include="Extensions\Commands\Core\CTrig.cs" />
+    <Compile Include="Extensions\Commands\Core\Debug.cs" />
     <Compile Include="Extensions\Commands\Core\Demote.cs" />
     <Compile Include="Extensions\Commands\Core\Eval.cs" />
+    <Compile Include="Extensions\Commands\Core\Help.cs" />
     <Compile Include="Extensions\Commands\Core\Kick.cs" />
     <Compile Include="Extensions\Commands\Core\Kill.cs" />
     <Compile Include="Extensions\Commands\Core\NetInfo.cs" />
@@ -177,6 +181,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Storage.cs" />
+    <Compile Include="Timer.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="Types.cs" />
     <Compile Include="Extensions\Commands\Core\About.cs" />

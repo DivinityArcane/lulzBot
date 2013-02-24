@@ -321,6 +321,8 @@ namespace lulzbot
         /// <param name="cmd_name">command name</param>
         public static void CallCommand (String cmd_name, dAmnPacket packet)
         {
+            if (Core._disabled_commands.Contains(cmd_name.ToLower())) return;
+
             bool a = false, b = false;
             if ((a = _commands.ContainsKey (cmd_name.ToLower ())) || (b = _external_commands.ContainsKey (cmd_name.ToLower ()))) {
                 Command callback = null;
@@ -372,6 +374,8 @@ namespace lulzbot
         /// <param name="from">person who initiated the command</param>
         public static void CallExternalCommand(String cmd_name, String chan, String msg, String[] args, String from)
         {
+            if (Core._disabled_commands.Contains(cmd_name.ToLower())) return;
+
             if (_external_commands.ContainsKey(cmd_name.ToLower()))
             {
                 Command callback = _external_commands[cmd_name.ToLower()];
@@ -464,6 +468,7 @@ namespace lulzbot
                 foreach (KeyValuePair<String, Command> KVP in _commands)
                 {
                     if (blacklist.Contains(KVP.Key)) continue;
+                    if (Core._disabled_commands.Contains(KVP.Key)) continue;
                     if (KVP.Value.MinimumPrivs <= pl || whitelist.Contains(KVP.Key))
                         list.Add(KVP.Key);
                 }
@@ -474,6 +479,7 @@ namespace lulzbot
                 foreach (KeyValuePair<String, Command> KVP in _external_commands)
                 {
                     if (blacklist.Contains(KVP.Key)) continue;
+                    if (Core._disabled_commands.Contains(KVP.Key)) continue;
                     if (KVP.Value.MinimumPrivs <= pl || whitelist.Contains(KVP.Key))
                         list.Add(KVP.Key);
                 }
@@ -482,6 +488,14 @@ namespace lulzbot
             list.Sort();
 
             return list;
+        }
+
+        public static String CommandDescription(string cmd)
+        {
+            if (!ValidateCommandName(cmd)) return String.Empty;
+            else if (_commands.ContainsKey(cmd)) return _commands[cmd].Description;
+            else if (_external_commands.ContainsKey(cmd)) return _external_commands[cmd].Description;
+            return null;
         }
     }
 }

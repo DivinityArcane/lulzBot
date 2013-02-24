@@ -21,6 +21,11 @@ namespace lulzbot.Extensions
                     bot.Say(ns, "<b>&raquo; Cannot set trigger to current trigger.</b>");
                     return;
                 }
+                else if (trig.Length < 2)
+                {
+                    bot.Say(ns, "<b>&raquo; Cannot set the trigger to something less than two characters in length.</b>");
+                    return;
+                }
 
                 bot.Say(ns, String.Format("<b>&raquo; Trigger changed:</b> from <b><code>{0}</code></b> to <b><code>{1}</code></b>", bot.Config.Trigger, trig));
                 Program.Change_Trigger(trig);

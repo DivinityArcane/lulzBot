@@ -29,9 +29,15 @@ namespace lulzbot.Extensions
             lock (ChannelData[ns.ToLower()])
             {
                 if (type == "topic")
+                {
                     ChannelData[ns.ToLower()].Topic = packet.Body;
+                    Bot.Logger.LogProperty(Tools.FormatChat(packet.Parameter), "topic", packet.Body);
+                }
                 else if (type == "title")
+                {
                     ChannelData[ns.ToLower()].Title = packet.Body;
+                    Bot.Logger.LogProperty(Tools.FormatChat(packet.Parameter), "title", packet.Body);
+                }
                 else if (type == "privclasses")
                 {
                     // Ensure we don't run into duplicates.
@@ -92,6 +98,7 @@ namespace lulzbot.Extensions
                 }
                 else if (type == "info")
                 {
+                    Events.CallEvent("whois", packet);
                     lock (CommandChannels["whois"])
                     {
                         if (CommandChannels["whois"].Count > 0)
@@ -105,13 +112,13 @@ namespace lulzbot.Extensions
 
                             // Don't parse what we don't need!
                             // Icon is 0
-                            wd.Name     = packet.Parameter.Substring(6);
+                            wd.Name = packet.Parameter.Substring(6);
                             //wd.Symbol   = data[1].Substring(7);
                             wd.RealName = data[2].Substring(9);
                             //wd.TypeName = data[3].Substring(9);
-                            wd.GPC      = data[4].Substring(4);
+                            wd.GPC = data[4].Substring(4);
 
-                            int conID   = 0;
+                            int conID = 0;
                             wd.Connections.Add(new WhoisConnection());
 
                             for (int i = 7; i < data.Length; i++)
@@ -136,7 +143,7 @@ namespace lulzbot.Extensions
                             foreach (WhoisConnection wc in wd.Connections)
                             {
                                 wc.Channels.Sort();
-                                output += String.Format("<br/><b>&raquo; Connection #{0}</b><br/> <b>&middot; Online:</b> {1}<br/> <b>&middot; Idle:</b> {2}<br/> <b>&middot; Channels:</b> <b>[</b>{3}<b>]</b><br/>", 
+                                output += String.Format("<br/><b>&raquo; Connection #{0}</b><br/> <b>&middot; Online:</b> {1}<br/> <b>&middot; Idle:</b> {2}<br/> <b>&middot; Channels:</b> <b>[</b>{3}<b>]</b><br/>",
                                     wc.ConnectionID + 1, Tools.FormatTime(wc.Online), Tools.FormatTime(wc.Idle), String.Join("<b>]</b>, <b>[</b>", wc.Channels));
                             }
 

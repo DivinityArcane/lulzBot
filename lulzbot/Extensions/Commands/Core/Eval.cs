@@ -2,6 +2,8 @@
 using lulzbot.Types;
 using Microsoft.CSharp;
 using System;
+using System.Linq;
+using System.Linq.Expressions;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Reflection;
@@ -21,6 +23,7 @@ namespace lulzbot.Extensions
                 try
                 {
                     String code = "using System;\n" +
+                        "using System.Net;\n" +
                         "using System.Linq;\n" +
                         "using System.Linq.Expressions;\n" +
                         "using System.Collections;\n" +
@@ -29,10 +32,15 @@ namespace lulzbot.Extensions
                         "using lulzbot.Extensions;\n\n" +
                         "public class c_eval {\n\t#pragma warning disable 162\n\t" +
                         "public static object v_eval () {\n\t\t" +
-                        msg.Substring(5) + "\n\t\treturn null;\n\t}\n}";
+                        msg.Substring(5).Replace("&amp;", "&") + "\n\t\treturn null;\n\t}\n}";
 
                     CodeDomProvider codeDomProvider = CSharpCodeProvider.CreateProvider("C#");
                     CompilerParameters compilerParams = new CompilerParameters();
+                    compilerParams.ReferencedAssemblies.Add("System.dll");
+                    compilerParams.ReferencedAssemblies.Add("System.Core.dll");
+                    compilerParams.ReferencedAssemblies.Add("System.Data.dll");
+                    compilerParams.ReferencedAssemblies.Add("System.Xml.dll");
+                    compilerParams.ReferencedAssemblies.Add("Newtonsoft.Json.dll");
                     compilerParams.GenerateExecutable = false;
                     compilerParams.GenerateInMemory = true;
                     compilerParams.IncludeDebugInformation = false;
@@ -42,10 +50,12 @@ namespace lulzbot.Extensions
 
                     if (results.Errors.Count > 0)
                     {
+                        String output = String.Format("<b>&raquo; Evaluation of code failed. {0} error{1}:</b>", results.Errors.Count, results.Errors.Count == 1 ? "" : "s");
                         foreach (CompilerError error in results.Errors)
                         {
-                            bot.Say(ns, "<b>&raquo; Error in code:</b> " + error.ToString());
+                            output += String.Format("<br/><b> &middot; Error {0}:</b> {1}", error.ErrorNumber, error.ErrorText);
                         }
+                        bot.Say(ns, output);
                     }
                     else
                     {

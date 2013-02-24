@@ -14,6 +14,22 @@ namespace lulzbot
         // Our socket wrapper/object.
         private SocketWrapper Socket = null;
 
+        public int QueuedIn
+        {
+            get
+            {
+                return Socket.QueuedIn;
+            }
+        }
+
+        public int QueuedOut
+        {
+            get
+            {
+                return Socket.QueuedOut;
+            }
+        }
+
         // This is our config.
         public Config Config;
 
@@ -29,13 +45,14 @@ namespace lulzbot
         public static Logger Logger;
         public static ExtensionContainer Extensions;
         public static Users Users;
+        public static Colors Colors;
 
         // Whether or not we can loop
         private bool can_loop = false;
         private Thread _loop_thread;
 
         // Wait event for the thread
-        public static ManualResetEvent wait_event;
+        //public static ManualResetEvent wait_event;
 
         // Bot vars!
         private static readonly DateTime _epoch = new DateTime(1970, 1, 1, 0, 0, 0);
@@ -67,6 +84,19 @@ namespace lulzbot
         }
 
         /// <summary>
+        /// Milliseconds since the unix epoch
+        /// </summary>
+        public static int EpochTimestampMS
+        {
+            get
+            {
+                return Convert.ToInt32((DateTime.UtcNow - _epoch).TotalMilliseconds);
+            }
+
+            set { }
+        }
+
+        /// <summary>
         /// Ticks when we were pinged.
         /// </summary>
         public int _pinged = 0;
@@ -79,7 +109,7 @@ namespace lulzbot
         public Bot(Config config)
         {
             // Initialize the wait handler
-            wait_event = new ManualResetEvent(false);
+            //wait_event = new ManualResetEvent(false);
 
             // Assign the config to our class variable
             this.Config = config;
@@ -112,6 +142,7 @@ namespace lulzbot
             Logger      = new Logger();
             Extensions  = new ExtensionContainer();
             Users       = new Users(this.Config.Owner);
+            Colors      = new Colors();
 
             // Now, let's initialize the socket.
             Socket = new SocketWrapper();
@@ -134,14 +165,20 @@ namespace lulzbot
             while (can_loop)
             {
                 // Wait for a signal
-                wait_event.WaitOne();
+                //wait_event.WaitOne();
+
+                if (Socket.QueuedOut > 0)
+                {
+                    Socket.PopPacket();
+                }
 
                 dAmnPacket packet = null;
 
-                while ((packet = Socket.Dequeue()) != null)
+                if ((packet = Socket.Dequeue()) != null)
                 {
                     if (packet != null)
                     {
+                        Program.packets_in++;
                         // Process the packet
                         if (packet.Command == "recv")
                         {
@@ -155,7 +192,9 @@ namespace lulzbot
                 }
 
                 // Go back to waiting.
-                wait_event.Reset();
+                //wait_event.Reset();
+
+                Thread.Sleep(1);
             }
         }
 
@@ -220,6 +259,8 @@ namespace lulzbot
             {
                 channel = String.Format("chat:{0}", channel.Substring(1));
             }
+            if (Colors.Config.Enabled)
+                message += Colors.ColorTag;
             Send(dAmnPackets.Message(channel, message));
         }
 

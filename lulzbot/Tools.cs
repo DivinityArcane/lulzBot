@@ -237,9 +237,13 @@ namespace lulzbot
                             {
                                 // Two OR three arguments. Odd one.
                                 // We just use the first, in a way, instead of getting the title.
-                                parsed += "<a href=\"" + bits[p + 1] + "\">[link]</a>";
+                                parsed += "<a href=\"" + bits[p + 1] + "\">";
                                 if (bits[p + 2] != "&")
+                                {
+                                    parsed += bits[p + 2] + "</a>";
                                     arg_count++;
+                                }
+                                else parsed += "[link]</a>";
                             }
                         }
 
@@ -534,7 +538,7 @@ namespace lulzbot
             return new String(a, 0, i);
         }
 
-        public static String GrabPage(String url, bool strip_tags = false)
+        public static String GrabPage(String url, bool strip_tags = false, bool gzip = true, String accept = null)
         {
             try
             {
@@ -542,16 +546,16 @@ namespace lulzbot
                 String content = String.Empty;
                 Encoding enc = Encoding.GetEncoding("ASCII", new EncoderReplacementFallback(""), new DecoderReplacementFallback(""));
 
-                HttpWebRequest page_request = (HttpWebRequest)HttpWebRequest.Create(url);
+                HttpWebRequest page_request = (HttpWebRequest)HttpWebRequest.Create(new Uri(url).AbsoluteUri);
 
-                page_request.Method      = "GET";
-                page_request.KeepAlive   = false;
-                page_request.Proxy       = null;
+                page_request.Method = "GET";
+                //page_request.KeepAlive = false;
+                page_request.Proxy = null;
                 page_request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
                 // :)
-                page_request.UserAgent   = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17";
-                page_request.Accept      = "text/plain; gzip, deflate; en-us";
-                page_request.ContentType = "text/plain";
+                page_request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17";
+                page_request.Accept = (accept != null ? accept : "text/plain") + (gzip ? "; gzip, deflate;" : "");
+                page_request.ContentType = (accept != null ? accept : "text/plain");
 
                 using (WebResponse resp = page_request.GetResponse())
                 {
@@ -572,6 +576,11 @@ namespace lulzbot
         private static bool ValidateRemoteCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors policyErrors)
         {
             return true;
+        }
+
+        public static String RegexReplace(String haystack, String what, String with)
+        {
+            return System.Text.RegularExpressions.Regex.Replace(haystack, what, with);
         }
     }
 }

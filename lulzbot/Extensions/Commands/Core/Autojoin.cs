@@ -39,6 +39,7 @@ namespace lulzbot.Extensions
                         {
                             Program.AddChannel(chan);
                             bot.Say(ns, "<b>&raquo; Channel added to autojoin:</b> " + args[2]);
+                            bot.Join(chan);
                         }
                         else
                         {

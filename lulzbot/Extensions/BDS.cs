@@ -1,6 +1,7 @@
 ﻿using lulzbot.Networking;
 using lulzbot.Types;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Timers;
 
@@ -12,8 +13,10 @@ namespace lulzbot.Extensions
         private static Dictionary<String, Types.BotInfo> _botinfo_database          = new Dictionary<string, Types.BotInfo>();
         private static Dictionary<String, Types.ClientInfo> _clientinfo_database    = new Dictionary<string, Types.ClientInfo>();
         private static Dictionary<String, String> _info_requests                    = new Dictionary<string, string>();
-
+        private static List<String> _botcheck_privclasses = new List<string>() { "Bots", "TestBots", "BrokenBots", "SuspiciousBots", "PoliceBot" };
+        private static List<String> _clientcheck_privclasses                        = new List<string>() { "Clients", "BrokenClients", "Members", "Seniors", "CoreTeam" };
         private const int UPDATE_TIME = 604800;
+        public const double Version = 0.3;
 
         /// <summary>
         /// Set this to false to overwrite automated saving of the database.
@@ -26,6 +29,7 @@ namespace lulzbot.Extensions
             Events.AddEvent("join",         new Event(this, "evt_onjoin", "Handles BDS related actions on joining datashare."));
             
             Events.AddCommand("bot",        new Command(this, "cmd_bot", "DivinityArcane", 25, "Gets information from the database."));
+            Events.AddCommand("client",     new Command(this, "cmd_client", "DivinityArcane", 25, "Gets information from the database."));
             Events.AddCommand("bds",        new Command(this, "cmd_bds", "DivinityArcane", 75, "Manage BDS database."));
 
             if (Program.Debug)
@@ -67,7 +71,7 @@ namespace lulzbot.Extensions
             {
                 // IDS-NOTE, XFER, BOTCHECK-SYNC ?
                 String[] caps = new String[] { "BOTCHECK", "BOTCHECK-EXT", "LDS-UPDATE", "LDS-BOTCHECK" };
-                bot.Say(packet.Parameter, "BDS:PROVIDER:CAPS:" + String.Join(",", caps));
+                bot.NPSay(packet.Parameter, "BDS:PROVIDER:CAPS:" + String.Join(",", caps));
             }
         }
 
@@ -111,7 +115,7 @@ namespace lulzbot.Extensions
         /// </summary>
         public void cmd_bot(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
-            String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>&raquo; {0}bot info [username]<br/>&raquo; {0}bot count", bot.Config.Trigger);
+            String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>&raquo; {0}bot info [username]<br/>&raquo; {0}bot count<br/>&raquo; {0}bot online [type]", bot.Config.Trigger);
             
             // First arg is the command
             if (args.Length == 1)
@@ -148,6 +152,10 @@ namespace lulzbot.Extensions
                             output += String.Format("<b>Last modified:</b> {0} ago", Tools.FormatTime(ts).TrimEnd('.'));
                             bot.Say(ns, output);
                         }
+                        else if (_clientinfo_database.ContainsKey(args[2].ToLower()))
+                        {
+                            bot.Say(ns, String.Format("<b>&raquo; {0} is a client. Use {1}client info {0}</b>", args[2], bot.Config.Trigger));
+                        }
                         else
                         {
                             lock (_info_requests)
@@ -166,7 +174,291 @@ namespace lulzbot.Extensions
                 }
                 else if (args[1] == "count")
                 {
-                    bot.Say(ns, String.Format("<b>&raquo;</b> There are {0} bot{1} in my local database.", _botinfo_database.Count, _botinfo_database.Count == 1 ? "" : "s"));
+                    if (_botinfo_database.Count == 0)
+                    {
+                        bot.Say(ns, "<b>&raquo; There are 0 bots in my local database.</b>");
+                        return;
+                    }
+
+                    Dictionary<String, int> bots = new Dictionary<string, int>();
+
+                    foreach (BotInfo info in _botinfo_database.Values)
+                    {
+                        if (!bots.ContainsKey(info.Type))
+                            bots.Add(info.Type, 0);
+
+                        bots[info.Type]++;
+                    }
+
+                    var bots_sorted =    from pair in bots
+                                         orderby pair.Value descending
+                                         select pair;
+
+                    String output = String.Empty;
+                    int count = 0;
+
+                    foreach (KeyValuePair<String, int> pair in bots_sorted)
+                    {
+                        output += String.Format("{0} ({1})<b>]</b>, <b>[</b>", pair.Key, pair.Value);
+                        count += pair.Value;
+                    }
+
+                    bot.Say(ns, String.Format("<b>&raquo; There are {0} bot{1} in my local database:</b><br/><b>&raquo; [</b>", count, count == 1 ? "" : "s") + output.Substring(0, output.Length - 10));
+                }
+                else if (args[1] == "online")
+                {
+                    String type = "all";
+                    if (args.Length >= 3)
+                    {
+                        type = msg.Substring(11).ToLower();
+                    }
+
+                    if (type == "all")
+                    {
+                        Dictionary<String, int> bots = new Dictionary<string, int>();
+
+                        if (Core.ChannelData.ContainsKey("chat:datashare"))
+                        {
+                            ChatData cd = Core.ChannelData["chat:datashare"];
+
+                            foreach (ChatMember m in cd.Members.Values)
+                            {
+                                if (_botcheck_privclasses.Contains(m.Privclass))
+                                {
+                                    if (_botinfo_database.ContainsKey(m.Name.ToLower()))
+                                    {
+                                        if (!bots.ContainsKey(_botinfo_database[m.Name.ToLower()].Type))
+                                            bots.Add(_botinfo_database[m.Name.ToLower()].Type, 0);
+
+                                        bots[_botinfo_database[m.Name.ToLower()].Type]++;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (bots.Count == 0)
+                        {
+                            bot.Say(ns, "<b>&raquo; 0 known online bots.</b>");
+                            return;
+                        }
+
+                        var bots_sorted =    from pair in bots
+                                             orderby pair.Value descending
+                                             select pair;
+
+                        String output = String.Empty;
+                        int count = 0;
+
+                        foreach (KeyValuePair<String, int> pair in bots_sorted)
+                        {
+                            output += String.Format("{0} ({1})<b>]</b>, <b>[</b>", pair.Key, pair.Value);
+                            count += pair.Value;
+                        }
+
+                        bot.Say(ns, String.Format("<b>&raquo; {0} known online bot{1}:</b><br/><b>&raquo; [</b>", count, count == 1 ? "" : "s") + output.Substring(0, output.Length - 10));
+                    }
+                    else
+                    {
+                        List<String> bots = new List<string>();
+
+                        if (Core.ChannelData.ContainsKey("chat:datashare"))
+                        {
+                            ChatData cd = Core.ChannelData["chat:datashare"];
+
+                            foreach (ChatMember m in cd.Members.Values)
+                            {
+                                if (_botcheck_privclasses.Contains(m.Privclass))
+                                {
+                                    if (_botinfo_database.ContainsKey(m.Name.ToLower()) && _botinfo_database[m.Name.ToLower()].Type.ToLower() == type)
+                                        bots.Add(m.Name);
+                                }
+                            }
+                        }
+
+                        bots.Sort();
+
+                        if (bots.Count > 0)
+                        {
+                            bot.Say(ns, String.Format("<b>&raquo; {0} known online bot{1} of type {2}:</b><br/><b>&raquo; [</b>{3}<b>]</b>", bots.Count, bots.Count == 1 ? "" : "s", type, String.Join("<b>]</b>, <b>[</b>", bots)));
+                        }
+                        else
+                            bot.Say(ns, String.Format("<b>&raquo; 0 known online bots of type {0}.</b>", type));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// BDS command
+        /// </summary>
+        public void cmd_client(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        {
+            String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>&raquo; {0}client info [username]<br/>&raquo; {0}client count<br/>&raquo; {0}client online [type]", bot.Config.Trigger);
+
+            // First arg is the command
+            if (args.Length == 1)
+            {
+                bot.Say(ns, helpmsg);
+            }
+            else
+            {
+                if (args[1] == "info")
+                {
+                    if (args.Length >= 3)
+                    {
+                        if (_clientinfo_database.ContainsKey(args[2].ToLower()))
+                        {
+                            Types.ClientInfo info = _clientinfo_database[args[2].ToLower()];
+                            int ts = Bot.EpochTimestamp - info.Modified;
+                            if (ts >= UPDATE_TIME) // 7 days
+                            {
+                                lock (_info_requests)
+                                {
+                                    _info_requests.Add(args[2].ToLower(), ns);
+                                }
+
+                                bot.NPSay("chat:datashare", "BDS:BOTCHECK:REQUEST:" + args[2]);
+                                bot.Say(ns, String.Format("{0}: Data for {1} is outdated, one second while I update it...", from, args[2]));
+                                return;
+                            }
+                            String output = String.Format("<b>&raquo; Information on :dev{0}:</b><br/>", info.Name);
+                            output += String.Format("<b>Client type:</b> {0}<br/>", info.Type);
+                            output += String.Format("<b>Client version:</b> {0}<br/>", info.Version);
+                            output += String.Format("<b>Last modified:</b> {0} ago", Tools.FormatTime(ts).TrimEnd('.'));
+                            bot.Say(ns, output);
+                        }
+                        else if (_botinfo_database.ContainsKey(args[2].ToLower()))
+                        {
+                            bot.Say(ns, String.Format("<b>&raquo; {0} is a bot. Use {1}bot info {0}</b>", args[2], bot.Config.Trigger));
+                        }
+                        else
+                        {
+                            lock (_info_requests)
+                            {
+                                _info_requests.Add(args[2].ToLower(), ns);
+                            }
+
+                            bot.NPSay("chat:datashare", "BDS:BOTCHECK:REQUEST:" + args[2]);
+                            bot.Say(ns, String.Format("{0}: {1} isn't in my database yet. Requesting information, please stand by...", from, args[2]));
+                        }
+                    }
+                    else
+                    {
+                        bot.Say(ns, helpmsg);
+                    }
+                }
+                else if (args[1] == "count")
+                {
+                    if (_clientinfo_database.Count == 0)
+                    {
+                        bot.Say(ns, "<b>&raquo; There are 0 clients in my local database.</b>");
+                        return;
+                    }
+
+                    Dictionary<String, int> clients = new Dictionary<string, int>();
+
+                    foreach (ClientInfo info in _clientinfo_database.Values)
+                    {
+                        if (!clients.ContainsKey(info.Type))
+                            clients.Add(info.Type, 0);
+
+                        clients[info.Type]++;
+                    }
+
+                    var clients_sorted = from pair in clients
+                                         orderby pair.Value descending
+                                         select pair;
+
+                    String output = String.Empty;
+                    int count = 0;
+
+                    foreach (KeyValuePair<String, int> pair in clients_sorted)
+                    {
+                        output += String.Format("{0} ({1})<b>]</b>, <b>[</b>", pair.Key, pair.Value);
+                        count += pair.Value;
+                    }
+
+                    bot.Say(ns, String.Format("<b>&raquo; There are {0} client{1} in my local database:</b><br/><b>&raquo; [</b>", count, count == 1 ? "" : "s") + output.Substring(0, output.Length - 10));
+                }
+                else if (args[1] == "online")
+                {
+                    String type = "all";
+                    if (args.Length >= 3)
+                    {
+                        type = msg.Substring(14).ToLower();
+                    }
+
+                    if (type == "all")
+                    {
+                        Dictionary<String, int> clients = new Dictionary<string, int>();
+
+                        if (Core.ChannelData.ContainsKey("chat:datashare"))
+                        {
+                            ChatData cd = Core.ChannelData["chat:datashare"];
+
+                            foreach (ChatMember m in cd.Members.Values)
+                            {
+                                if (_clientcheck_privclasses.Contains(m.Privclass))
+                                {
+                                    if (_clientinfo_database.ContainsKey(m.Name.ToLower()))
+                                    {
+                                        if (!clients.ContainsKey(_clientinfo_database[m.Name.ToLower()].Type))
+                                            clients.Add(_clientinfo_database[m.Name.ToLower()].Type, 0);
+
+                                        clients[_clientinfo_database[m.Name.ToLower()].Type]++;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (clients.Count == 0)
+                        {
+                            bot.Say(ns, "<b>&raquo; 0 known online clients.</b>");
+                            return;
+                        }
+
+                        var clients_sorted = from pair in clients
+                                             orderby pair.Value descending
+                                             select pair;
+
+                        String output = String.Empty;
+                        int count = 0;
+
+                        foreach (KeyValuePair<String, int> pair in clients_sorted)
+                        {
+                            output += String.Format("{0} ({1})<b>]</b>, <b>[</b>", pair.Key, pair.Value);
+                            count += pair.Value;
+                        }
+
+                        bot.Say(ns, String.Format("<b>&raquo; {0} known online client{1}:</b><br/><b>&raquo; [</b>", count, count == 1 ? "" : "s") + output.Substring(0, output.Length - 10));
+                    }
+                    else
+                    {
+                        List<String> clients = new List<string>();
+
+                        if (Core.ChannelData.ContainsKey("chat:datashare"))
+                        {
+                            ChatData cd = Core.ChannelData["chat:datashare"];
+
+                            foreach (ChatMember m in cd.Members.Values)
+                            {
+                                if (_clientcheck_privclasses.Contains(m.Privclass))
+                                {
+                                    if (_clientinfo_database.ContainsKey(m.Name.ToLower()) && _clientinfo_database[m.Name.ToLower()].Type.ToLower() == type)
+                                        clients.Add(m.Name);
+                                }
+                            }
+                        }
+
+                        clients.Sort();
+
+                        if (clients.Count > 0)
+                        {
+                            bot.Say(ns, String.Format("<b>&raquo; {0} known online client{1} of type {2}:</b><br/><b>&raquo; [</b>{3}<b>]</b>", clients.Count, clients.Count == 1 ? "" : "s", type, String.Join("<b>]</b>, <b>[</b>", clients)));
+                        }
+                        else
+                            bot.Say(ns, String.Format("<b>&raquo; 0 known online clients of type {0}.</b>", type));
+                    }
                 }
             }
         }
@@ -192,7 +484,7 @@ namespace lulzbot.Extensions
                 }
                 else if (arg == "update")
                 {
-                    List<String> bots = new List<String>();
+                    List<String> datas = new List<String>();
 
                     if (Core.ChannelData.ContainsKey("chat:datashare"))
                     {
@@ -200,20 +492,27 @@ namespace lulzbot.Extensions
 
                         foreach (ChatMember m in cd.Members.Values)
                         {
-                            if (m.Privclass == "Bots")
+                            if (_botcheck_privclasses.Contains(m.Privclass))
                             {
                                 if (!_botinfo_database.ContainsKey(m.Name.ToLower()) || Bot.EpochTimestamp - _botinfo_database[m.Name.ToLower()].Modified >= UPDATE_TIME)
                                 {
-                                    bots.Add(m.Name);
+                                    datas.Add(m.Name);
+                                }
+                            }
+                            else if (_clientcheck_privclasses.Contains(m.Privclass))
+                            {
+                                if (!_clientinfo_database.ContainsKey(m.Name.ToLower()) || Bot.EpochTimestamp - _clientinfo_database[m.Name.ToLower()].Modified >= UPDATE_TIME)
+                                {
+                                    datas.Add(m.Name);
                                 }
                             }
                         }
                     }
 
-                    if (bots.Count > 0)
+                    if (datas.Count > 0)
                     {
-                        bot.Say("chat:DataShare", "BDS:BOTCHECK:REQUEST:" + String.Join(",", bots));
-                        bot.Say(ns, String.Format("<b>&raquo; Requested data for {0} bot{1}.</b>", bots.Count, bots.Count == 1 ? "" : "s"));
+                        bot.Say("chat:DataShare", "BDS:BOTCHECK:REQUEST:" + String.Join(",", datas));
+                        bot.Say(ns, String.Format("<b>&raquo; Requested data for {0} bot{1}/client{1}.</b>", datas.Count, datas.Count == 1 ? "" : "s"));
                     }
                     else
                         bot.Say(ns, "<b>&raquo; No data needs to be updated.</b>");
@@ -257,7 +556,7 @@ namespace lulzbot.Extensions
                             return;
 
                         String hashkey = Tools.md5((trigger + from + username).ToLower());
-                        bot.NPSay(ns, String.Format("BDS:BOTCHECK:RESPONSE:{0},{1},{2},{3}/0.3,{4},{5}", from, owner, Program.BotName, Program.Version, hashkey, trigger));
+                        bot.NPSay(ns, String.Format("BDS:BOTCHECK:RESPONSE:{0},{1},{2},{3}/{4},{5},{6}", from, owner, Program.BotName, Program.Version, Version, hashkey, trigger));
                     }
                     else if (bits[2] == "DIRECT" && bits[3].ToLower().Contains(","))
                     {
@@ -270,7 +569,7 @@ namespace lulzbot.Extensions
                                 return;
 
                             String hashkey = Tools.md5((trigger + from + username).ToLower());
-                            bot.NPSay(ns, String.Format("BDS:BOTCHECK:RESPONSE:{0},{1},{2},{3}/0.3,{4},{5}", from, owner, Program.BotName, Program.Version, hashkey, trigger));
+                            bot.NPSay(ns, String.Format("BDS:BOTCHECK:RESPONSE:{0},{1},{2},{3}/{4},{5},{6}", from, owner, Program.BotName, Program.Version, Version, hashkey, trigger));
                         }
                     }
                     else if (bits[2] == "RESPONSE" && bits.Length >= 4)
@@ -347,6 +646,65 @@ namespace lulzbot.Extensions
 
                                     if (Program.Debug)
                                         ConIO.Write("Added bot to database: " + from, "BDS");
+                                }
+                            }
+                        }
+
+                    }
+                    else if (bits[2] == "CLIENT" && bits.Length >= 4)
+                    {
+                        // Look for a valid string
+                        if (!bits[3].Contains(","))
+                            return;
+
+                        // Handle it
+                        String input = String.Empty;
+
+                        for (byte b = 3; b < bits.Length; b++)
+                        {
+                            if (b >= bits.Length - 1)
+                                input += bits[b];
+                            else
+                                input += bits[b] + ":";
+                        }
+
+                        String[] data = input.Split(',');
+
+                        // Invalid data
+                        if (data.Length < 4)
+                            return;
+
+                        String name = data[1];
+                        String ver  = data[2];
+                        String hash = data[3];
+
+                        Types.ClientInfo client_info = new ClientInfo(from, name, ver, Bot.EpochTimestamp);
+
+                        String hashkey = Tools.md5((name + ver + from + data[0]).ToLower()).ToLower();
+
+                        if (hashkey != hash)
+                        {
+                            // Invalid hash supplied
+                            // For now, we ignore this. Though I'd like to see policebots send and error like:
+                            //  BDS:BOTCHECK:ERROR:INVALID_RESPONSE_HASH
+                        }
+                        else
+                        {
+                            lock (_clientinfo_database)
+                            {
+                                if (_clientinfo_database.ContainsKey(from.ToLower()))
+                                {
+                                    _clientinfo_database[from.ToLower()] = client_info;
+
+                                    if (Program.Debug)
+                                        ConIO.Write("Updated database for client: " + from, "BDS");
+                                }
+                                else
+                                {
+                                    _clientinfo_database.Add(from.ToLower(), client_info);
+
+                                    if (Program.Debug)
+                                        ConIO.Write("Added client to database: " + from, "BDS");
                                 }
                             }
                         }
@@ -432,6 +790,65 @@ namespace lulzbot.Extensions
                             }
                         }
                     }
+                    else if (bits.Length >= 4 && bits[2] == "CLIENTINFO")
+                    {
+                        if (!bits[3].Contains(","))
+                            return;
+
+                        // Handle it
+                        String input = String.Empty;
+
+                        for (byte b = 3; b < bits.Length; b++)
+                        {
+                            if (b >= bits.Length - 1)
+                                input += bits[b];
+                            else
+                                input += bits[b] + ":";
+                        }
+
+                        String[] data = input.Split(',');
+
+                        // Invalid data
+                        if (data.Length < 3)
+                            return;
+
+                        String name = data[1];
+                        String ver = data[2];
+
+                        Types.ClientInfo client_info = new ClientInfo(data[0], name, ver, Bot.EpochTimestamp);
+
+                        lock (_clientinfo_database)
+                        {
+                            if (_clientinfo_database.ContainsKey(data[0].ToLower()))
+                            {
+                                _clientinfo_database[data[0].ToLower()] = client_info;
+
+                                if (Program.Debug)
+                                    ConIO.Write("Updated database for client: " + data[0], "BDS");
+                            }
+                            else
+                            {
+                                _clientinfo_database.Add(data[0].ToLower(), client_info);
+
+                                if (Program.Debug)
+                                    ConIO.Write("Added client to database: " + data[0], "BDS");
+                            }
+                        }
+
+                        lock (_info_requests)
+                        {
+                            if (_info_requests.ContainsKey(data[0].ToLower()))
+                            {
+                                String chan = _info_requests[data[0].ToLower()];
+                                _info_requests.Remove(data[0].ToLower());
+
+                                String output = String.Format("<b>&raquo; Information on :dev{0}:</b><br/>", client_info.Name);
+                                output += String.Format("<b>Client type:</b> {0}<br/>", client_info.Type);
+                                output += String.Format("<b>Client version:</b> {0}", client_info.Version);
+                                bot.Say(chan, output);
+                            }
+                        }
+                    }
                     else if (bits.Length >= 4 && bits[2] == "NODATA")
                     {
                         // Ignore data from non-police bots
@@ -444,7 +861,7 @@ namespace lulzbot.Extensions
                             {
                                 String chan = _info_requests[bits[3].ToLower()];
                                 _info_requests.Remove(bits[3].ToLower());
-                                bot.Say(chan, "<b>&raquo; Bot doesn't exist:</b> " + bits[3]);
+                                bot.Say(chan, "<b>&raquo; Bot/client doesn't exist:</b> " + bits[3]);
                             }
                         }
                     }
@@ -471,6 +888,29 @@ namespace lulzbot.Extensions
 
                         // Maybe store this later.
                     }
+                    else if (bits.Length >= 4 && bits[2] == "BADCLIENT")
+                    {
+                        // Ignore data from non-police bots
+                        if (!from_policebot)
+                            return;
+
+                        if (!bits[3].Contains(","))
+                            return;
+
+                        String[] data = bits[3].Split(',');
+
+                        lock (_info_requests)
+                        {
+                            if (_info_requests.ContainsKey(data[0].ToLower()))
+                            {
+                                String chan = _info_requests[data[0].ToLower()];
+                                _info_requests.Remove(data[0].ToLower());
+                                bot.Say(chan, "<b>&raquo; Client is banned:</b> " + data[0]);
+                            }
+                        }
+
+                        // Maybe store this later.
+                    }
                 }
                 else if (bits.Length >= 4 && bits[1] == "BOTDEF")
                 {
@@ -481,7 +921,7 @@ namespace lulzbot.Extensions
                             return;
 
                         String hashkey = Tools.md5((from + Program.BotName + "DivinityArcane").ToLower());
-                        bot.NPSay(ns, String.Format("BDS:BOTDEF:RESPONSE:{0},{1},{2},{3},{4},{5}", from, Program.BotName, "C#", "DivinityArcane", "http://botdom.com/wiki/User:Kyogo/lulzBot", hashkey));
+                        bot.NPSay(ns, String.Format("BDS:BOTDEF:RESPONSE:{0},{1},{2},{3},{4},{5}", from, Program.BotName, "C#", "DivinityArcane", "http://botdom.com/wiki/LulzBot", hashkey));
                     }
                 }
             }

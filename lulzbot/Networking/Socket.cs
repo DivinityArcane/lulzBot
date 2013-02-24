@@ -65,6 +65,7 @@ namespace lulzbot.Networking
         //  want to use a packet queue instead. We just grab complete packets from the buffer, and add
         //  them to the queue. After which, they're processed from there on. Simple enough?
         private Queue<dAmnPacket> _packet_queue;
+        private Queue<byte[]> _out_queue;
 
         public void Connect(String host, int port)
         {
@@ -79,6 +80,7 @@ namespace lulzbot.Networking
 
                 // Initialize the packet queue
                 _packet_queue = new Queue<dAmnPacket>();
+                _out_queue = new Queue<byte[]>();
 
                 ConIO.Write("Attempting to connect to the server...");
 
@@ -144,6 +146,8 @@ namespace lulzbot.Networking
 
         private void on_disconnect()
         {
+            if (Program.Bot != null && Program.Bot.Quitting) return;
+
             ConIO.Warning("Socket", "Disconnected! Reconnecting...");
 
             _socket.Dispose();
@@ -206,7 +210,7 @@ namespace lulzbot.Networking
                     return;
 
                 // End the receive, and get the number of bytes that are data.
-                int received_bytes = _socket.EndSend(result);
+                int received_bytes = _socket.EndReceive(result);
 
                 if (received_bytes <= 0)
                 {
@@ -222,7 +226,8 @@ namespace lulzbot.Networking
                 //  are actual data, and not null chars used for padding (which would screw up our
                 //  real null char, which ends a packet!)
                 byte[] temp_buffer = new byte[received_bytes];
-                Array.Copy(_buffer, temp_buffer, received_bytes);
+                //Array.Copy(_buffer, temp_buffer, received_bytes);
+                Buffer.BlockCopy(_buffer, 0, temp_buffer, 0, received_bytes);
 
                 // Parse the packet!
                 _packet += Encoding.ASCII.GetString(temp_buffer);
@@ -242,9 +247,6 @@ namespace lulzbot.Networking
 
                     // Throw it in the queue
                     _packet_queue.Enqueue(new dAmnPacket(packet));
-
-                    // Tell the bot we have a packet to handle
-                    Bot.wait_event.Set();
                 }
 
                 // Clear the buffer and go back to listening
@@ -276,13 +278,14 @@ namespace lulzbot.Networking
         /// Sends a packet to the server
         /// </summary>
         /// <param name="packet">Packet in byte array form</param>
-        public void Send(byte[] packet)
+        public void SendOut(byte[] packet)
         {
             try
             {
                 if (_socket == null || Closed)
                     return;
 
+                Program.packets_out++;
                 _socket.BeginSend(packet, 0, packet.Length, SocketFlags.None, new AsyncCallback(on_sent), null);
             }
             catch (SocketException)
@@ -294,6 +297,15 @@ namespace lulzbot.Networking
             {
                 AnnounceError("Send", E);
             }
+        }
+
+        /// <summary>
+        /// Queues a packet for sending
+        /// </summary>
+        /// <param name="packet">Packet in byte array form</param>
+        public void Send(byte[] packet)
+        {
+            _out_queue.Enqueue(packet);
         }
 
         /// <summary>
@@ -327,6 +339,31 @@ namespace lulzbot.Networking
             else
             {
                 return null;
+            }
+        }
+
+        public void PopPacket()
+        {
+            if (_out_queue.Count > 0)
+            {
+                SendOut(_out_queue.Dequeue());
+                //Bot.wait_event.Set();
+            }
+        }
+
+        public int QueuedIn
+        {
+            get
+            {
+                return _packet_queue.Count;
+            }
+        }
+
+        public int QueuedOut
+        {
+            get
+            {
+                return _out_queue.Count;
             }
         }
 

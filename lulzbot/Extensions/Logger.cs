@@ -25,5 +25,13 @@ namespace lulzbot.Extensions
             String content = String.Format("[{0}] {1}{2}", ts, msg, Environment.NewLine);
             Tools.WriteFile(path, content, true);
         }
+
+        public void LogProperty(String ns, String prop, String content)
+        {
+            if (prop != "title" && prop != "topic") return;
+            if (ns.ToLower() == "#datashare") return;
+
+            Tools.WriteFile("Storage/Logs/" + ns + "/" + prop + ".txt", content);
+        }
     }
 }

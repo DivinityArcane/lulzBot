@@ -14,6 +14,8 @@ namespace lulzbot.Extensions
         /// </summary>
         public static Dictionary<String, List<String>> CommandChannels = new Dictionary<String, List<String>>();
 
+        public static List<String> _disabled_commands;
+
         /// <summary>
         /// Constructor. Add basic events.
         /// </summary>
@@ -46,12 +48,15 @@ namespace lulzbot.Extensions
             Events.AddCommand("act",        new Command(this, "cmd_act",              "DivinityArcane", 75,     "Makes the bot say the specified message to the specified channel."));
             Events.AddCommand("admin",      new Command(this, "cmd_admin",            "DivinityArcane", 75,     "Makes the bot send the specified admin command to the specified channel."));
             Events.AddCommand("ban",        new Command(this, "cmd_ban",              "DivinityArcane", 75,     "Bans the specified user in the specified channel."));
+            Events.AddCommand("command",    new Command(this, "cmd_command",          "DivinityArcane", 100,    "Disables certain commands."));
             Events.AddCommand("commands",   new Command(this, "cmd_commands",         "DivinityArcane", 25,     "Displays commands available to the user."));
             Events.AddCommand("ctrig",      new Command(this, "cmd_ctrig",            "DivinityArcane", 100,    "Changes the bot's trigger."));
+            Events.AddCommand("debug",      new Command(this, "cmd_debug",            "DivinityArcane", 100,    "Toggles debug mode."));
             Events.AddCommand("demote",     new Command(this, "cmd_demote",           "DivinityArcane", 75,     "Demotes the specified user in the specified channel."));
             Events.AddCommand("eval",       new Command(this, "cmd_eval",             "DivinityArcane", 100,    "Evaluates C# code."));
             Events.AddCommand("event",      new Command(this, "cmd_event",            "DivinityArcane", 25,     "Gets information on the events system."));
             Events.AddCommand("get",        new Command(this, "cmd_get",              "DivinityArcane", 50,     "Gets the specified data for the specified channel."));
+            Events.AddCommand("help",       new Command(this, "cmd_help",             "DivinityArcane", 25,     "Checks the description of the specified command."));
             Events.AddCommand("join",       new Command(this, "cmd_join",             "DivinityArcane", 75,     "Makes the bot join the specified channel."));
             Events.AddCommand("kick",       new Command(this, "cmd_kick",             "DivinityArcane", 75,     "Makes the bot kick the specified person in the specified channel."));
             Events.AddCommand("kill",       new Command(this, "cmd_kill",             "DivinityArcane", 75,     "Makes the bot kill the specified person."));
@@ -74,6 +79,16 @@ namespace lulzbot.Extensions
 
             foreach (String c_type in c_types)
                 CommandChannels.Add(c_type, new List<String>());
+
+            _disabled_commands = Storage.Load<List<String>>("disabled_commands");
+
+            if (_disabled_commands == null)
+                _disabled_commands = new List<String>();
+        }
+
+        private static void SaveDisabled()
+        {
+            Storage.Save("disabled_commands", _disabled_commands);
         }
     }
 }

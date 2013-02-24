@@ -36,6 +36,7 @@ namespace lulzbot.Networking
 
             // Set a few request parameters
             request.KeepAlive       = false;
+            request.Proxy           = null;
             request.CookieContainer = cookie_jar;
             request.Accept          = "text/html";
             request.Method          = "POST";
@@ -57,6 +58,7 @@ namespace lulzbot.Networking
             // Request parameters
             page_request.Method             = "GET";
             page_request.KeepAlive          = false;
+            page_request.Proxy              = null;
             page_request.CookieContainer    = cookie_jar;
             page_request.Accept             = "text/html";
 

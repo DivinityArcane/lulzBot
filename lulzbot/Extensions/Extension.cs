@@ -139,6 +139,11 @@ namespace lulzbot.Extensions
             Program.Bot.Say(chan, msg);
         }
 
+        public static void NPSay(String chan, String msg)
+        {
+            Program.Bot.NPSay(chan, msg);
+        }
+
         public static void Act(String chan, String msg)
         {
             Program.Bot.Act(chan, msg);
@@ -152,6 +157,36 @@ namespace lulzbot.Extensions
         public static void Part(String chan)
         {
             Program.Bot.Part(chan);
+        }
+
+        public static void Kick(String chan, String who, String why = null)
+        {
+            Program.Bot.Kick(chan, who, why);
+        }
+
+        public static void Promote(String chan, String who, String privclass = null)
+        {
+            Program.Bot.Promote(chan, who, privclass);
+        }
+
+        public static void Demote(String chan, String who, String privclass = null)
+        {
+            Program.Bot.Promote(chan, who, privclass);
+        }
+
+        public static void Ban(String chan, String who)
+        {
+            Program.Bot.Ban(chan, who);
+        }
+
+        public static void UnBan(String chan, String who)
+        {
+            Program.Bot.UnBan(chan, who);
+        }
+
+        public static void Admin(String chan, String cmd)
+        {
+            Program.Bot.Admin(chan, cmd);
         }
 
         public static void AddEvent(String event_name, object class_ref, String method_name)

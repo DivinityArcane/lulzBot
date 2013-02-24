@@ -46,10 +46,10 @@ namespace lulzbot
         // Bot related globals.
         public static DateTime StartTime = DateTime.UtcNow;
         public static int Disconnects = 0;
-        public static ulong bytes_sent = 0, bytes_received = 0;
+        public static ulong bytes_sent = 0, bytes_received = 0, packets_in = 0, packets_out = 0;
         public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations" };
         public const String BotName = "lulzBot";
-        public const String Version = "0.7b";
+        public const String Version = "0.8b";
 
         static void Main (string[] args)
         {
@@ -70,7 +70,7 @@ namespace lulzbot
             ///TODO: Fix the damn botinfo, make it request on old info.
             // Just a bit of a simple title.
             ConIO.Write (String.Format ("{0}, version {1}", BotName, Version));
-            ConIO.Write ("Authors: DivinityArcane, OrrinFox.");
+            ConIO.Write ("Written and developed by DivinityArcane.");
             
             Type _monotype = Type.GetType ("Mono.Runtime");
             if (null != _monotype)
@@ -112,7 +112,12 @@ namespace lulzbot
                 Config.Username = ConIO.Read("What is the bot's dA username?");
                 Config.Password = ConIO.Read("What is the bot's dA password?");
                 Config.Owner = ConIO.Read("What is your dA username?");
-                Config.Trigger = ConIO.Read("What is the bot's trigger?");
+                Config.Trigger = ConIO.Read("What is the bot's command trigger?");
+                while (Config.Trigger.Length < 2)
+                {
+                    ConIO.Notice("The command trigger must be at least two characters long!");
+                    Config.Trigger = ConIO.Read("What is the bot's command trigger?");
+                }
 
                 // Channels need to be split, so let's just get them one by one.
                 String channel = "none";

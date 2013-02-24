@@ -11,7 +11,7 @@ namespace lulzbot.Extensions
         {
             String output = String.Empty;
 
-            output += String.Format("<b>&raquo; {0} v{1} by :devDivinityArcane:, with collaboration from :devOrrinFox:</b><br/>", Program.BotName, Program.Version);
+            output += String.Format("<b>&raquo; {0} v{1}, written by :devDivinityArcane:, with periodic criticism from :devOrrinFox:</b><br/>", Program.BotName, Program.Version);
             output += String.Format("<b>&raquo; Owned by:</b> :dev{0}:<br/>", bot.Config.Owner);
             output += String.Format("<b>&raquo; System:</b> {0}<br/>", Program.OS);
             output += String.Format("<b>&raquo; Uptime:</b> {0}<br/>", Tools.FormatTime(bot.uptime));

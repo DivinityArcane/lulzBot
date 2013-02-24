@@ -142,5 +142,21 @@ namespace lulzbot
                 }
             }
         }
+
+        public override string ToString()
+        {
+            String output = "dAmnPacket()\n{";
+            output += "\n\tCmd     : " + Command;
+            output += "\n\tParam   : " + Parameter;
+            output += "\n\tSubCmd  : " + SubCommand;
+            output += "\n\tSubParam: " + SubParameter;
+            output += "\n\tArgs    :\n\t{";
+            foreach (var pair in Arguments)
+            {
+                output += "\n\t\t[" + pair.Key + "]: " + pair.Value;
+            }
+            output += "\n\t}\n\tBody    : " + Body.Replace("\n", "\n\t\t  ") +"\n}";
+            return output.Replace("\0", "");
+        }
     }
 }

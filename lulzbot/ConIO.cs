@@ -19,7 +19,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="output">Message to print.</param>
         /// <param name="ns">Namespace. Defaults to "Bot". Usually a #channel</param>
-        public static void Write(String output, String ns = "Bot")
+        public static void Write (String output, String ns = "Bot")
         {
             if (!Program.Running) return; // No need to output any queued data after this.
 
@@ -46,7 +46,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="where">What file/function triggered this warning.</param>
         /// <param name="output">warning message</param>
-        public static void Warning(String where, String output)
+        public static void Warning (String where, String output)
         {
             if (!Program.Running) return; // No need to output any queued data after this.
 
@@ -65,7 +65,7 @@ namespace lulzbot
         /// Outputs a notice.
         /// </summary>
         /// <param name="output">notice message</param>
-        public static void Notice(String output)
+        public static void Notice (String output)
         {
             if (!Program.Running) return; // No need to output any queued data after this.
 
@@ -79,14 +79,14 @@ namespace lulzbot
                 Console.WriteLine(output);
             }
         }
-        
+
         /// <summary>
         /// Static method for prompting the user for input and returning it.
         /// </summary>
         /// <param name="prompt">The prompt to display.</param>
         /// <param name="ns">Namespace. Defaults to "Bot.". Usually a #channel</param>
         /// <returns>The user's input.</returns>
-        public static String Read(String prompt, String ns = "Bot")
+        public static String Read (String prompt, String ns = "Bot")
         {
             // Buffer for the received input.
             String input = String.Empty;
@@ -109,10 +109,10 @@ namespace lulzbot
         /// Simple method to create an output timestamp.
         /// </summary>
         /// <returns>Timestamp in string format.</returns>
-        private static String Timestamp()
+        private static String Timestamp ()
         {
             DateTime time = DateTime.Now;
-            return String.Format("[{0}:{1}:{2}]", 
+            return String.Format("[{0}:{1}:{2}]",
                 time.Hour.ToString().PadLeft(2, '0'),
                 time.Minute.ToString().PadLeft(2, '0'),
                 time.Second.ToString().PadLeft(2, '0'));

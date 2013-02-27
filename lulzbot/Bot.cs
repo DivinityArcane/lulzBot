@@ -46,6 +46,7 @@ namespace lulzbot
         public static ExtensionContainer Extensions;
         public static Users Users;
         public static Colors Colors;
+        public static AI AI;
 
         // Whether or not we can loop
         private bool can_loop = false;
@@ -106,7 +107,7 @@ namespace lulzbot
         /// Constructor. Spawn a new bot instance
         /// </summary>
         /// <param name="config">Configuration object</param>
-        public Bot(Config config)
+        public Bot (Config config)
         {
             // Initialize the wait handler
             //wait_event = new ManualResetEvent(false);
@@ -137,12 +138,13 @@ namespace lulzbot
             Events.ClearEvents();
 
             // Initialize the Core extensions
-            Core        = new Core();
-            BDS         = new BDS();
-            Logger      = new Logger();
-            Extensions  = new ExtensionContainer();
-            Users       = new Users(this.Config.Owner);
-            Colors      = new Colors();
+            Core = new Core();
+            BDS = new BDS();
+            Logger = new Logger();
+            Extensions = new ExtensionContainer();
+            Users = new Users(this.Config.Owner);
+            Colors = new Colors();
+            AI = new AI();
 
             // Now, let's initialize the socket.
             Socket = new SocketWrapper();
@@ -159,7 +161,7 @@ namespace lulzbot
         /// <summary>
         /// Main bot loop
         /// </summary>
-        private void MainLoop()
+        private void MainLoop ()
         {
             // Woo! Loop!
             while (can_loop)
@@ -201,7 +203,7 @@ namespace lulzbot
         /// <summary>
         /// Reconnect the bot
         /// </summary>
-        public void Reconnect()
+        public void Reconnect ()
         {
             if (Quitting)
                 return;
@@ -225,7 +227,7 @@ namespace lulzbot
         /// Joins a dAmn channel
         /// </summary>
         /// <param name="channel">Channel to join</param>
-        public void Join(String channel)
+        public void Join (String channel)
         {
             if (channel.StartsWith("#"))
             {
@@ -238,7 +240,7 @@ namespace lulzbot
         /// Parts a dAmn channel
         /// </summary>
         /// <param name="channel">Channel to part</param>
-        public void Part(String channel)
+        public void Part (String channel)
         {
             if (channel.StartsWith("#"))
             {
@@ -253,7 +255,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="channel">Channel to send to</param>
         /// <param name="message">Message to say</param>
-        public void Say(String channel, String message)
+        public void Say (String channel, String message)
         {
             if (channel.StartsWith("#"))
             {
@@ -269,7 +271,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="channel">Channel to send to</param>
         /// <param name="message">Message to say</param>
-        public void NPSay(String channel, String message)
+        public void NPSay (String channel, String message)
         {
             if (channel.StartsWith("#"))
             {
@@ -283,7 +285,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="channel">Channel to send to</param>
         /// <param name="message">Message to say</param>
-        public void Act(String channel, String message)
+        public void Act (String channel, String message)
         {
             if (channel.StartsWith("#"))
             {
@@ -292,7 +294,7 @@ namespace lulzbot
             Send(dAmnPackets.Action(channel, message));
         }
 
-        public void Kick(String channel, String who, String reason)
+        public void Kick (String channel, String who, String reason)
         {
             if (channel.StartsWith("#"))
             {
@@ -301,7 +303,7 @@ namespace lulzbot
             Send(dAmnPackets.Kick(channel, who, reason));
         }
 
-        public void Ban(String channel, String who)
+        public void Ban (String channel, String who)
         {
             if (channel.StartsWith("#"))
             {
@@ -310,7 +312,7 @@ namespace lulzbot
             Send(dAmnPackets.Ban(channel, who));
         }
 
-        public void UnBan(String channel, String who)
+        public void UnBan (String channel, String who)
         {
             if (channel.StartsWith("#"))
             {
@@ -319,7 +321,7 @@ namespace lulzbot
             Send(dAmnPackets.UnBan(channel, who));
         }
 
-        public void Admin(String channel, String command)
+        public void Admin (String channel, String command)
         {
             if (channel.StartsWith("#"))
             {
@@ -328,12 +330,12 @@ namespace lulzbot
             Send(dAmnPackets.Admin(channel, command));
         }
 
-        public void Kill(String who, String reason)
+        public void Kill (String who, String reason)
         {
             Send(dAmnPackets.Kill(who, reason));
         }
 
-        public void Promote(String channel, String who, String privclass)
+        public void Promote (String channel, String who, String privclass)
         {
             if (channel.StartsWith("#"))
             {
@@ -342,7 +344,7 @@ namespace lulzbot
             Send(dAmnPackets.Promote(channel, who, privclass));
         }
 
-        public void Demote(String channel, String who, String privclass)
+        public void Demote (String channel, String who, String privclass)
         {
             if (channel.StartsWith("#"))
             {
@@ -355,7 +357,7 @@ namespace lulzbot
         /// Sends a packet to the server
         /// </summary>
         /// <param name="packet">dAmnPacket in byte array form</param>
-        public void Send(byte[] packet)
+        public void Send (byte[] packet)
         {
             Socket.Send(packet);
         }
@@ -364,7 +366,7 @@ namespace lulzbot
         /// Sends a packet to the server
         /// </summary>
         /// <param name="packet">dAmnPacket in string form</param>
-        public void Send(String packet)
+        public void Send (String packet)
         {
             Socket.Send(packet);
         }
@@ -372,7 +374,7 @@ namespace lulzbot
         /// <summary>
         /// Sends the disconnect packet.
         /// </summary>
-        public void Disconnect()
+        public void Disconnect ()
         {
             Send("disconnect\n\0");
         }
@@ -380,7 +382,7 @@ namespace lulzbot
         /// <summary>
         /// Closes down the bot.
         /// </summary>
-        public void Close()
+        public void Close ()
         {
             Socket.Close();
             can_loop = false;
@@ -392,7 +394,7 @@ namespace lulzbot
         /// Return the server endpoint in IP:PORT format
         /// </summary>
         /// <returns>Server endpoint</returns>
-        public String Endpoint()
+        public String Endpoint ()
         {
             return Socket.Endpoint();
         }

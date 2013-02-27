@@ -1,20 +1,24 @@
-﻿using lulzbot.Networking;
-using lulzbot.Types;
+﻿using lulzbot.Types;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
 using System.Timers;
 
 namespace lulzbot.Extensions
 {
     public class BDS
     {
-        private static Dictionary<String, Types.BotDef> _botdef_database            = new Dictionary<string, Types.BotDef>();
-        private static Dictionary<String, Types.BotInfo> _botinfo_database          = new Dictionary<string, Types.BotInfo>();
-        private static Dictionary<String, Types.ClientInfo> _clientinfo_database    = new Dictionary<string, Types.ClientInfo>();
-        private static Dictionary<String, String> _info_requests                    = new Dictionary<string, string>();
-        private static List<String> _botcheck_privclasses = new List<string>() { "Bots", "TestBots", "BrokenBots", "SuspiciousBots", "PoliceBot" };
-        private static List<String> _clientcheck_privclasses                        = new List<string>() { "Clients", "BrokenClients", "Members", "Seniors", "CoreTeam" };
+        public static Dictionary<String, Types.BotDef> _botdef_database             = new Dictionary<String, Types.BotDef>();
+        public static Dictionary<String, Types.BotInfo> _botinfo_database           = new Dictionary<String, Types.BotInfo>();
+        public static Dictionary<String, Types.ClientInfo> _clientinfo_database     = new Dictionary<String, Types.ClientInfo>();
+        private static Dictionary<String, String> _info_requests                    = new Dictionary<String, String>();
+        public static List<String> TranslateLangs                                   = new List<String>() { "ar", "bg", "zh-CN", "hr", "cs", "da", "nl", "en", "fi", "fr", "de", "el", "hi", "it", "ja", "ko", "no", "pl", "pt", "ro", "ru", "es", "sv" };
+        public static Dictionary<String, String> LanguageAliases                    = new Dictionary<String, String>() { { "arabic", "ar" }, { "bulgarian", "bg" }, { "chinese", "zh-CN" }, { "croatian", "hr" }, { "czech", "cs" }, { "danish", "da" }, { "dutch", "nl" }, { "english", "en" }, { "finnish", "fi" }, { "french", "fr" }, { "german", "de" }, { "greek", "el" }, { "hindi", "hi" }, { "italian", "it" }, { "japanese", "ja" }, { "korean", "ko" }, { "norwegian", "no" }, { "polish", "pl" }, { "portugese", "pt" }, { "romanian", "ro" }, { "russian", "ru" }, { "spanish", "es" }, { "swedish", "sv" } };
+        private static List<String> _translate_requests                             = new List<String>();
+        private static List<String> _botcheck_privclasses                           = new List<String>() { "Bots", "TestBots", "BrokenBots", "SuspiciousBots", "PoliceBot" };
+        private static List<String> _clientcheck_privclasses                        = new List<String>() { "Clients", "BrokenClients", "Members", "Seniors", "CoreTeam" };
         private const int UPDATE_TIME = 604800;
         public const double Version = 0.3;
 
@@ -23,22 +27,23 @@ namespace lulzbot.Extensions
         /// </summary>
         public static bool AutoSave = true;
 
-        public BDS()
+        public BDS ()
         {
-            Events.AddEvent("recv_msg",     new Event(this, "ParseBDS", "Parses BDS messages."));
-            Events.AddEvent("join",         new Event(this, "evt_onjoin", "Handles BDS related actions on joining datashare."));
-            
-            Events.AddCommand("bot",        new Command(this, "cmd_bot", "DivinityArcane", 25, "Gets information from the database."));
-            Events.AddCommand("client",     new Command(this, "cmd_client", "DivinityArcane", 25, "Gets information from the database."));
-            Events.AddCommand("bds",        new Command(this, "cmd_bds", "DivinityArcane", 75, "Manage BDS database."));
+            Events.AddEvent("recv_msg", new Event(this, "ParseBDS", "Parses BDS messages."));
+            Events.AddEvent("join", new Event(this, "evt_onjoin", "Handles BDS related actions on joining datashare."));
+
+            Events.AddCommand("bot", new Command(this, "cmd_bot", "DivinityArcane", 25, "Gets information from the database."));
+            Events.AddCommand("client", new Command(this, "cmd_client", "DivinityArcane", 25, "Gets information from the database."));
+            Events.AddCommand("bds", new Command(this, "cmd_bds", "DivinityArcane", 75, "Manage BDS database."));
+            Events.AddCommand("translate", new Command(this, "cmd_translate", "DivinityArcane", 25, "Translates text using BDS."));
 
             if (Program.Debug)
                 ConIO.Write("Loading databases...", "BDS");
 
             // Load saved data, if we can.
-            _botdef_database        = Storage.Load<Dictionary<String, Types.BotDef>>("bds_botdef_database");
-            _botinfo_database       = Storage.Load<Dictionary<String, Types.BotInfo>>("bds_botinfo_database");
-            _clientinfo_database    = Storage.Load<Dictionary<String, Types.ClientInfo>>("bds_clientinfo_database");
+            _botdef_database = Storage.Load<Dictionary<String, Types.BotDef>>("bds_botdef_database");
+            _botinfo_database = Storage.Load<Dictionary<String, Types.BotInfo>>("bds_botinfo_database");
+            _clientinfo_database = Storage.Load<Dictionary<String, Types.ClientInfo>>("bds_clientinfo_database");
 
             // Values can be null if the file is empty or doesn't exist.
             if (_botdef_database == null)
@@ -65,7 +70,7 @@ namespace lulzbot.Extensions
             }
         }
 
-        public static void evt_onjoin(Bot bot, dAmnPacket packet)
+        public static void evt_onjoin (Bot bot, dAmnPacket packet)
         {
             if (packet.Parameter.ToLower() == "chat:datashare")
             {
@@ -78,7 +83,7 @@ namespace lulzbot.Extensions
         /// <summary>
         /// Saves the databases to disk
         /// </summary>
-        private static void Save()
+        private static void Save ()
         {
             if (Program.Debug)
                 ConIO.Write("Saving databases.", "BDS");
@@ -94,7 +99,7 @@ namespace lulzbot.Extensions
         /// <param name="username">Username to check</param>
         /// <param name="channel">Channel to check. Default: #DataShare</param>
         /// <returns>true if PoliceBot, false otherwise.</returns>
-        private static bool IsPoliceBot(String username, String channel = "chat:datashare")
+        private static bool IsPoliceBot (String username, String channel = "chat:datashare")
         {
             channel = channel.ToLower();
 
@@ -113,10 +118,10 @@ namespace lulzbot.Extensions
         /// <summary>
         /// BDS command
         /// </summary>
-        public void cmd_bot(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public void cmd_bot (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>&raquo; {0}bot info [username]<br/>&raquo; {0}bot count<br/>&raquo; {0}bot online [type]", bot.Config.Trigger);
-            
+
             // First arg is the command
             if (args.Length == 1)
             {
@@ -291,7 +296,7 @@ namespace lulzbot.Extensions
         /// <summary>
         /// BDS command
         /// </summary>
-        public void cmd_client(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public void cmd_client (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>&raquo; {0}client info [username]<br/>&raquo; {0}client count<br/>&raquo; {0}client online [type]", bot.Config.Trigger);
 
@@ -466,7 +471,7 @@ namespace lulzbot.Extensions
         /// <summary>
         /// BDS command
         /// </summary>
-        public void cmd_bds(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public void cmd_bds (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             // First arg is the command
             if (args.Length == 1)
@@ -511,11 +516,80 @@ namespace lulzbot.Extensions
 
                     if (datas.Count > 0)
                     {
-                        bot.Say("chat:DataShare", "BDS:BOTCHECK:REQUEST:" + String.Join(",", datas));
+                        bot.NPSay("chat:DataShare", "BDS:BOTCHECK:REQUEST:" + String.Join(",", datas));
                         bot.Say(ns, String.Format("<b>&raquo; Requested data for {0} bot{1}/client{1}.</b>", datas.Count, datas.Count == 1 ? "" : "s"));
                     }
                     else
                         bot.Say(ns, "<b>&raquo; No data needs to be updated.</b>");
+                }
+            }
+        }
+
+        public void cmd_translate (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        {
+            String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>{0}translate languages<br/>{0}translate <i>from_lang to_lang</i> message", " &middot; " + bot.Config.Trigger);
+            if (args.Length == 1)
+            {
+                bot.Say(ns, helpmsg);
+            }
+            else
+            {
+                if (args[1] == "languages")
+                {
+                    String output = String.Format("<b>&raquo; There are {0} supported language{1}:</b><br/><br/>", TranslateLangs.Count, TranslateLangs.Count == 1 ? "" : "s");
+
+                    foreach (var pair in LanguageAliases)
+                    {
+                        output += String.Format("<b>[{0}:</b> {1}<b>]</b> &nbsp; ", pair.Key, pair.Value);
+                    }
+
+                    output += "<br/><br/><sub><i>* Note that at least one of the languages used in translation must be English.</i></sub>";
+
+                    bot.Say(ns, output);
+                }
+                else
+                {
+                    if (args.Length > 3)
+                    {
+                        String from_lang = args[1].ToLower(), to_lang = args[2].ToLower();
+
+                        if (!TranslateLangs.Contains(from_lang))
+                        {
+                            if (LanguageAliases.ContainsKey(from_lang))
+                                from_lang = LanguageAliases[from_lang];
+                            else
+                            {
+                                bot.Say(ns, "<b>&raquo; Invalid from_lang.</b>");
+                                return;
+                            }
+                        }
+
+                        if (!TranslateLangs.Contains(to_lang))
+                        {
+                            if (LanguageAliases.ContainsKey(to_lang))
+                                to_lang = LanguageAliases[to_lang];
+                            else
+                            {
+                                bot.Say(ns, "<b>&raquo; Invalid to_lang.</b>");
+                                return;
+                            }
+                        }
+
+                        if (from_lang != "en" && to_lang != "en")
+                        {
+                            bot.Say(ns, "<b>&raquo; At least one of the languages must be English!</b>");
+                            return;
+                        }
+
+                        String message = Convert.ToBase64String(Encoding.UTF8.GetBytes(WebUtility.HtmlDecode(msg.Substring(11 + args[1].Length + args[2].Length))));
+
+                        lock (_translate_requests)
+                        {
+                            _translate_requests.Add(packet.Parameter);
+                            bot.NPSay("chat:datashare", String.Format("BDS:TRANSLATE:REQUEST:{0},{1},{2},{3}", packet.Parameter, from_lang, to_lang, message));
+                        }
+                    }
+                    else bot.Say(ns, helpmsg);
                 }
             }
         }
@@ -525,8 +599,15 @@ namespace lulzbot.Extensions
         /// </summary>
         /// <param name="bot">Bot instance</param>
         /// <param name="packet">Packet object</param>
-        public void ParseBDS(Bot bot, dAmnPacket packet)
+        public void ParseBDS (Bot bot, dAmnPacket packet)
         {
+            if (packet.Parameter == "chat:Botdom" && packet.Body.ToLower().StartsWith("<abbr title=\"" + bot.Config.Username.ToLower() + ": botcheck\"></abbr>"))
+            {
+                String hash = Tools.md5((bot.Config.Trigger + packet.Arguments["from"] + bot.Config.Username).ToLower()).ToLower();
+                bot.Say(packet.Parameter, String.Format("Beep! <abbr title=\"botresponse: {0} {1} {2} {3} {4} {5}\"></abbr>", packet.Arguments["from"], bot.Config.Owner, Program.BotName, Program.Version, hash, bot.Config.Trigger));
+                return;
+            }
+
             // Not from DS? Ignore it.
             if (packet.Parameter.ToLower() != "chat:datashare")
                 return;
@@ -628,6 +709,8 @@ namespace lulzbot.Extensions
                             // Invalid hash supplied
                             // For now, we ignore this. Though I'd like to see policebots send and error like:
                             //  BDS:BOTCHECK:ERROR:INVALID_RESPONSE_HASH
+                            if (Program.Debug)
+                                ConIO.Warning("BDS", "Invalid hash for bot: " + from);
                         }
                         else
                         {
@@ -687,6 +770,8 @@ namespace lulzbot.Extensions
                             // Invalid hash supplied
                             // For now, we ignore this. Though I'd like to see policebots send and error like:
                             //  BDS:BOTCHECK:ERROR:INVALID_RESPONSE_HASH
+                            if (Program.Debug)
+                                ConIO.Warning("BDS", "Invalid hash for client: " + from);
                         }
                         else
                         {
@@ -924,6 +1009,40 @@ namespace lulzbot.Extensions
                         bot.NPSay(ns, String.Format("BDS:BOTDEF:RESPONSE:{0},{1},{2},{3},{4},{5}", from, Program.BotName, "C#", "DivinityArcane", "http://botdom.com/wiki/LulzBot", hashkey));
                     }
                 }
+                else if (bits.Length >= 4 && bits[1] == "TRANSLATE" && bits[2] == "RESPONSE")
+                {
+                    // Ignore data from non-police bots
+                    if (!from_policebot)
+                        return;
+
+                    if (!bits[3].Contains(","))
+                        return;
+
+                    String input = String.Empty;
+
+                    for (byte b = 3; b < bits.Length; b++)
+                    {
+                        if (b >= bits.Length - 1)
+                            input += bits[b];
+                        else
+                            input += bits[b] + ":";
+                    }
+
+                    String[] data = input.Split(',');
+
+                    if (data[0].ToLower() != username.ToLower() || data.Length < 3) return;
+
+                    lock (_translate_requests)
+                    {
+                        if (_translate_requests.Contains(data[1]))
+                        {
+                            int id = _translate_requests.IndexOf(data[1]);
+                            String chan = _translate_requests[id];
+                            _translate_requests.RemoveAt(id);
+                            bot.Say(chan, "<b>&raquo; Translated text:</b> " + WebUtility.HtmlEncode(Encoding.UTF8.GetString(Convert.FromBase64String(data[2]))));
+                        }
+                    }
+                }
             }
             else if (bits[0] == "LDS")
             {
@@ -939,7 +1058,7 @@ namespace lulzbot.Extensions
                         {
                             if (bits[3].Contains(","))
                             {
-                                String[] pars = bits[3].Split(new char[] {','});
+                                String[] pars = bits[3].Split(new char[] { ',' });
                                 if (pars.Length == 3 && pars[0].ToLower() == username.ToLower())
                                 {
                                     int secs = 0;

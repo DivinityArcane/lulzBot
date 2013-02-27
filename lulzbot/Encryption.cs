@@ -17,7 +17,7 @@ namespace lulzbot
             149, 211, 228, 015, 132, 103, 056, 085, 
             211, 173, 023, 166, 012, 006, 059, 142};
 
-        public static String Encrypt(String data)
+        public static String Encrypt (String data)
         {
             RijndaelManaged crypt = new RijndaelManaged()
             {
@@ -27,7 +27,7 @@ namespace lulzbot
             MemoryStream ms = new MemoryStream();
             CryptoStream cs = new CryptoStream(ms, crypt.CreateEncryptor(key, iv), CryptoStreamMode.Write);
 
-            byte[] encrypted_data = Encoding.ASCII.GetBytes(data);
+            byte[] encrypted_data = Encoding.UTF8.GetBytes(data);
             cs.Write(encrypted_data, 0, encrypted_data.Length);
             cs.FlushFinalBlock();
             cs.Close();
@@ -35,7 +35,7 @@ namespace lulzbot
             return Convert.ToBase64String(ms.ToArray());
         }
 
-        public static String Decrypt(String data)
+        public static String Decrypt (String data)
         {
             byte[] data_bytes = Convert.FromBase64String(data);
 
@@ -51,7 +51,7 @@ namespace lulzbot
             cs.FlushFinalBlock();
             cs.Close();
 
-            return Encoding.ASCII.GetString(ms.ToArray());
+            return Encoding.UTF8.GetString(ms.ToArray());
         }
     }
 }

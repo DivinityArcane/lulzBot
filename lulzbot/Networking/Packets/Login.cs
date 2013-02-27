@@ -5,9 +5,9 @@ namespace lulzbot.Networking
 {
     public partial class dAmnPackets
     {
-        public static byte[] Login(String username, String authtoken)
+        public static byte[] Login (String username, String authtoken)
         {
-            return Encoding.ASCII.GetBytes(String.Format("login {0}\npk={1}\n\0", username, authtoken));
+            return Encoding.UTF8.GetBytes(String.Format("login {0}\npk={1}\n\0", username, authtoken));
         }
     }
 }

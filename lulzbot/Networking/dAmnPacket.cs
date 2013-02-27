@@ -11,7 +11,7 @@ namespace lulzbot
     public class dAmnPacket
     {
         // Here are our public properties, which will hold our important data!
-        
+
         // This shouldn't ever change in dAmn, but who knows. It's the separator between
         //  argument names and their data.
         // This is flagged "const" (a constant) so that it cannot be changed. It's also
@@ -48,14 +48,14 @@ namespace lulzbot
         /// </param>
         public dAmnPacket (String data)
         {
-            this.Parse (data);
+            this.Parse(data);
         }
 
         /// <summary>
         /// Here, we'll parse the string data of a packet and create our object.
         /// </summary>
         /// <param name="data">The string data of a packet.</param>
-        public void Parse(String data)
+        public void Parse (String data)
         {
             if (data.Contains("\n"))
             {
@@ -65,8 +65,8 @@ namespace lulzbot
                 if (header.Contains(" "))
                 {
                     String[] bits   = header.Split(' ');
-                    Command         = bits[0];
-                    Parameter       = bits[1];
+                    Command = bits[0];
+                    Parameter = bits[1];
                 }
                 else
                 {
@@ -75,7 +75,7 @@ namespace lulzbot
                 data = data.Substring(pos + 1);
                 if (data.Contains("\n\n"))
                 {
-                    pos  = data.IndexOf("\n\n");
+                    pos = data.IndexOf("\n\n");
                     // We'll parse tablumps here
                     Body = Tools.ParseTablumps(data.Substring(pos + 2));
                     data = data.Substring(0, pos);
@@ -101,12 +101,12 @@ namespace lulzbot
                             if (chunk.Contains(" "))
                             {
                                 String[] bits   = chunk.Split(' ');
-                                SubCommand      = bits[0];
-                                SubParameter    = bits[1];
+                                SubCommand = bits[0];
+                                SubParameter = bits[1];
                             }
                             else
                             {
-                                SubCommand      = chunk;
+                                SubCommand = chunk;
                             }
                         }
                         else
@@ -121,7 +121,7 @@ namespace lulzbot
         /// <summary>
         /// Some packets contain arguments in the body. This function pulls them and adds them to Arguments.
         /// </summary>
-        public void PullBodyArguments()
+        public void PullBodyArguments ()
         {
             if (!Body.Contains("\n") || !Body.Contains(Separator))
                 return;
@@ -143,7 +143,7 @@ namespace lulzbot
             }
         }
 
-        public override string ToString()
+        public override string ToString ()
         {
             String output = "dAmnPacket()\n{";
             output += "\n\tCmd     : " + Command;
@@ -155,7 +155,7 @@ namespace lulzbot
             {
                 output += "\n\t\t[" + pair.Key + "]: " + pair.Value;
             }
-            output += "\n\t}\n\tBody    : " + Body.Replace("\n", "\n\t\t  ") +"\n}";
+            output += "\n\t}\n\tBody    : " + Body.Replace("\n", "\n\t\t  ") + "\n}";
             return output.Replace("\0", "");
         }
     }

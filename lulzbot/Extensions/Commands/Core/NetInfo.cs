@@ -1,14 +1,29 @@
-﻿using lulzbot.Networking;
-using lulzbot.Types;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace lulzbot.Extensions
 {
     public partial class Core
     {
-        public static void cmd_netinfo(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public static void cmd_netinfo (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
+            if (args.Length >= 2 && args[1] == "reset")
+            {
+                if (Users.GetPrivs(from.ToLower()) >= (int)Privs.Operators)
+                {
+                    Program.bytes_sent = 0;
+                    Program.bytes_received = 0;
+                    Program.packets_in = 0;
+                    Program.packets_out = 0;
+                    bot.Say(ns, "<b>&raquo; Network usage stats reset.</b>");
+                    return;
+                }
+                else
+                {
+                    bot.Say(ns, "<b>&raquo; You don't have permission to do that.</b>");
+                    return;
+                }
+            }
+
             String output = "<bcode>";
 
             bool verbose = (args.Length >= 2 && args[1] == "verbose");

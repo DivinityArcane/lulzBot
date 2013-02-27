@@ -1,13 +1,10 @@
-using lulzbot.Networking;
-using lulzbot.Types;
 using System;
-using System.Collections.Generic;
 
 namespace lulzbot.Extensions
 {
     public partial class Core
     {
-        public static void evt_part(Bot bot, dAmnPacket packet)
+        public static void evt_part (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() == "chat:datashare") return;
@@ -18,7 +15,7 @@ namespace lulzbot.Extensions
                 if (packet.Arguments.ContainsKey("r"))
                 {
                     ConIO.Write(String.Format("** Left [{0}] ({1})", packet.Arguments["e"], packet.Arguments["r"]), Tools.FormatChat(packet.Parameter));
-                    
+
                     // If we parted with a reason, that means we disconnected or timed out!
                     if (bot.Quitting)
                     {

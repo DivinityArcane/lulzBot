@@ -19,7 +19,7 @@ namespace lulzbot.Networking
         /// <param name="username">dA username</param>
         /// <param name="password">dA password</param>
         /// <returns>authtoken</returns>
-        public static String Grab(String username, String password)
+        public static String Grab (String username, String password)
         {
             // This should really be replaced with an OAuth method, or the likes.
 
@@ -29,19 +29,19 @@ namespace lulzbot.Networking
             // Initialize the request and variables.
             String page_content         = String.Empty;
             CookieContainer cookie_jar  = new CookieContainer();
-            HttpWebRequest request      = (HttpWebRequest) HttpWebRequest.Create(_login_uri);
+            HttpWebRequest request      = (HttpWebRequest)HttpWebRequest.Create(_login_uri);
 
             // Create our POST data string
             String post_data = String.Format("&username={0}&password={1}&reusetoken=1", Uri.EscapeUriString(username), Uri.EscapeUriString(password));
 
             // Set a few request parameters
-            request.KeepAlive       = false;
-            request.Proxy           = null;
+            request.KeepAlive = false;
+            request.Proxy = null;
             request.CookieContainer = cookie_jar;
-            request.Accept          = "text/html";
-            request.Method          = "POST";
-            request.ContentType     = "application/x-www-form-urlencoded";
-            request.ContentLength   = post_data.Length;
+            request.Accept = "text/html";
+            request.Method = "POST";
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.ContentLength = post_data.Length;
 
             // Create a temporary stream writer
             using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
@@ -56,11 +56,11 @@ namespace lulzbot.Networking
             HttpWebRequest page_request = (HttpWebRequest)HttpWebRequest.Create(_chat_uri);
 
             // Request parameters
-            page_request.Method             = "GET";
-            page_request.KeepAlive          = false;
-            page_request.Proxy              = null;
-            page_request.CookieContainer    = cookie_jar;
-            page_request.Accept             = "text/html";
+            page_request.Method = "GET";
+            page_request.KeepAlive = false;
+            page_request.Proxy = null;
+            page_request.CookieContainer = cookie_jar;
+            page_request.Accept = "text/html";
 
             // Create a temporary stream reader
             using (StreamReader reader = new StreamReader(page_request.GetResponse().GetResponseStream()))
@@ -82,7 +82,7 @@ namespace lulzbot.Networking
         /// <summary>
         /// Bypass certificate checks on Linux.
         /// </summary>
-        private static bool ValidateRemoteCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors policyErrors)
+        private static bool ValidateRemoteCertificate (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors policyErrors)
         {
             return true;
         }

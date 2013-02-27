@@ -1,10 +1,7 @@
 ﻿using lulzbot.Extensions;
-using lulzbot.Networking;
 using lulzbot.Types;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Threading;
 
 namespace lulzbot
 {
@@ -21,11 +18,12 @@ namespace lulzbot
         private static Dictionary<String, Command> _commands            = new Dictionary<string, Command>();
         private static Dictionary<String, Command> _external_commands   = new Dictionary<string, Command>();
         public static Dictionary<String, UInt32> HitCounts              = new Dictionary<string, uint>();
+        private static Dictionary<String, int> _last_command            = new Dictionary<string, int>();
 
         /// <summary>
         /// Adds the default event names and lists.
         /// </summary>
-        public static void InitEvents()
+        public static void InitEvents ()
         {
             ConIO.Write("Initializing events...");
 
@@ -65,7 +63,7 @@ namespace lulzbot
         /// Returns the events dict.
         /// </summary>
         /// <returns>events dictionary</returns>
-        public static Dictionary<String, List<Types.Event>> GetEvents()
+        public static Dictionary<String, List<Types.Event>> GetEvents ()
         {
             return _events;
         }
@@ -74,7 +72,7 @@ namespace lulzbot
         /// Returns the external events dict.
         /// </summary>
         /// <returns>external events dictionary</returns>
-        public static Dictionary<String, List<Types.Event>> GetExternalEvents()
+        public static Dictionary<String, List<Types.Event>> GetExternalEvents ()
         {
             return _external_events;
         }
@@ -83,7 +81,7 @@ namespace lulzbot
         /// Adds a new event list for the specified event name.
         /// </summary>
         /// <param name="event_name">Event name. i.e. recv_msg, do_something</param>
-        private static void AddEventType(String event_name)
+        private static void AddEventType (String event_name)
         {
             lock (_events)
             {
@@ -101,7 +99,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="event_name">Event name</param>
         /// <returns>true or false</returns>
-        public static bool ValidateEventName(String event_name)
+        public static bool ValidateEventName (String event_name)
         {
             return _events.ContainsKey(event_name) || _external_events.ContainsKey(event_name);
         }
@@ -111,7 +109,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="cmd_name">Command name</param>
         /// <returns>true or false</returns>
-        public static bool ValidateCommandName(String cmd_name)
+        public static bool ValidateCommandName (String cmd_name)
         {
             return _commands.ContainsKey(cmd_name) || _external_commands.ContainsKey(cmd_name);
         }
@@ -121,7 +119,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="cmd_name">Command name</param>
         /// <returns>Priv level or -1</returns>
-        public static int GetCommandAccess(String cmd_name)
+        public static int GetCommandAccess (String cmd_name)
         {
             if (_commands.ContainsKey(cmd_name))
                 return _commands[cmd_name].MinimumPrivs;
@@ -135,7 +133,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="event_name">name of the event</param>
         /// <param name="callback">Event object</param>
-        public static void AddEvent(String event_name, Event callback)
+        public static void AddEvent (String event_name, Event callback)
         {
             lock (_events)
             {
@@ -155,7 +153,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="event_name">event name</param>
         /// <param name="callback">callback object</param>
-        public static void AddExternalEvent(String event_name, Event callback)
+        public static void AddExternalEvent (String event_name, Event callback)
         {
             lock (_external_events)
             {
@@ -175,7 +173,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="event_name">event name</param>
         /// <param name="packet">dAmnPacket object</param>
-        public static void CallEvent(String event_name, dAmnPacket packet)
+        public static void CallEvent (String event_name, dAmnPacket packet)
         {
             lock (_events)
             {
@@ -210,7 +208,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="event_name"></param>
         /// <param name="packet"></param>
-        private static void CallExternalEvent(String event_name, dAmnPacket packet)
+        private static void CallExternalEvent (String event_name, dAmnPacket packet)
         {
             // We will not let it see its own messages! This avoids infinite loops.
             if (event_name == "recv_msg" && packet.Arguments["from"].ToLower() == Program.Bot.Config.Username.ToLower())
@@ -246,7 +244,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="event_name">event name</param>
         /// <param name="parameters">list of parameters to be passed to the events</param>
-        public static void CallSpecialEvent(String event_name, object[] parameters)
+        public static void CallSpecialEvent (String event_name, object[] parameters)
         {
             lock (_events)
             {
@@ -270,7 +268,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="cmd_name">name of the command</param>
         /// <param name="callback">Command object</param>
-        public static void AddCommand(String cmd_name, Command callback)
+        public static void AddCommand (String cmd_name, Command callback)
         {
             lock (_commands)
             {
@@ -290,7 +288,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="cmd_name">name of the command</param>
         /// <param name="callback">callback object</param>
-        public static void AddExternalCommand(String cmd_name, Command callback)
+        public static void AddExternalCommand (String cmd_name, Command callback)
         {
             lock (_external_commands)
             {
@@ -310,7 +308,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="cmd_name">command name</param>
         /// <returns>true or false</returns>
-        public static bool CommandExists(String cmd_name)
+        public static bool CommandExists (String cmd_name)
         {
             return _commands.ContainsKey(cmd_name.ToLower()) || _external_commands.ContainsKey(cmd_name.ToLower());
         }
@@ -324,28 +322,36 @@ namespace lulzbot
             if (Core._disabled_commands.Contains(cmd_name.ToLower())) return;
 
             bool a = false, b = false;
-            if ((a = _commands.ContainsKey (cmd_name.ToLower ())) || (b = _external_commands.ContainsKey (cmd_name.ToLower ()))) {
+            if ((a = _commands.ContainsKey(cmd_name.ToLower())) || (b = _external_commands.ContainsKey(cmd_name.ToLower())))
+            {
                 Command callback = null;
 
                 String from = String.Empty;
-                if (packet.Arguments.ContainsKey ("from"))
-                    from = packet.Arguments ["from"];
+                if (packet.Arguments.ContainsKey("from"))
+                    from = packet.Arguments["from"];
+
+                if (!_last_command.ContainsKey(from))
+                    _last_command.Add(from, 0);
+
+                if (Environment.TickCount - _last_command[from] < 1000) return;
 
                 String[] cmd_args;
-                String msg = packet.Body.Substring (Program.Bot.Config.Trigger.Length).TrimEnd(new char[] {' '});
+                String msg = packet.Body.Substring(Program.Bot.Config.Trigger.Length).TrimEnd(new char[] { ' ' });
 
-                if (packet.Body.Contains (" "))
-                    cmd_args = msg.Split (' ');
+                if (packet.Body.Contains(" "))
+                    cmd_args = msg.Split(' ');
                 else
                     cmd_args = new String[1] { msg };
-               
+
                 if (a)
                 {
-                    callback = _commands [cmd_name.ToLower ()];
+                    callback = _commands[cmd_name.ToLower()];
 
                     // Access denied
                     if (!Users.CanAccess(from, callback.MinimumPrivs, cmd_name.ToLower()))
                         return;
+
+                    _last_command[from] = Environment.TickCount;
 
                     try
                     {
@@ -358,9 +364,11 @@ namespace lulzbot
                 }
 
                 if (b)
-                    CallExternalCommand (cmd_name, Tools.FormatChat (packet.Parameter), msg, cmd_args, from);
-            } else {
-                ConIO.Write ("Unknown command: " + cmd_name.ToLower (), "Events");
+                    CallExternalCommand(cmd_name, Tools.FormatChat(packet.Parameter), msg, cmd_args, from);
+            }
+            else
+            {
+                ConIO.Write("Unknown command: " + cmd_name.ToLower(), "Events");
             }
         }
 
@@ -372,9 +380,14 @@ namespace lulzbot
         /// <param name="msg">message the person spoke</param>
         /// <param name="args">message arguments</param>
         /// <param name="from">person who initiated the command</param>
-        public static void CallExternalCommand(String cmd_name, String chan, String msg, String[] args, String from)
+        public static void CallExternalCommand (String cmd_name, String chan, String msg, String[] args, String from)
         {
             if (Core._disabled_commands.Contains(cmd_name.ToLower())) return;
+
+            if (!_last_command.ContainsKey(from))
+                _last_command.Add(from, 0);
+
+            if (Environment.TickCount - _last_command[from] < 1000) return;
 
             if (_external_commands.ContainsKey(cmd_name.ToLower()))
             {
@@ -383,6 +396,8 @@ namespace lulzbot
                 // Access denied
                 if (!Users.CanAccess(from, callback.MinimumPrivs, cmd_name.ToLower()))
                     return;
+
+                _last_command[from] = Environment.TickCount;
 
                 try
                 {
@@ -402,7 +417,7 @@ namespace lulzbot
         /// <summary>
         /// Clears all the events and commands.
         /// </summary>
-        public static void ClearEvents()
+        public static void ClearEvents ()
         {
             lock (_events)
             {
@@ -424,7 +439,7 @@ namespace lulzbot
         /// <summary>
         /// Clears all the events and commands.
         /// </summary>
-        public static void ClearExternalEvents()
+        public static void ClearExternalEvents ()
         {
             lock (_events)
             {
@@ -442,7 +457,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="minimum_priv_level">Minimum privilege level</param>
         /// <returns>Sorted list of command names</returns>
-        public static List<String> GetAvailableCommands(String username)
+        public static List<String> GetAvailableCommands (String username)
         {
             List<String> list = new List<string>();
 
@@ -452,7 +467,7 @@ namespace lulzbot
 
             if (Users.userdata.ContainsKey(who))
             {
-                pl        = Users.userdata[who].PrivLevel;
+                pl = Users.userdata[who].PrivLevel;
                 whitelist = Users.userdata[who].Access;
                 blacklist = Users.userdata[who].Banned;
             }
@@ -490,7 +505,7 @@ namespace lulzbot
             return list;
         }
 
-        public static String CommandDescription(string cmd)
+        public static String CommandDescription (string cmd)
         {
             if (!ValidateCommandName(cmd)) return String.Empty;
             else if (_commands.ContainsKey(cmd)) return _commands[cmd].Description;

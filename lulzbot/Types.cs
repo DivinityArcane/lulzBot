@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using lulzbot.Networking;
 using System.Runtime.InteropServices;
 
 namespace lulzbot.Types
@@ -25,12 +24,12 @@ namespace lulzbot.Types
         /// <param name="author">Bot's author</param>
         /// <param name="language">Language the bot is programmed in</param>
         /// <param name="link">Link to the bot's wiki page</param>
-        public BotDef(String name, String author, String language, String link)
+        public BotDef (String name, String author, String language, String link)
         {
-            Name        = name;
-            Author      = author;
-            Language    = language;
-            Link        = link;
+            Name = name;
+            Author = author;
+            Language = language;
+            Link = link;
         }
     }
 
@@ -57,15 +56,15 @@ namespace lulzbot.Types
         /// <param name="trigger">Bot's trigger</param>
         /// <param name="bdsver">Bot's BDS version</param>
         /// <param name="lastmod">Timestamp of last modification</param>
-        public BotInfo(String name, String owner, String type, String version, String trigger, double bdsver, int lastmod)
+        public BotInfo (String name, String owner, String type, String version, String trigger, double bdsver, int lastmod)
         {
-            Name        = name;
-            Owner       = owner;
-            Type        = type;
-            Version     = version;
-            Trigger     = trigger;
-            BDSVersion  = bdsver;
-            Modified    = lastmod;
+            Name = name;
+            Owner = owner;
+            Type = type;
+            Version = version;
+            Trigger = trigger;
+            BDSVersion = bdsver;
+            Modified = lastmod;
         }
     }
 
@@ -86,12 +85,12 @@ namespace lulzbot.Types
         /// <param name="type">Client type</param>
         /// <param name="version">Client version</param>
         /// <param name="lastmod">Timestamp of last modification</param>
-        public ClientInfo(String name, String type, String version, int lastmod)
+        public ClientInfo (String name, String type, String version, int lastmod)
         {
-            Name        = name;
-            Type        = type;
-            Version     = version;
-            Modified    = lastmod;
+            Name = name;
+            Type = type;
+            Version = version;
+            Modified = lastmod;
         }
     }
     #endregion BDS relater
@@ -141,9 +140,9 @@ namespace lulzbot.Types
         ExaByte   = (1024 * 1024 * 1024 * 1024 * 1024 * 1024),
         PetaByte  = (1024 * 1024 * 1024 * 1024 * 1024),
         TeraByte  = (1024 * 1024 * 1024 * 1024),*/
-        GigaByte  = (1024 * 1024 * 1024),
-        MegaByte  = (1024 * 1024),
-        KiloByte  = 1024,
+        GigaByte = (1024 * 1024 * 1024),
+        MegaByte = (1024 * 1024),
+        KiloByte = 1024,
     }
 
     public class WhoisConnection
@@ -166,13 +165,13 @@ namespace lulzbot.Types
 
     public enum DayOfWeek : int
     {
-        Sunday      = 0,
-        Monday      = 1,
-        Tuesday     = 2,
-        Wednesday   = 3,
-        Thursday    = 4,
-        Friday      = 5,
-        Saturday    = 6
+        Sunday = 0,
+        Monday = 1,
+        Tuesday = 2,
+        Wednesday = 3,
+        Thursday = 4,
+        Friday = 5,
+        Saturday = 6
     }
 
     #endregion strftime
@@ -210,7 +209,7 @@ namespace lulzbot.Types
         /// <param name="class_obj">Class pointer (i.e. "this")</param>
         /// <param name="method_name">Callback method name</param>
         /// <param name="desc">Description</param>
-        public Event(object class_obj, String method_name, String desc = "", String class_name = null)
+        public Event (object class_obj, String method_name, String desc = "", String class_name = null)
         {
             Class = class_obj;
             Method = Class.GetType().GetMethod(method_name);
@@ -259,8 +258,8 @@ namespace lulzbot.Types
         /// <param name="class_obj">Class pointer (i.e. "this")</param>
         /// <param name="method_name">Callback method name</param>
         /// <param name="desc">Description</param>
-        public Command(object class_obj, String method_name,
-            String author = "",  int privs = 25, String desc = "")
+        public Command (object class_obj, String method_name,
+            String author = "", int privs = 25, String desc = "")
         {
             Class = class_obj;
             Method = Class.GetType().GetMethod(method_name);
@@ -284,8 +283,8 @@ namespace lulzbot.Extensions
 
         public ExtensionInfo (String name, String author, String ver)
         {
-            Name    = name;
-            Author  = author;
+            Name = name;
+            Author = author;
             Version = ver;
         }
     }
@@ -309,7 +308,7 @@ namespace lulzbot.Extensions
         public String Event, Description = String.Empty;
         public BindEvent (String evt, String desc = "")
         {
-            Event       = evt;
+            Event = evt;
             Description = desc;
         }
     }
@@ -325,11 +324,11 @@ namespace lulzbot.Extensions
 
     public enum Privs : int
     {
-        Banned    = 0,
-        Guest     = 25,
-        Members   = 50,
+        Banned = 0,
+        Guest = 25,
+        Members = 50,
         Operators = 75,
-        Admins    = 99,
-        Owner     = 100
+        Admins = 99,
+        Owner = 100
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
@@ -8,9 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("lulzBot")]
 [assembly: AssemblyDescription("A fast and full featured bot for dAmn.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("DivinityArcane, OrrinFox")]
+[assembly: AssemblyCompany("DivinityArcane")]
 [assembly: AssemblyProduct("lulzBot")]
-[assembly: AssemblyCopyright("Copyright © Justin Eittreim 2012")]
+[assembly: AssemblyCopyright("Copyright © Justin Eittreim 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

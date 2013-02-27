@@ -20,7 +20,7 @@ namespace lulzbot.Networking
     /// It makes things a tad cleaner, and also allows for modification of the methods later on,
     ///  without the need for modifying every single usagee. Such is the beauty of OOP design.
     /// </summary>
-    
+
     public class SocketWrapper
     {
         // This is private so it can only be accessed within the class.
@@ -67,7 +67,7 @@ namespace lulzbot.Networking
         private Queue<dAmnPacket> _packet_queue;
         private Queue<byte[]> _out_queue;
 
-        public void Connect(String host, int port)
+        public void Connect (String host, int port)
         {
             try
             {
@@ -110,8 +110,10 @@ namespace lulzbot.Networking
                 _socket.Blocking = false;
                 _socket.BeginConnect(_endpoint, new AsyncCallback(on_connect), null);
             }
-            catch
+            catch (Exception E)
             {
+                if (Program.Debug)
+                    ConIO.Warning("Socket", "Error while creating socket: " + E.Message);
                 ConIO.Warning("Socket", "Unable to connect to the internet. Check your connection.");
                 ConIO.Notice("Attempting to reconnect in 10 seconds...");
                 System.Threading.Thread.Sleep(10000);
@@ -121,7 +123,7 @@ namespace lulzbot.Networking
             }
         }
 
-        private void TimerTick(object sender, ElapsedEventArgs e)
+        private void TimerTick (object sender, ElapsedEventArgs e)
         {
             if (_socket == null) return;
 
@@ -144,7 +146,7 @@ namespace lulzbot.Networking
             }
         }
 
-        private void on_disconnect()
+        private void on_disconnect ()
         {
             if (Program.Bot != null && Program.Bot.Quitting) return;
 
@@ -159,7 +161,7 @@ namespace lulzbot.Networking
             Program.wait_event.Set();
         }
 
-        private void on_connect(IAsyncResult result)
+        private void on_connect (IAsyncResult result)
         {
             try
             {
@@ -186,7 +188,7 @@ namespace lulzbot.Networking
             }
         }
 
-        private void on_sent(IAsyncResult result)
+        private void on_sent (IAsyncResult result)
         {
             try
             {
@@ -202,7 +204,7 @@ namespace lulzbot.Networking
             }
         }
 
-        private void on_receive(IAsyncResult result)
+        private void on_receive (IAsyncResult result)
         {
             try
             {
@@ -230,7 +232,8 @@ namespace lulzbot.Networking
                 Buffer.BlockCopy(_buffer, 0, temp_buffer, 0, received_bytes);
 
                 // Parse the packet!
-                _packet += Encoding.ASCII.GetString(temp_buffer);
+                //_packet += Encoding.UTF8.GetString(temp_buffer);
+                _packet += Tools.UnicodeString(temp_buffer);
 
                 // Unset the temporary buffer
                 temp_buffer = null;
@@ -269,7 +272,7 @@ namespace lulzbot.Networking
         /// </summary>
         /// <param name="function">Name of the function the error originated</param>
         /// <param name="E">Exception object</param>
-        private void AnnounceError(String function, Exception E)
+        private void AnnounceError (String function, Exception E)
         {
             ConIO.Write(String.Format("Error in SocketWrapper.{0}: {1}\n\tException: {2}", function, E.Message, E.ToString()));
         }
@@ -278,7 +281,7 @@ namespace lulzbot.Networking
         /// Sends a packet to the server
         /// </summary>
         /// <param name="packet">Packet in byte array form</param>
-        public void SendOut(byte[] packet)
+        public void SendOut (byte[] packet)
         {
             try
             {
@@ -303,7 +306,7 @@ namespace lulzbot.Networking
         /// Queues a packet for sending
         /// </summary>
         /// <param name="packet">Packet in byte array form</param>
-        public void Send(byte[] packet)
+        public void Send (byte[] packet)
         {
             _out_queue.Enqueue(packet);
         }
@@ -312,13 +315,13 @@ namespace lulzbot.Networking
         /// Sends a packet to the server
         /// </summary>
         /// <param name="packet">Packet in string form</param>
-        public void Send(String packet)
+        public void Send (String packet)
         {
             try
             {
                 if (_socket == null) return;
 
-                Send(Encoding.ASCII.GetBytes(packet));
+                Send(Encoding.UTF8.GetBytes(packet));
             }
             catch (Exception E)
             {
@@ -330,7 +333,7 @@ namespace lulzbot.Networking
         /// Grabs the first packet in the queue, and removes it.
         /// </summary>
         /// <returns>dAmnPacket object</returns>
-        public dAmnPacket Dequeue()
+        public dAmnPacket Dequeue ()
         {
             if (_packet_queue.Count > 0)
             {
@@ -342,7 +345,7 @@ namespace lulzbot.Networking
             }
         }
 
-        public void PopPacket()
+        public void PopPacket ()
         {
             if (_out_queue.Count > 0)
             {
@@ -370,7 +373,7 @@ namespace lulzbot.Networking
         /// <summary>
         /// Closes and kills the socket.
         /// </summary>
-        public void Close()
+        public void Close ()
         {
             try
             {
@@ -388,7 +391,7 @@ namespace lulzbot.Networking
         /// Gets the string representation of the IP:PORT we're connected to.
         /// </summary>
         /// <returns>String representation of the server endpoint</returns>
-        public String Endpoint()
+        public String Endpoint ()
         {
             return _socket.RemoteEndPoint.ToString();
         }

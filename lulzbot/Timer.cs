@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Timers;
 
 namespace lulzbot
@@ -18,7 +16,7 @@ namespace lulzbot
             }
         }
 
-        public static String Add(int delay, ElapsedEventHandler action)
+        public static String Add (int delay, ElapsedEventHandler action)
         {
             String id = Tools.md5(String.Format("{0}", Environment.TickCount + timers.Count));
             Timer t = new Timer(delay);
@@ -33,7 +31,7 @@ namespace lulzbot
             return id;
         }
 
-        public static bool Remove(String id)
+        public static bool Remove (String id)
         {
             if (timers.ContainsKey(id))
             {

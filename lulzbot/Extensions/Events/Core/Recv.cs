@@ -1,13 +1,10 @@
-using lulzbot.Networking;
-using lulzbot.Types;
 using System;
-using System.Collections.Generic;
 
 namespace lulzbot.Extensions
 {
     public partial class Core
     {
-        public static void evt_recv_msg(Bot bot, dAmnPacket packet)
+        public static void evt_recv_msg (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() != "chat:datashare")
@@ -45,14 +42,14 @@ namespace lulzbot.Extensions
             }
         }
 
-        public static void evt_recv_action(Bot bot, dAmnPacket packet)
+        public static void evt_recv_action (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() != "chat:datashare")
                 ConIO.Write(String.Format("* {0} {1}", packet.Arguments["from"], packet.Body), Tools.FormatChat(packet.Parameter));
         }
 
-        public static void evt_recv_join(Bot bot, dAmnPacket packet)
+        public static void evt_recv_join (Bot bot, dAmnPacket packet)
         {
 
             // Due to the odd format of this packet, arguments are pushed to the body.
@@ -86,7 +83,7 @@ namespace lulzbot.Extensions
             }
         }
 
-        public static void evt_recv_part(Bot bot, dAmnPacket packet)
+        public static void evt_recv_part (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() != "chat:datashare")
@@ -108,7 +105,7 @@ namespace lulzbot.Extensions
             }
         }
 
-        public static void evt_recv_privchg(Bot bot, dAmnPacket packet)
+        public static void evt_recv_privchg (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() != "chat:datashare")
@@ -136,7 +133,7 @@ namespace lulzbot.Extensions
             }
         }
 
-        public static void evt_recv_kicked(Bot bot, dAmnPacket packet)
+        public static void evt_recv_kicked (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() != "chat:datashare")
@@ -170,7 +167,7 @@ namespace lulzbot.Extensions
             }
         }
 
-        public static void evt_recv_admin(Bot bot, dAmnPacket packet)
+        public static void evt_recv_admin (Bot bot, dAmnPacket packet)
         {
             String cmdchan = String.Empty;
             if (packet.Arguments.ContainsKey("by") && packet.Arguments["by"].ToLower() == bot.Config.Username.ToLower())

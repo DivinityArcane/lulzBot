@@ -1,5 +1,4 @@
-﻿using lulzbot.Networking;
-using lulzbot.Types;
+﻿using lulzbot.Types;
 using System;
 using System.Collections.Generic;
 
@@ -12,9 +11,9 @@ namespace lulzbot.Extensions
         /// <summary>
         /// Constructor. Add basic events.
         /// </summary>
-        public Users(String owner)
+        public Users (String owner)
         {
-            Events.AddCommand("users",  new Command(this, "cmd_users",  "DivinityArcane", 75, "Manages bot users."));
+            Events.AddCommand("users", new Command(this, "cmd_users", "DivinityArcane", 75, "Manages bot users."));
             Events.AddCommand("access", new Command(this, "cmd_access", "DivinityArcane", 75, "Manages individual command access."));
 
             userdata = Storage.Load<Dictionary<String, UserData>>("users");
@@ -24,16 +23,16 @@ namespace lulzbot.Extensions
                 userdata = new Dictionary<String, UserData>();
                 userdata.Add(owner.ToLower(), new UserData()
                 {
-                    Name        = owner,
-                    PrivLevel   = 100,
-                    Access      = new List<String>(),
-                    Banned      = new List<String>()
+                    Name = owner,
+                    PrivLevel = 100,
+                    Access = new List<String>(),
+                    Banned = new List<String>()
                 });
                 Storage.Save("users", userdata);
             }
         }
 
-        public static bool CanAccess(String username, int privs, String cmd)
+        public static bool CanAccess (String username, int privs, String cmd)
         {
             int pl = 25;
             String who = username.ToLower();
@@ -50,7 +49,7 @@ namespace lulzbot.Extensions
             return pl >= privs;
         }
 
-        public static int GetPrivs(String username)
+        public static int GetPrivs (String username)
         {
             int pl = 25;
             if (userdata.ContainsKey(username.ToLower())) pl = userdata[username.ToLower()].PrivLevel;

@@ -1,5 +1,5 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -10,7 +10,7 @@ namespace lulzbot
         /// <summary>
         /// Creates the storage directory if it doesn't exist.
         /// </summary>
-        private static void ConfirmStorageDir()
+        private static void ConfirmStorageDir ()
         {
             try
             {
@@ -32,7 +32,7 @@ namespace lulzbot
         /// <typeparam name="T">Type of data</typeparam>
         /// <param name="filename">Storage file name</param>
         /// <returns>object of type T or null</returns>
-        public static T Load<T>(String filename)
+        public static T Load<T> (String filename)
         {
             ConfirmStorageDir();
 
@@ -73,7 +73,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="filename">Storage file name</param>
         /// <param name="obj">Data object</param>
-        public static void Save(String filename, object obj)
+        public static void Save (String filename, object obj)
         {
             ConfirmStorageDir();
 
@@ -85,7 +85,10 @@ namespace lulzbot
                 return;
             }
 
-            String output = JsonConvert.SerializeObject(obj);
+            String output = JsonConvert.SerializeObject(obj, new JsonSerializerSettings()
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                });
 
             using (Stream stream = new FileStream(filename, FileMode.Create))
             {

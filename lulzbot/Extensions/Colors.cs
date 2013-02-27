@@ -1,9 +1,5 @@
-﻿using lulzbot.Networking;
-using lulzbot.Types;
+﻿using lulzbot.Types;
 using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Timers;
 
 namespace lulzbot.Extensions
 {
@@ -28,7 +24,7 @@ namespace lulzbot.Extensions
             }
         }
 
-        public Colors()
+        public Colors ()
         {
             Events.AddCommand("colors", new Command(this, "cmd_colors", "DivinityArcane", 100, "Changes the bot's colors."));
 
@@ -48,12 +44,12 @@ namespace lulzbot.Extensions
             }
         }
 
-        public static void Save()
+        public static void Save ()
         {
             Storage.Save("colors", Config);
         }
 
-        public static void cmd_colors(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public static void cmd_colors (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>{0}colors on/off<br/>{0}colors username/message #colorcode", " &middot; " + bot.Config.Trigger);
 

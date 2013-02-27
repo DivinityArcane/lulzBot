@@ -1,4 +1,3 @@
-using lulzbot.Networking;
 using lulzbot.Types;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ namespace lulzbot.Extensions
 {
     public partial class Core
     {
-        public static void cmd_event(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public static void cmd_event (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             if (args.Length == 1 || (args[1] != "hitcount" && args[1] != "list" && (args[1] != "info" || args.Length != 3)))
             {

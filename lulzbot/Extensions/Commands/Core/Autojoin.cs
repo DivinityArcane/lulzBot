@@ -1,13 +1,10 @@
-﻿using lulzbot.Networking;
-using lulzbot.Types;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace lulzbot.Extensions
 {
     public partial class Core
     {
-        public static void cmd_autojoin(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public static void cmd_autojoin (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>{0}autojoin list<br/>{0}autojoin add/del #channel", " &middot; " + bot.Config.Trigger);
             if (args.Length < 2)

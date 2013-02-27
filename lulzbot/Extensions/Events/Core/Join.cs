@@ -1,13 +1,10 @@
-using lulzbot.Networking;
-using lulzbot.Types;
 using System;
-using System.Collections.Generic;
 
 namespace lulzbot.Extensions
 {
     public partial class Core
     {
-        public static void evt_join(Bot bot, dAmnPacket packet)
+        public static void evt_join (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() == "chat:datashare") return;

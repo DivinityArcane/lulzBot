@@ -5,7 +5,7 @@ namespace lulzbot.Extensions
 {
     public class Logger
     {
-        public Logger()
+        public Logger ()
         {
             Events.AddEvent("log_msg", new Event(this, "handle_log_msg", "Handles logging messages."));
         }
@@ -16,7 +16,7 @@ namespace lulzbot.Extensions
         /// <param name="bot">Bot instance</param>
         /// <param name="ns">namespace, i.e. #Botdom</param>
         /// <param name="msg">output message. i.e. "<Botdom> Hi there"</param>
-        public void handle_log_msg(Bot bot, String ns, String msg)
+        public void handle_log_msg (Bot bot, String ns, String msg)
         {
             String day = Tools.strftime("%B %d %Y");
             String month = Tools.strftime("%Y-%m %B");
@@ -26,7 +26,7 @@ namespace lulzbot.Extensions
             Tools.WriteFile(path, content, true);
         }
 
-        public void LogProperty(String ns, String prop, String content)
+        public void LogProperty (String ns, String prop, String content)
         {
             if (prop != "title" && prop != "topic") return;
             if (ns.ToLower() == "#datashare") return;

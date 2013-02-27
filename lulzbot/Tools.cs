@@ -18,13 +18,13 @@ namespace lulzbot
     public class Tools
     {
         // This will keep track of how many arguments each tablump uses.
-        private static Dictionary<String, int> lump_arg_count = new Dictionary<string,int>();
+        private static Dictionary<String, int> lump_arg_count = new Dictionary<string, int>();
         private static DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0);
 
         /// <summary>
         /// Initialize the tablumps lists
         /// </summary>
-        public static void InitLumps()
+        public static void InitLumps ()
         {
             lump_arg_count.Clear();
 
@@ -39,20 +39,20 @@ namespace lulzbot
             }
 
             // One arg
-            foreach (String lump in new List<String>() {"abbr","acro"})
+            foreach (String lump in new List<String>() { "abbr", "acro" })
             {
                 lump_arg_count.Add(lump, 1);
             }
 
             // Two args
-            foreach (String lump in new List<String>() {"a","dev","avatar","link"})
+            foreach (String lump in new List<String>() { "a", "dev", "avatar", "link" })
             {
                 // Technically, link is two OR three. But we'll deal with that.
                 lump_arg_count.Add(lump, 2);
             }
 
             // Three args
-            foreach (String lump in new List<String>() {"img","iframe","embed"})
+            foreach (String lump in new List<String>() { "img", "iframe", "embed" })
             {
                 lump_arg_count.Add(lump, 3);
             }
@@ -61,7 +61,7 @@ namespace lulzbot
             // None
 
             // Five args
-            foreach (String lump in new List<String>() {"emote"})
+            foreach (String lump in new List<String>() { "emote" })
             {
                 lump_arg_count.Add(lump, 5);
             }
@@ -70,7 +70,7 @@ namespace lulzbot
             // None
 
             // Seven args
-            foreach (String lump in new List<String>() {"thumb"})
+            foreach (String lump in new List<String>() { "thumb" })
             {
                 lump_arg_count.Add(lump, 7);
             }
@@ -81,7 +81,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="channel">Namespace to format</param>
         /// <returns>Formatted namespace</returns>
-        public static String FormatChat(String channel)
+        public static String FormatChat (String channel)
         {
             // This could arguably be better. Thinking of changing how it works alltogether. 
             if (channel.StartsWith("chat:"))
@@ -102,7 +102,7 @@ namespace lulzbot
             }
         }
 
-        public static String ParseEntities(String message)
+        public static String ParseEntities (String message)
         {
             // Doesn't need to be parsed?
             if (!message.Contains("&"))
@@ -116,9 +116,38 @@ namespace lulzbot
             parsed = parsed.Replace("&raquo;", "»");
             parsed = parsed.Replace("&laquo;", "«");
             parsed = parsed.Replace("&middot;", "·");
-            
+            parsed = parsed.Replace("&nbsp;", " ");
+
             //message = message.Replace("&amp;", "&");
             return parsed;
+        }
+
+        public static String HtmlEncode (String msg)
+        {
+            String ret = "";
+
+            foreach (char c in msg)
+            {
+                if (!Char.IsLetterOrDigit(c))
+                    ret += "&#" + (int)c + ";";
+                else
+                    ret += c;
+            }
+
+            return ret;
+        }
+
+        public static String UnicodeString (byte[] data)
+        {
+            var x = "";
+            foreach (byte b in data)
+            {
+                if (b > 127)
+                    x += "&#" + (int)b + ";";
+                else
+                    x += (char)b;
+            }
+            return x;
         }
 
         /// <summary>
@@ -126,7 +155,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="message">Unparsed message</param>
         /// <returns>Parsed message</returns>
-        public static String ParseTablumps(String message)
+        public static String ParseTablumps (String message)
         {
             // Do the basics to get certains & out of our way.
             message = ParseEntities(message);
@@ -281,7 +310,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="input">Plaintext string</param>
         /// <returns>MD5 hash in string format</returns>
-        public static String md5(String input)
+        public static String md5 (String input)
         {
             StringBuilder output = new StringBuilder();
             using (MD5 md5 = MD5.Create())
@@ -295,7 +324,7 @@ namespace lulzbot
             return output.ToString();
         }
 
-        public static int Timestamp(bool milliseconds = false)
+        public static int Timestamp (bool milliseconds = false)
         {
             if (milliseconds)
                 return (int)((DateTime.UtcNow - epoch).TotalMilliseconds);
@@ -310,7 +339,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="seconds">Amount of seconds</param>
         /// <returns>Human readable string</returns>
-        public static String FormatTime(int seconds)
+        public static String FormatTime (int seconds)
         {
             String output = String.Empty;
 
@@ -360,7 +389,7 @@ namespace lulzbot
         /// 1kB, 2B.
         /// </summary>
         /// <returns>Human readable string</returns>
-        public static String FormatBytes(ulong bytes, bool verbose = false)
+        public static String FormatBytes (ulong bytes, bool verbose = false)
         {
             String output = String.Empty;
 
@@ -419,7 +448,7 @@ namespace lulzbot
         /// <param name="filename">filename with path</param>
         /// <param name="content">content to write</param>
         /// <param name="append">append to the end or overwrite the file</param>
-        public static void WriteFile(String filename, String content, bool append = false)
+        public static void WriteFile (String filename, String content, bool append = false)
         {
             if (!filename.Contains("/") || filename.Contains("..") || filename.Contains("~") || filename.StartsWith(@"\") || filename.StartsWith("/"))
             {
@@ -453,7 +482,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="format">format string</param>
         /// <returns>formatted time string</returns>
-        public static String strftime(String format, DateTime date)
+        public static String strftime (String format, DateTime date)
         {
             // I haven't extensively tested this, but it should work OK. - Justin
 
@@ -488,18 +517,18 @@ namespace lulzbot
             return final;
         }
 
-        public static String strftime(String format, int timestamp)
+        public static String strftime (String format, int timestamp)
         {
             DateTime then = epoch.Date.AddSeconds(timestamp);
             return strftime(format, then);
         }
 
-        public static String strftime(String format)
+        public static String strftime (String format)
         {
             return strftime(format, DateTime.Now);
         }
 
-        public static List<String> MutualChannels(String user)
+        public static List<String> MutualChannels (String user)
         {
             List<String> chans = new List<String>();
             String who = user.ToLower();
@@ -515,7 +544,7 @@ namespace lulzbot
             return chans;
         }
 
-        public static T Json2Data<T>(String json)
+        public static T Json2Data<T> (String json)
         {
             try
             {
@@ -524,7 +553,7 @@ namespace lulzbot
             catch { return default(T); }
         }
 
-        public static String StripTags(String data)
+        public static String StripTags (String data)
         {
             char[] a = new char[data.Length];
             int i = 0;
@@ -538,7 +567,7 @@ namespace lulzbot
             return new String(a, 0, i);
         }
 
-        public static String GrabPage(String url, bool strip_tags = false, bool gzip = true, String accept = null)
+        public static String GrabPage (String url, bool strip_tags = false, bool gzip = true, String accept = null)
         {
             try
             {
@@ -573,12 +602,12 @@ namespace lulzbot
             catch { return null; }
         }
 
-        private static bool ValidateRemoteCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors policyErrors)
+        private static bool ValidateRemoteCertificate (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors policyErrors)
         {
             return true;
         }
 
-        public static String RegexReplace(String haystack, String what, String with)
+        public static String RegexReplace (String haystack, String what, String with)
         {
             return System.Text.RegularExpressions.Regex.Replace(haystack, what, with);
         }

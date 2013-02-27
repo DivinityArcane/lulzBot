@@ -5,9 +5,9 @@ namespace lulzbot.Networking
 {
     public partial class dAmnPackets
     {
-        public static byte[] Whois(String who)
+        public static byte[] Whois (String who)
         {
-            return Encoding.ASCII.GetBytes(String.Format("get login:{0}\np=info\n\0", who));
+            return Encoding.UTF8.GetBytes(String.Format("get login:{0}\np=info\n\0", who));
         }
     }
 }

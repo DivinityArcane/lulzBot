@@ -1,8 +1,4 @@
-﻿using lulzbot.Networking;
-using lulzbot.Types;
-using System;
-using System.Collections.Generic;
-
+﻿
 namespace lulzbot.Extensions
 {
     public partial class HTTPD
@@ -12,7 +8,7 @@ namespace lulzbot.Extensions
         /// <summary>
         /// Constructor. Add basic events.
         /// </summary>
-        public HTTPD()
+        public HTTPD ()
         {
         }
     }

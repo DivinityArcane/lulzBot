@@ -1,13 +1,10 @@
-﻿using lulzbot.Networking;
-using lulzbot.Types;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace lulzbot.Extensions
 {
     public partial class Core
     {
-        public static void cmd_kick(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public static void cmd_kick (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             String helpmsg = String.Format("<b>&raquo; Usage:</b> {0}kick <i>[#channel]</i> username <i>[reason]</i>", bot.Config.Trigger);
 
@@ -42,7 +39,7 @@ namespace lulzbot.Extensions
                     CommandChannels["kick"].Add(ns);
                 }
 
-                bot.Kick(chan, who, "<b>"+from+"</b>"+reason);
+                bot.Kick(chan, who, "<b>" + from + "</b>" + reason);
             }
         }
     }

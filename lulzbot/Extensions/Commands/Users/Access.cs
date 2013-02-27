@@ -1,14 +1,11 @@
-﻿using lulzbot.Networking;
-using lulzbot.Types;
-using System;
-using System.Linq;
+﻿using System;
 using System.Collections.Generic;
 
 namespace lulzbot.Extensions
 {
     public partial class Users
     {
-        public static void cmd_access(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public static void cmd_access (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>{0}access username add/del command<br/>{0}access username ban/unban command<br/>{0}access username list", " &middot; " + bot.Config.Trigger);
 
@@ -84,7 +81,7 @@ namespace lulzbot.Extensions
                                 Access = new List<String>(),
                                 Banned = new List<String>()
                             });
-                        
+
                         String realname = userdata[who].Name;
 
                         if (userdata[who].Access.Contains(cmd))

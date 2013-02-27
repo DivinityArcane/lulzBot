@@ -1,13 +1,11 @@
-using lulzbot.Networking;
 using lulzbot.Types;
 using System;
-using System.Collections.Generic;
 
 namespace lulzbot.Extensions
 {
     public partial class Core
     {
-        public static void evt_property(Bot bot, dAmnPacket packet)
+        public static void evt_property (Bot bot, dAmnPacket packet)
         {
             // Only output this in debug mode.
             if (Program.Debug && packet.Parameter.ToLower() != "chat:datashare")

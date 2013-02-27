@@ -1,27 +1,39 @@
-﻿using lulzbot.Networking;
-using lulzbot.Types;
-using Microsoft.CSharp;
+﻿using Microsoft.CSharp;
 using System;
-using System.Linq;
-using System.Linq.Expressions;
 using System.CodeDom.Compiler;
-using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace lulzbot.Extensions
 {
     public partial class Core
     {
-        public static void cmd_eval(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public static void cmd_eval (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             if (args.Length < 2)
             {
-                bot.Say(ns, String.Format("<b>&raquo; Usage:</b> {0}eval code", bot.Config.Trigger));
+                bot.Say(ns, String.Format("<b>&raquo; Usage:</b> {0}eval <i>[--using Some.Namespace,Another.Namespace]</i> code", bot.Config.Trigger));
             }
             else
             {
                 try
                 {
+                    String usercode = msg.Substring(5).Replace("&amp;", "&");
+                    String[] usings;
+                    String nusings = "";
+
+                    if (args[1] == "--using")
+                    {
+                        if (args[2].Contains(','))
+                        {
+                            usings = args[2].Split(new char[] { ',' });
+                            nusings = "using " + String.Join(";\nusing ", usings) + ";\n";
+                        }
+                        else nusings = "using " + args[2] + ";\n";
+                        usercode = usercode.Substring(9 + args[2].Length);
+                    }
+                    else usings = new String[0];
+
                     String code = "using System;\n" +
                         "using System.Net;\n" +
                         "using System.Linq;\n" +
@@ -29,10 +41,10 @@ namespace lulzbot.Extensions
                         "using System.Collections;\n" +
                         "using System.Collections.Generic;\n" +
                         "using lulzbot;\n" +
-                        "using lulzbot.Extensions;\n\n" +
+                        "using lulzbot.Extensions;\n" + nusings + "\n" +
                         "public class c_eval {\n\t#pragma warning disable 162\n\t" +
                         "public static object v_eval () {\n\t\t" +
-                        msg.Substring(5).Replace("&amp;", "&") + "\n\t\treturn null;\n\t}\n}";
+                        usercode + "\n\t\treturn null;\n\t}\n}";
 
                     CodeDomProvider codeDomProvider = CSharpCodeProvider.CreateProvider("C#");
                     CompilerParameters compilerParams = new CompilerParameters();
@@ -41,6 +53,7 @@ namespace lulzbot.Extensions
                     compilerParams.ReferencedAssemblies.Add("System.Data.dll");
                     compilerParams.ReferencedAssemblies.Add("System.Xml.dll");
                     compilerParams.ReferencedAssemblies.Add("Newtonsoft.Json.dll");
+                    compilerParams.ReferencedAssemblies.Add("AIMLbot.dll");
                     compilerParams.GenerateExecutable = false;
                     compilerParams.GenerateInMemory = true;
                     compilerParams.IncludeDebugInformation = false;

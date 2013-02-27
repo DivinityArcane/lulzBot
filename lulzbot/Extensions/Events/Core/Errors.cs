@@ -1,13 +1,10 @@
-using lulzbot.Networking;
-using lulzbot.Types;
 using System;
-using System.Collections.Generic;
 
 namespace lulzbot.Extensions
 {
     public partial class Core
     {
-        public static void evt_send_error(Bot bot, dAmnPacket packet)
+        public static void evt_send_error (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() == "chat:datashare") return;
@@ -17,13 +14,13 @@ namespace lulzbot.Extensions
                 String chan = CommandChannels["send"][0];
                 CommandChannels["send"].RemoveAt(0);
 
-               bot.Say(chan, String.Format("<b>&raquo; Failed to send to {0}:</b> {1}", Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
+                bot.Say(chan, String.Format("<b>&raquo; Failed to send to {0}:</b> {1}", Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
             }
 
             ConIO.Write(String.Format("*** Failed to send to {0} [{1}]", Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
         }
 
-        public static void evt_kick_error(Bot bot, dAmnPacket packet)
+        public static void evt_kick_error (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() == "chat:datashare") return;
@@ -39,7 +36,7 @@ namespace lulzbot.Extensions
             ConIO.Write(String.Format("*** Failed to kick {0} from {1} [{2}]", packet.Arguments["u"], Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
         }
 
-        public static void evt_get_error(Bot bot, dAmnPacket packet)
+        public static void evt_get_error (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() == "chat:datashare") return;
@@ -61,7 +58,7 @@ namespace lulzbot.Extensions
                 ConIO.Write(String.Format("*** Failed to get {0} in {1} [{2}]", packet.Arguments["p"], Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
         }
 
-        public static void evt_set_error(Bot bot, dAmnPacket packet)
+        public static void evt_set_error (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
             if (packet.Parameter.ToLower() == "chat:datashare") return;
@@ -77,7 +74,7 @@ namespace lulzbot.Extensions
             ConIO.Write(String.Format("*** Failed to set {0} in {1} [{2}]", packet.Arguments["p"], Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
         }
 
-        public static void evt_kill_error(Bot bot, dAmnPacket packet)
+        public static void evt_kill_error (Bot bot, dAmnPacket packet)
         {
             ConIO.Write(String.Format("*** Failed to kill {0} [{1}]", Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
 

@@ -1,13 +1,10 @@
-﻿using lulzbot.Networking;
-using lulzbot.Types;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace lulzbot.Extensions
 {
     public partial class Core
     {
-        public static void cmd_sudo(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public static void cmd_sudo (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             if (args.Length < 3)
             {

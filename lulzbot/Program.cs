@@ -10,10 +10,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
 using System.Threading;
-using System.Windows.Forms;
 
 namespace lulzbot
 {
@@ -49,35 +46,36 @@ namespace lulzbot
         public static ulong bytes_sent = 0, bytes_received = 0, packets_in = 0, packets_out = 0;
         public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations" };
         public const String BotName = "lulzBot";
-        public const String Version = "0.8b";
+        public const String Version = "0.9b";
 
         static void Main (string[] args)
         {
-             /* Well, first off, the bot is _not_ going to be in the main file.
-             * Why? That's silly. I don't like doing that. OOP, man. OOP.
-             * Anyway, the Bot will be a separate class, and hence, object.
-             * 
-             * Of course, it will be started in a separate thread, but this main
-             *  class will be in control of when the program ultimately ends.
-             * 
-             * For example: If you were to set the variable "Running" to false, 
-             *  the bot instance would be killed off and the application will exit.
-             *  
-             * This ensures that there is always a reasonable way to kill of the bot.
-             * 
-             * Maybe that's just me though. -DivinityArcane */
+            /* Well, first off, the bot is _not_ going to be in the main file.
+            * Why? That's silly. I don't like doing that. OOP, man. OOP.
+            * Anyway, the Bot will be a separate class, and hence, object.
+            * 
+            * Of course, it will be started in a separate thread, but this main
+            *  class will be in control of when the program ultimately ends.
+            * 
+            * For example: If you were to set the variable "Running" to false, 
+            *  the bot instance would be killed off and the application will exit.
+            *  
+            * This ensures that there is always a reasonable way to kill of the bot.
+            * 
+            * Maybe that's just me though. -DivinityArcane */
 
-            ///TODO: Fix the damn botinfo, make it request on old info.
+            //Console.OutputEncoding = System.Text.Encoding.UTF8;
+
             // Just a bit of a simple title.
-            ConIO.Write (String.Format ("{0}, version {1}", BotName, Version));
-            ConIO.Write ("Written and developed by DivinityArcane.");
-            
-            Type _monotype = Type.GetType ("Mono.Runtime");
+            ConIO.Write(String.Format("{0}, version {1}", BotName, Version));
+            ConIO.Write("Written and developed by DivinityArcane.");
+
+            Type _monotype = Type.GetType("Mono.Runtime");
             if (null != _monotype)
             {
                 System.Reflection.MethodInfo _mono_dsp_name = _monotype.GetMethod("GetDisplayName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
                 if (null != _mono_dsp_name)
-                    OS += String.Format (" (Running in Mono {0})", _mono_dsp_name.Invoke(null, null));
+                    OS += String.Format(" (Running in Mono {0})", _mono_dsp_name.Invoke(null, null));
                 else
                     OS += " (Running in Mono)";
             }
@@ -229,26 +227,26 @@ namespace lulzbot
         /// <summary>
         /// Initializes a new bot instance
         /// </summary>
-        public static void Start()
+        public static void Start ()
         {
             if (!Program.Running || (Program.Bot != null && Program.Bot.Quitting)) return;
             Program.Bot = null;
             Program.Bot = new Bot(Config);
         }
 
-        public static void Change_Trigger(String trig)
+        public static void Change_Trigger (String trig)
         {
             Config.Trigger = trig;
             Config.Save("./Config.dat");
         }
 
-        public static void AddChannel(String chan)
+        public static void AddChannel (String chan)
         {
             Config.Channels.Add(chan);
             Config.Save("./Config.dat");
         }
 
-        public static void RemoveChannel(String chan)
+        public static void RemoveChannel (String chan)
         {
             Config.Channels.Remove(chan);
             Config.Save("./Config.dat");

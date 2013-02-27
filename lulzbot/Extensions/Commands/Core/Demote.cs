@@ -1,13 +1,10 @@
-﻿using lulzbot.Networking;
-using lulzbot.Types;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace lulzbot.Extensions
 {
     public partial class Core
     {
-        public static void cmd_demote(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public static void cmd_demote (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             String helpmsg = String.Format("<b>&raquo; Usage:</b> {0}demote <i>[#channel]</i> username <i>privclass</i>", bot.Config.Trigger);
 

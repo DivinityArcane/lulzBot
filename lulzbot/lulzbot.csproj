@@ -11,7 +11,8 @@
     <RootNamespace>lulzbot</RootNamespace>
     <AssemblyName>lulzbot</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <PublishUrl>publish\</PublishUrl>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>E:\lulzBot\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -21,10 +22,10 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationRevision>1</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -105,7 +106,23 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>bin\64bit\</OutputPath>
   </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>B3D463801B9792975B40079B258C13D8E4DDEB95</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>lulzbot_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AIMLbot, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\AIMLbot.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -131,6 +148,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="Encryption.cs" />
     <Compile Include="Events.cs" />
+    <Compile Include="Extensions\AI.cs" />
     <Compile Include="Extensions\BDS.cs" />
     <Compile Include="Extensions\Colors.cs" />
     <Compile Include="Extensions\Commands\Core\Act.cs" />
@@ -151,6 +169,7 @@
     <Compile Include="Extensions\Commands\Core\Say.cs" />
     <Compile Include="Extensions\Commands\Core\Set.cs" />
     <Compile Include="Extensions\Commands\Core\Sudo.cs" />
+    <Compile Include="Extensions\Commands\Core\System.cs" />
     <Compile Include="Extensions\Commands\Core\Unban.cs" />
     <Compile Include="Extensions\Commands\Core\Whois.cs" />
     <Compile Include="Extensions\Commands\Users\Access.cs" />
@@ -235,6 +254,9 @@
       <ProductName>Windows Installer 4.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lulzbot_TemporaryKey.pfx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

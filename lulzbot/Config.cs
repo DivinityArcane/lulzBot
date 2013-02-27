@@ -21,7 +21,7 @@ namespace lulzbot
         /// Method to save the configuration to a file.
         /// </summary>
         /// <param name="filename">The file that we will save the data to.</param>
-        public void Save(String filename)
+        public void Save (String filename)
         {
             // We need a buffer to put all the data in.
             String buffer = String.Empty;
@@ -49,7 +49,7 @@ namespace lulzbot
         /// </summary>
         /// <param name="filename">The file that we will load the data from.</param>
         /// <returns>boolean; whether or not the file existed.</returns>
-        public bool Load(String filename)
+        public bool Load (String filename)
         {
             // First off, does the file even exist?
             if (!File.Exists(filename))
@@ -88,7 +88,7 @@ namespace lulzbot
                 Authtoken = bits[2];
                 Owner = bits[3];
                 Trigger = bits[4];
-                
+
                 // Do channels need to be split up?
                 if (bits[5].Contains(','))
                 {

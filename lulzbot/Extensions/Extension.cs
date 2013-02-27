@@ -2,11 +2,8 @@
 using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace lulzbot.Extensions
 {
@@ -14,12 +11,12 @@ namespace lulzbot.Extensions
     {
         public static String CurrentFile = String.Empty;
 
-        public ExtensionContainer()
+        public ExtensionContainer ()
         {
             Load();
         }
 
-        public void Load()
+        public void Load ()
         {
             if (!Directory.Exists("./Extensions/Enabled"))
             {
@@ -38,15 +35,15 @@ namespace lulzbot.Extensions
             }
         }
 
-        private void LoadFile(String filename)
+        private void LoadFile (String filename)
         {
             CurrentFile = Path.GetFileName(filename);
 
             CodeDomProvider codeDomProvider         = CSharpCodeProvider.CreateProvider("C#");
             CompilerParameters compilerParams       = new CompilerParameters();
-            compilerParams.GenerateExecutable       = false;
-            compilerParams.GenerateInMemory         = true;
-            compilerParams.IncludeDebugInformation  = false;
+            compilerParams.GenerateExecutable = false;
+            compilerParams.GenerateInMemory = true;
+            compilerParams.IncludeDebugInformation = false;
 
             compilerParams.ReferencedAssemblies.Add(Assembly.GetExecutingAssembly().Location);
             compilerParams.ReferencedAssemblies.Add("System.dll");
@@ -77,7 +74,7 @@ namespace lulzbot.Extensions
                     }
                     else
                     {
-                        ConIO.Write (String.Format("Loaded extension: {0} v{1} by {2}.", ext_info.Name, ext_info.Version, ext_info.Author));
+                        ConIO.Write(String.Format("Loaded extension: {0} v{1} by {2}.", ext_info.Name, ext_info.Version, ext_info.Author));
                         object class_instance = Activator.CreateInstance(compiled_type);
 
                         foreach (MethodInfo method in compiled_type.GetMethods(BindingFlags.Instance | BindingFlags.Public))
@@ -96,7 +93,7 @@ namespace lulzbot.Extensions
                             }
                             else if (Attribute.IsDefined(method, typeof(BindEvent)))
                             {
-                                
+
                                 object[] m_attrs = method.GetCustomAttributes(true);
                                 foreach (object potential in m_attrs)
                                 {
@@ -129,67 +126,67 @@ namespace lulzbot.Extensions
         public static String Username = Program.Bot.Config.Username;
         public static String Owner = Program.Bot.Config.Owner;
 
-        public static void Print(String msg)
+        public static void Print (String msg)
         {
             ConIO.Write(msg);
         }
 
-        public static void Say(String chan, String msg)
+        public static void Say (String chan, String msg)
         {
             Program.Bot.Say(chan, msg);
         }
 
-        public static void NPSay(String chan, String msg)
+        public static void NPSay (String chan, String msg)
         {
             Program.Bot.NPSay(chan, msg);
         }
 
-        public static void Act(String chan, String msg)
+        public static void Act (String chan, String msg)
         {
             Program.Bot.Act(chan, msg);
         }
 
-        public static void Join(String chan)
+        public static void Join (String chan)
         {
             Program.Bot.Join(chan);
         }
 
-        public static void Part(String chan)
+        public static void Part (String chan)
         {
             Program.Bot.Part(chan);
         }
 
-        public static void Kick(String chan, String who, String why = null)
+        public static void Kick (String chan, String who, String why = null)
         {
             Program.Bot.Kick(chan, who, why);
         }
 
-        public static void Promote(String chan, String who, String privclass = null)
+        public static void Promote (String chan, String who, String privclass = null)
         {
             Program.Bot.Promote(chan, who, privclass);
         }
 
-        public static void Demote(String chan, String who, String privclass = null)
+        public static void Demote (String chan, String who, String privclass = null)
         {
             Program.Bot.Promote(chan, who, privclass);
         }
 
-        public static void Ban(String chan, String who)
+        public static void Ban (String chan, String who)
         {
             Program.Bot.Ban(chan, who);
         }
 
-        public static void UnBan(String chan, String who)
+        public static void UnBan (String chan, String who)
         {
             Program.Bot.UnBan(chan, who);
         }
 
-        public static void Admin(String chan, String cmd)
+        public static void Admin (String chan, String cmd)
         {
             Program.Bot.Admin(chan, cmd);
         }
 
-        public static void AddEvent(String event_name, object class_ref, String method_name)
+        public static void AddEvent (String event_name, object class_ref, String method_name)
         {
             if (ExtensionContainer.CurrentFile == String.Empty)
                 throw new Exception("Events must be bound in the Initialize() method!");
@@ -201,7 +198,7 @@ namespace lulzbot.Extensions
             Events.AddExternalEvent(event_name, evt);
         }
 
-        public static void AddCommand(String cmd_name, object class_ref, String method_name, String author, byte privs, String desc)
+        public static void AddCommand (String cmd_name, object class_ref, String method_name, String author, byte privs, String desc)
         {
             if (ExtensionContainer.CurrentFile == String.Empty)
                 throw new Exception("Events must be bound in the Initialize() method!");
@@ -213,12 +210,12 @@ namespace lulzbot.Extensions
             Events.AddExternalCommand(cmd_name, cmd);
         }
 
-        public static void Save(String filename, object data)
+        public static void Save (String filename, object data)
         {
             Storage.Save(filename, data);
         }
 
-        public static T Load<T>(String filename)
+        public static T Load<T> (String filename)
         {
             T data = Storage.Load<T>(filename);
             return data;

@@ -1,14 +1,11 @@
-﻿using lulzbot.Networking;
-using lulzbot.Types;
-using System;
-using System.Linq;
+﻿using System;
 using System.Collections.Generic;
 
 namespace lulzbot.Extensions
 {
     public partial class Users
     {
-        public static void cmd_users(Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        public static void cmd_users (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>{0}users list<br/>{0}users add username <i>privs</i><br/>{0}users del username", " &middot; " + bot.Config.Trigger);
 

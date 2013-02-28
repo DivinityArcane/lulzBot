@@ -159,6 +159,7 @@
     <Compile Include="Extensions\Commands\Core\CTrig.cs" />
     <Compile Include="Extensions\Commands\Core\Debug.cs" />
     <Compile Include="Extensions\Commands\Core\Demote.cs" />
+    <Compile Include="Extensions\Commands\Core\Disconnects.cs" />
     <Compile Include="Extensions\Commands\Core\Eval.cs" />
     <Compile Include="Extensions\Commands\Core\Help.cs" />
     <Compile Include="Extensions\Commands\Core\Kick.cs" />
@@ -171,6 +172,7 @@
     <Compile Include="Extensions\Commands\Core\Sudo.cs" />
     <Compile Include="Extensions\Commands\Core\System.cs" />
     <Compile Include="Extensions\Commands\Core\Unban.cs" />
+    <Compile Include="Extensions\Commands\Core\Update.cs" />
     <Compile Include="Extensions\Commands\Core\Whois.cs" />
     <Compile Include="Extensions\Commands\Users\Access.cs" />
     <Compile Include="Extensions\Commands\Users\Users.cs" />
@@ -254,9 +256,6 @@
       <ProductName>Windows Installer 4.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="lulzbot_TemporaryKey.pfx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

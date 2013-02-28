@@ -151,6 +151,58 @@ namespace lulzbot
         }
 
         /// <summary>
+        /// Checks if the bot is up to date.
+        /// </summary>
+        /// <param name="ver">Bot version</param>
+        /// <returns>OK if up to date [or newer]; ERR if error. Otherwise, update message.</returns>
+        public static String UpToDate (String ver)
+        {
+            var p = Tools.GrabPage(@"http://botdom.com/w/api.php?action=query&prop=revisions&rvlimit=1&rvprop=content&format=json&titles=LulzBot");
+            
+            var searchA = "last_release_s = ";
+            var searchB = "last_releasedate_s = ";
+            
+            int indexA, indexB;
+
+            if (!p.Contains("\\n")) return "ERR";
+
+            if ((indexA = p.IndexOf(searchA)) != -1)
+            {
+                if (indexA + searchA.Length + 16 < p.Length)
+                {
+                    var nver = p.Substring(indexA + searchA.Length, 16);
+                    nver = nver.Substring(0, nver.IndexOf("\\n")).Trim().ToLower();
+
+                    if (nver != ver.ToLower())
+                    {
+                        double realver = 0.0, realnver = 0.0;
+
+                        if (!double.TryParse(RegexReplace(ver, @"[^0-9\.]", ""), out realver)) return "ERR";
+                        if (!double.TryParse(RegexReplace(nver, @"[^0-9\.]", ""), out realnver)) return "ERR";
+
+                        if (realver >= realnver) return "OK";
+
+                        if ((indexB = p.IndexOf(searchB)) != -1)
+                        {
+                            if (indexB + searchB.Length + 16 < p.Length)
+                            {
+                                var nrel = p.Substring(indexB + searchB.Length, 16);
+                                nrel = nrel.Substring(0, nrel.IndexOf("\\n")).Trim();
+
+                                return String.Format("Version {0} is now available! Released {1}.", nver, nrel);
+                            }
+                            else return String.Format("Version {0} is now available!", nver);
+                        }
+                        else return String.Format("Version {0} is now available!", nver);
+                    }
+                    else return "OK";
+                }
+                else return "ERR";
+            }
+            else return "ERR";
+        }
+
+        /// <summary>
         /// Parse tablumps in a message.
         /// </summary>
         /// <param name="message">Unparsed message</param>

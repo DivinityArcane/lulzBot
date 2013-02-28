@@ -177,6 +177,19 @@ namespace lulzbot
                 }
             }
 
+            ConIO.Write("Checking if we're running an up-to-date version...");
+            String uptodate = Tools.UpToDate(Version);
+
+            if (uptodate == "ERR")
+                ConIO.Warning("Botdom", "Unable to retreive version information at this time.");
+            else if (uptodate == "OK")
+                ConIO.Write("We're up to date!");
+            else
+            {
+                ConIO.Notice(uptodate);
+                ConIO.Write("To update, check http://j.mp/15ikMg1 or use " + Config.Trigger + "update");
+            }
+
             // Initialize events system
             Events.InitEvents();
 

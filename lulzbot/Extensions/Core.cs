@@ -52,6 +52,7 @@ namespace lulzbot.Extensions
             Events.AddCommand("ctrig", new Command(this, "cmd_ctrig", "DivinityArcane", 100, "Changes the bot's trigger."));
             Events.AddCommand("debug", new Command(this, "cmd_debug", "DivinityArcane", 100, "Toggles debug mode."));
             Events.AddCommand("demote", new Command(this, "cmd_demote", "DivinityArcane", 75, "Demotes the specified user in the specified channel."));
+            Events.AddCommand("disconnects", new Command(this, "cmd_disconnects", "DivinityArcane", 25, "Displays how many times the bot has disconnected since startup."));
             Events.AddCommand("eval", new Command(this, "cmd_eval", "DivinityArcane", 100, "Evaluates C# code."));
             Events.AddCommand("event", new Command(this, "cmd_event", "DivinityArcane", 25, "Gets information on the events system."));
             Events.AddCommand("get", new Command(this, "cmd_get", "DivinityArcane", 50, "Gets the specified data for the specified channel."));
@@ -72,6 +73,7 @@ namespace lulzbot.Extensions
             Events.AddCommand("sudo", new Command(this, "cmd_sudo", "DivinityArcane", 100, "Runs a command as the specified user."));
             Events.AddCommand("system", new Command(this, "cmd_system", "DivinityArcane", 25, "Gets information on the host machine."));
             Events.AddCommand("unban", new Command(this, "cmd_unban", "DivinityArcane", 75, "Un-bans the specified user in the specified channel."));
+            Events.AddCommand("update", new Command(this, "cmd_update", "DivinityArcane", 25, "Checks if the bot is up to date."));
             Events.AddCommand("uptime", new Command(this, "cmd_uptime", "DivinityArcane", 25, "Returns how long the bot has been running."));
             Events.AddCommand("whois", new Command(this, "cmd_whois", "DivinityArcane", 25, "Performs a whois on the specified user."));
 

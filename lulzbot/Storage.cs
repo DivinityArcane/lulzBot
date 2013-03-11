@@ -1,12 +1,51 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace lulzbot
 {
     public class Storage
     {
+        private static Dictionary<String, Object> Heap = new Dictionary<String, Object>();
+
+        public static int HeapCount
+        {
+            get
+            {
+                return Heap.Count;
+            }
+        }
+
+        public static bool AddHeapVar (String variable, Object value)
+        {
+            if (Heap.ContainsKey(variable)) return false;
+            Heap.Add(variable, value);
+            return true;
+        }
+
+        public static bool ModifyHeapVar (String variable, Object new_value)
+        {
+            if (!Heap.ContainsKey(variable)) return false;
+            Heap[variable] = new_value;
+            return true;
+        }
+
+        public static Object GetHeapVar (String variable)
+        {
+            if (!Heap.ContainsKey(variable)) return null;
+            return Heap[variable];
+        }
+
+        public static bool RemoveHeapVar (String variable)
+        {
+            if (Heap.ContainsKey(variable))
+                return Heap.Remove(variable);
+            return true;
+        }
+
         /// <summary>
         /// Creates the storage directory if it doesn't exist.
         /// </summary>

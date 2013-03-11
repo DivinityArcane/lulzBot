@@ -123,8 +123,10 @@ namespace lulzbot
 
                 if (String.IsNullOrWhiteSpace(Config.Authtoken))
                 {
-                    ConIO.Write("Invalid username or password!");
+                    ConIO.Write("Invalid username or password! Deleting config...");
+                    System.IO.File.Delete(@"./Config.dat");
                     Program.Running = false;
+                    Program.wait_event.Set();
                     return;
                 }
                 else

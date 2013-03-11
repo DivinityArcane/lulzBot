@@ -101,7 +101,7 @@ namespace lulzbot.Networking
 
                 if (_socket == null)
                 {
-                    ConIO.Warning("Socket", "Unable to connect to the internet. Check your connection.");
+                    ConIO.Warning("Socket", "Unable to obtain a socket! Does the bot have privileges, or is a firewall blocking it?");
                     Program.Running = false;
                     Program.wait_event.Set();
                     return;
@@ -200,7 +200,8 @@ namespace lulzbot.Networking
             }
             catch (Exception E)
             {
-                AnnounceError("on_sent", E);
+                if (Program.Debug)
+                    AnnounceError("on_sent", E);
             }
         }
 
@@ -263,7 +264,8 @@ namespace lulzbot.Networking
             }
             catch (Exception E)
             {
-                AnnounceError("on_receive", E);
+                if (Program.Debug)
+                    AnnounceError("on_receive", E);
             }
         }
 
@@ -298,7 +300,8 @@ namespace lulzbot.Networking
             }
             catch (Exception E)
             {
-                AnnounceError("Send", E);
+                if (Program.Debug)
+                    AnnounceError("Send", E);
             }
         }
 
@@ -325,7 +328,8 @@ namespace lulzbot.Networking
             }
             catch (Exception E)
             {
-                AnnounceError("Send(str)", E);
+                if (Program.Debug)
+                    AnnounceError("Send(str)", E);
             }
         }
 

@@ -37,7 +37,7 @@ namespace lulzbot
             }
 
             // Log output event
-            if (ns.StartsWith("#") && ns.ToLower() != "#datashare")
+            if ((ns.StartsWith("#") || ns.StartsWith("@")) && ns.ToLower() != "#datashare")
                 Events.CallSpecialEvent("log_msg", new object[] { Program.Bot, ns, output });
         }
 

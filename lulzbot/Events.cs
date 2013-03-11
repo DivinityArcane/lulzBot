@@ -336,7 +336,7 @@ namespace lulzbot
                 if (Environment.TickCount - _last_command[from] < 1000) return;
 
                 String[] cmd_args;
-                String msg = packet.Body.Substring(Program.Bot.Config.Trigger.Length).TrimEnd(new char[] { ' ' });
+                String msg = packet.Body.Substring(Program.Bot.Config.Trigger.Length);//.TrimEnd(new char[] { ' ' });
 
                 if (packet.Body.Contains(" "))
                     cmd_args = msg.Split(' ');

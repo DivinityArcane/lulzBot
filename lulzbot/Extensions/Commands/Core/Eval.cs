@@ -1,6 +1,7 @@
 ﻿using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -19,41 +20,64 @@ namespace lulzbot.Extensions
                 try
                 {
                     String usercode = msg.Substring(5).Replace("&amp;", "&");
-                    String[] usings;
+                    List<String> usings = new List<String>(); ;
                     String nusings = "";
 
                     if (args[1] == "--using")
                     {
                         if (args[2].Contains(','))
                         {
-                            usings = args[2].Split(new char[] { ',' });
-                            nusings = "using " + String.Join(";\nusing ", usings) + ";\n";
+                            usings = new List<String>(args[2].Split(new char[] { ',' }));
                         }
-                        else nusings = "using " + args[2] + ";\n";
+                        else usings.Add(args[2]);
                         usercode = usercode.Substring(9 + args[2].Length);
                     }
-                    else usings = new String[0];
+                    else if (args[1] == "--show")
+                    {
+                        usercode = usercode.Substring(7);
+                    }
 
-                    String code = "using System;\n" +
-                        "using System.Net;\n" +
-                        "using System.Linq;\n" +
-                        "using System.Linq.Expressions;\n" +
-                        "using System.Collections;\n" +
-                        "using System.Collections.Generic;\n" +
-                        "using lulzbot;\n" +
-                        "using lulzbot.Extensions;\n" + nusings + "\n" +
+                    if (usercode.StartsWith("<bcode>"))
+                    {
+                        usercode = usercode.Substring(7).Replace("</bcode>", "").Replace("\n", "\n\t\t");
+                    }
+
+                    usings.Add("System");
+                    usings.Add("System.Net");
+                    usings.Add("System.Linq");
+                    usings.Add("System.Linq.Expressions");
+                    usings.Add("System.Collections");
+                    usings.Add("System.Collections.Generic");
+                    usings.Add("lulzbot");
+                    usings.Add("lulzbot.Extensions");
+                    usings.Add("SRCDSQuery");
+                    usings.Add("MySql.Data");
+
+                    nusings = "using " + String.Join(";\nusing ", usings) + ";\n";
+
+                    String code = nusings + "\n" +
                         "public class c_eval {\n\t#pragma warning disable 162\n\t" +
                         "public static object v_eval () {\n\t\t" +
+                        "String ns = \"" + ns + "\", from = \"" + from + "\";\n\t\t" +
+                        "Bot bot = Program.Bot, self = Program.Bot;\n\t\t" +
                         usercode + "\n\t\treturn null;\n\t}\n}";
+
+                    if (args[1] == "--show")
+                    {
+                        bot.Say(ns, "<b>&raquo; Generated code:</b><br/><bcode>" + code + "</bcode>");
+                        return;
+                    }
 
                     CodeDomProvider codeDomProvider = CSharpCodeProvider.CreateProvider("C#");
                     CompilerParameters compilerParams = new CompilerParameters();
                     compilerParams.ReferencedAssemblies.Add("System.dll");
                     compilerParams.ReferencedAssemblies.Add("System.Core.dll");
+                    compilerParams.ReferencedAssemblies.Add("System.Net.dll");
                     compilerParams.ReferencedAssemblies.Add("System.Data.dll");
                     compilerParams.ReferencedAssemblies.Add("System.Xml.dll");
                     compilerParams.ReferencedAssemblies.Add("Newtonsoft.Json.dll");
-                    compilerParams.ReferencedAssemblies.Add("AIMLbot.dll");
+                    compilerParams.ReferencedAssemblies.Add("SRCDSQuery.dll");
+                    compilerParams.ReferencedAssemblies.Add("mysql.data.dll");
                     compilerParams.GenerateExecutable = false;
                     compilerParams.GenerateInMemory = true;
                     compilerParams.IncludeDebugInformation = false;

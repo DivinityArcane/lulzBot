@@ -22,7 +22,7 @@ namespace lulzbot.Extensions
             {
                 String msg = packet.Body.Substring(bot.Config.Username.Length + 2);
 
-                if (msg.ToLower() == "trigcheck")
+                if (msg.ToLower() == "trigcheck" || msg.ToLower() == "trigger" || msg.ToLower() == "trig")
                 {
                     bot.Say(packet.Parameter, String.Format("{0}: My trigger is <b><code>{1}</code></b>", packet.Arguments["from"], bot.Config.Trigger.Replace("&", "&amp;")));
                 }
@@ -32,15 +32,18 @@ namespace lulzbot.Extensions
             if (packet.Body.StartsWith(bot.Config.Trigger))
             {
                 String cmd_name = String.Empty;
+                String msg = packet.Body.Substring(bot.Config.Trigger.Length);
 
-                if (packet.Body.Contains(" "))
-                    cmd_name = packet.Body.Substring(bot.Config.Trigger.Length, packet.Body.IndexOf(' ') - bot.Config.Trigger.Length);
+                if (msg.Contains(" "))
+                    cmd_name = msg.Substring(0, msg.IndexOf(' '));
                 else
-                    cmd_name = packet.Body.Substring(bot.Config.Trigger.Length);
+                    cmd_name = msg;
 
                 Events.CallCommand(cmd_name, packet);
             }
         }
+
+
 
         public static void evt_recv_action (Bot bot, dAmnPacket packet)
         {
@@ -49,8 +52,15 @@ namespace lulzbot.Extensions
                 ConIO.Write(String.Format("* {0} {1}", packet.Arguments["from"], packet.Body), Tools.FormatChat(packet.Parameter));
         }
 
+
+
         public static void evt_recv_join (Bot bot, dAmnPacket packet)
         {
+            if (packet.Parameter.StartsWith("pchat:"))
+            {
+                ConIO.Write(String.Format("** {0} joined.", packet.SubParameter));
+                return;
+            }
 
             // Due to the odd format of this packet, arguments are pushed to the body.
             packet.PullBodyArguments();
@@ -83,6 +93,8 @@ namespace lulzbot.Extensions
             }
         }
 
+
+
         public static void evt_recv_part (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
@@ -104,6 +116,8 @@ namespace lulzbot.Extensions
                 }
             }
         }
+
+
 
         public static void evt_recv_privchg (Bot bot, dAmnPacket packet)
         {
@@ -132,6 +146,8 @@ namespace lulzbot.Extensions
                 }
             }
         }
+
+
 
         public static void evt_recv_kicked (Bot bot, dAmnPacket packet)
         {
@@ -166,6 +182,8 @@ namespace lulzbot.Extensions
                 }
             }
         }
+
+
 
         public static void evt_recv_admin (Bot bot, dAmnPacket packet)
         {
@@ -214,7 +232,7 @@ namespace lulzbot.Extensions
                 {
                     // Don't display DataShare messages.
                     if (packet.Parameter.ToLower() != "chat:datashare")
-                        ConIO.Write(String.Format("*** {0} created privclass {1} with: {2}", packet.Arguments["by"], packet.Arguments["name"], packet.Arguments["privs"]), Tools.FormatChat(packet.Parameter));
+                        ConIO.Write(String.Format("*** {0} updated privclass {1} with: {2}", packet.Arguments["by"], packet.Arguments["name"], packet.Arguments["privs"]), Tools.FormatChat(packet.Parameter));
 
                     // Update channel data
                     if (ChannelData[packet.Parameter.ToLower()].Privclasses.ContainsKey(packet.Arguments["name"].ToLower()))

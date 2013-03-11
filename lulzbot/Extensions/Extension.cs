@@ -41,16 +41,19 @@ namespace lulzbot.Extensions
 
             CodeDomProvider codeDomProvider         = CSharpCodeProvider.CreateProvider("C#");
             CompilerParameters compilerParams       = new CompilerParameters();
-            compilerParams.GenerateExecutable = false;
-            compilerParams.GenerateInMemory = true;
-            compilerParams.IncludeDebugInformation = false;
+            compilerParams.GenerateExecutable       = false;
+            compilerParams.GenerateInMemory         = true;
+            compilerParams.IncludeDebugInformation  = false;
 
             compilerParams.ReferencedAssemblies.Add(Assembly.GetExecutingAssembly().Location);
             compilerParams.ReferencedAssemblies.Add("System.dll");
             compilerParams.ReferencedAssemblies.Add("System.Core.dll");
+            compilerParams.ReferencedAssemblies.Add("System.Net.dll");
             compilerParams.ReferencedAssemblies.Add("System.Data.dll");
             compilerParams.ReferencedAssemblies.Add("System.Xml.dll");
             compilerParams.ReferencedAssemblies.Add("Newtonsoft.Json.dll");
+            compilerParams.ReferencedAssemblies.Add("SRCDSQuery.dll");
+            compilerParams.ReferencedAssemblies.Add("mysql.data.dll");
 
             CompilerResults results = codeDomProvider.CompileAssemblyFromFile(compilerParams, filename);
 
@@ -184,30 +187,6 @@ namespace lulzbot.Extensions
         public static void Admin (String chan, String cmd)
         {
             Program.Bot.Admin(chan, cmd);
-        }
-
-        public static void AddEvent (String event_name, object class_ref, String method_name)
-        {
-            if (ExtensionContainer.CurrentFile == String.Empty)
-                throw new Exception("Events must be bound in the Initialize() method!");
-
-            if (!Events.ValidateEventName(event_name))
-                throw new Exception("Invalid event name: " + event_name);
-
-            Event evt = new Event(class_ref, method_name, "External event bound to " + event_name, String.Format("Extension[{0}]", ExtensionContainer.CurrentFile));
-            Events.AddExternalEvent(event_name, evt);
-        }
-
-        public static void AddCommand (String cmd_name, object class_ref, String method_name, String author, byte privs, String desc)
-        {
-            if (ExtensionContainer.CurrentFile == String.Empty)
-                throw new Exception("Events must be bound in the Initialize() method!");
-
-            if (Events.CommandExists(cmd_name))
-                throw new Exception("Command name is already taken: " + cmd_name.ToLower());
-
-            Command cmd = new Command(class_ref, method_name, author, privs, desc);
-            Events.AddExternalCommand(cmd_name, cmd);
         }
 
         public static void Save (String filename, object data)

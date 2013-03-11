@@ -80,26 +80,114 @@ namespace lulzbot
         /// Format a chat namespace.
         /// </summary>
         /// <param name="channel">Namespace to format</param>
-        /// <returns>Formatted namespace</returns>
+        /// <returns>Formatted namespace
+        /// Deprecated. Use FormatNamespace instead.</returns>
         public static String FormatChat (String channel)
         {
-            // This could arguably be better. Thinking of changing how it works alltogether. 
             if (channel.StartsWith("chat:"))
-            {
-                return "#" + channel.Substring(5);
-            }
+                return FormatNamespace(channel, NamespaceFormat.Channel);
             else if (channel.StartsWith("#"))
-            {
-                return "chat:" + channel.Substring(1);
-            }
+                return FormatNamespace(channel, NamespaceFormat.Packet);
             else if (channel.StartsWith("login:"))
-            {
-                return channel.Substring(6);
-            }
+                return FormatNamespace(channel, NamespaceFormat.Username);
+            else if (channel.StartsWith("pchat:"))
+                return FormatNamespace(channel, NamespaceFormat.PrivateChat);
             else
-            {
                 return channel;
+        }
+
+        public static String FormatPCNS (String who1, String who2)
+        {
+            var names = new System.Collections.Generic.List<String>() { who1, who2 };
+            names.Sort();
+            return "pchat:" + names[0] + ":" + names[1];
+        }
+
+        /// <summary>
+        /// Formats a namespace to the requested format.
+        /// </summary>
+        /// <param name="ns">Namespace to be formatted</param>
+        /// <param name="format">Format type</param>
+        /// <returns>Formatted namespace</returns>
+        public static String FormatNamespace (String ns, NamespaceFormat format)
+        {
+            if (ns.Length < 2)
+                throw new FormatException("Namespace provided was invalid.");
+
+            if (format == NamespaceFormat.Channel)
+            {
+                if (ns.Length > 1 && ns[0] == '#')
+                    return ns;
+
+                else if (ns.Length > 1 && ns[0] == '@')
+                    return ns;
+
+                else if (ns.StartsWith("chat:") && ns.Length > 5)
+                    return '#' + ns.Substring(5);
+
+                else if (ns.StartsWith("pchat:") && ns.Length > 6)
+                {
+                    String[] names = ns.Split(new char[] { ':' });
+
+                    if (names[1].ToLower() == Program.Bot.Config.Username.ToLower())
+                        return '@' + names[2];
+                    else
+                        return '@' + names[1];
+                }
+
+                else throw new FormatException("Namespace provided cannot be converted to channel format.");
             }
+
+            else if (format == NamespaceFormat.Packet)
+            {
+                if (ns.Length > 1 && ns[0] == '#')
+                    return "chat:" + ns.Substring(1);
+
+                else if (ns.Length > 1 && ns[0] == '@')
+                {
+                    List<String> names = new List<String>() { Program.Bot.Config.Username, ns.Substring(1) };
+                    names.Sort();
+                    return "pchat:" + names[0] + ":" + names[1];
+                }
+
+                else if (ns.StartsWith("chat:") && ns.Length > 5)
+                    return ns;
+
+                else if (ns.StartsWith("pchat:") && ns.Length > 6)
+                    return ns;
+
+                else throw new FormatException("Namespace provided cannot be converted to packet format.");
+            }
+
+            else if (format == NamespaceFormat.Username)
+            {
+                if (ns.StartsWith("login:") && ns.Length > 6)
+                    return ns.Substring(6);
+
+                else throw new FormatException("Namespace provided cannot be converted to username format.");
+            }
+
+            else if (format == NamespaceFormat.PrivateChat)
+            {
+                String[] bits;
+
+                if (ns.Length > 1 && ns[0] == '@')
+                    return ns;
+
+                else if (ns.Contains(":") && (bits = ns.Split(new char[] { ':' })).Length == 3)
+                {
+                    if (bits[1].ToLower() == Program.Bot.Config.Username.ToLower())
+                        return '@' + bits[2];
+                    else if (bits[2].ToLower() == Program.Bot.Config.Username.ToLower())
+                        return '@' + bits[1];
+
+                    else throw new FormatException("Namespace provided cannot be converted to private chat format.");
+                }
+
+                else throw new FormatException("Namespace provided cannot be converted to private chat format.");
+            }
+
+            throw new NotSupportedException("Unsupported namespace format.");
         }
 
         public static String ParseEntities (String message)
@@ -158,6 +246,8 @@ namespace lulzbot
         public static String UpToDate (String ver)
         {
             var p = Tools.GrabPage(@"http://botdom.com/w/api.php?action=query&prop=revisions&rvlimit=1&rvprop=content&format=json&titles=LulzBot");
+
+            if (p == null) return "ERR";
             
             var searchA = "last_release_s = ";
             var searchB = "last_releasedate_s = ";
@@ -508,10 +598,10 @@ namespace lulzbot
                 return;
             }
 
-            String dir = Path.GetDirectoryName(filename);
-
             try
             {
+                String dir = Path.GetDirectoryName(filename);
+
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
@@ -603,6 +693,15 @@ namespace lulzbot
                 return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
             }
             catch { return default(T); }
+        }
+
+        public static String Obj2Json (object obj)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+            }
+            catch { return ""; }
         }
 
         public static String StripTags (String data)

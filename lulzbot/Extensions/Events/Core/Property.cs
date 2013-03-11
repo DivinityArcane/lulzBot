@@ -15,6 +15,8 @@ namespace lulzbot.Extensions
             String ns = packet.Parameter;
             String type = packet.Arguments["p"];
 
+            if (ns.StartsWith("pchat:")) return;
+
             lock (ChannelData)
             {
                 if (!ChannelData.ContainsKey(ns.ToLower()))

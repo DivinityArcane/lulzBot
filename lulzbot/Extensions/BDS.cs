@@ -603,7 +603,7 @@ namespace lulzbot.Extensions
         {
             if (packet.Parameter == "chat:Botdom" && packet.Body.ToLower().StartsWith("<abbr title=\"" + bot.Config.Username.ToLower() + ": botcheck\"></abbr>"))
             {
-                String hash = Tools.md5((bot.Config.Trigger + packet.Arguments["from"] + bot.Config.Username).ToLower()).ToLower();
+                String hash = Tools.md5((bot.Config.Trigger + packet.Arguments["from"] + bot.Config.Username).ToLower()).Replace(" ", "").ToLower();
                 bot.Say(packet.Parameter, String.Format("Beep! <abbr title=\"botresponse: {0} {1} {2} {3} {4} {5}\"></abbr>", packet.Arguments["from"], bot.Config.Owner, Program.BotName, Program.Version, hash, bot.Config.Trigger));
                 return;
             }
@@ -636,7 +636,7 @@ namespace lulzbot.Extensions
                         if (!from_policebot)
                             return;
 
-                        String hashkey = Tools.md5((trigger + from + username).ToLower());
+                        String hashkey = Tools.md5((trigger + from + username).Replace(" ", "").ToLower());
                         bot.NPSay(ns, String.Format("BDS:BOTCHECK:RESPONSE:{0},{1},{2},{3}/{4},{5},{6}", from, owner, Program.BotName, Program.Version, Version, hashkey, trigger));
                     }
                     else if (bits[2] == "DIRECT" && bits[3].ToLower().Contains(","))
@@ -649,7 +649,7 @@ namespace lulzbot.Extensions
                             if (!from_policebot)
                                 return;
 
-                            String hashkey = Tools.md5((trigger + from + username).ToLower());
+                            String hashkey = Tools.md5((trigger + from + username).Replace(" ", "").ToLower());
                             bot.NPSay(ns, String.Format("BDS:BOTCHECK:RESPONSE:{0},{1},{2},{3}/{4},{5},{6}", from, owner, Program.BotName, Program.Version, Version, hashkey, trigger));
                         }
                     }
@@ -702,7 +702,7 @@ namespace lulzbot.Extensions
 
                         Types.BotInfo bot_info = new Types.BotInfo(from, data[1], data[2], botver, trig, bdsver, Bot.EpochTimestamp);
 
-                        String hashkey = Tools.md5((trig + data[0] + from).ToLower()).ToLower();
+                        String hashkey = Tools.md5((trig + data[0] + from).ToLower().Replace(" ", "")).ToLower();
 
                         if (hashkey != hash)
                         {
@@ -763,7 +763,7 @@ namespace lulzbot.Extensions
 
                         Types.ClientInfo client_info = new ClientInfo(from, name, ver, Bot.EpochTimestamp);
 
-                        String hashkey = Tools.md5((name + ver + from + data[0]).ToLower()).ToLower();
+                        String hashkey = Tools.md5((name + ver + from + data[0]).Replace(" ", "").ToLower()).ToLower();
 
                         if (hashkey != hash)
                         {

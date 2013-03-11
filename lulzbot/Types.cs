@@ -133,6 +133,14 @@ namespace lulzbot.Types
     }
     #endregion Channel related
 
+    public enum NamespaceFormat : byte
+    {
+        Channel = 1,
+        Username = 2,
+        Packet = 3,
+        PrivateChat = 4,
+    }
+
     public enum ByteCounts : ulong
     {
         /*YottaByte = (1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024),

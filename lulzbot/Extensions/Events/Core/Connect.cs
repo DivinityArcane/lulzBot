@@ -10,6 +10,7 @@ namespace lulzbot.Extensions
             {
                 if (bot == null)
                 {
+                    Program.ForceReconnect = true;
                     Program.wait_event.Set();
                     return;
                 }

@@ -8,8 +8,8 @@ namespace lulzbot
     public class Bot
     {
         // These are our dAmn server variables.
-        private const String _hostname = "chat.deviantart.com";
-        private const int _port = 3900;
+        //private const String _hostname = "chat.deviantart.com";
+        //private const int _port = 3900;
 
         // Our socket wrapper/object.
         private SocketWrapper Socket = null;
@@ -107,7 +107,7 @@ namespace lulzbot
         /// Constructor. Spawn a new bot instance
         /// </summary>
         /// <param name="config">Configuration object</param>
-        public Bot (Config config)
+        public Bot (Config config, string host, int port)
         {
             // Initialize the wait handler
             //wait_event = new ManualResetEvent(false);
@@ -150,7 +150,7 @@ namespace lulzbot
 
             // Now, let's initialize the socket.
             Socket = new SocketWrapper();
-            Socket.Connect(_hostname, _port);
+            Socket.Connect(host, port);
 
             can_loop = true;
 
@@ -186,11 +186,11 @@ namespace lulzbot
                         // Process the packet
                         if (packet.Command == "recv")
                         {
-                            Events.CallEvent("recv_" + packet.SubCommand, packet);
+                            new Thread (() => Events.CallEvent("recv_" + packet.SubCommand, packet)).Start ();
                         }
                         else
                         {
-                            Events.CallEvent(packet.Command, packet);
+                            new Thread (() => Events.CallEvent(packet.Command, packet)).Start ();
                         }
                     }
                 }

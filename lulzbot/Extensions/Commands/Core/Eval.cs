@@ -51,12 +51,14 @@ namespace lulzbot.Extensions
                     usings.Add("lulzbot");
                     usings.Add("lulzbot.Extensions");
                     usings.Add("SRCDSQuery");
+                    usings.Add("MCQuery");
                     usings.Add("MySql.Data");
 
                     nusings = "using " + String.Join(";\nusing ", usings) + ";\n";
 
                     String code = nusings + "\n" +
                         "public class c_eval {\n\t#pragma warning disable 162\n\t" +
+                        "#pragma warning disable 219\n\t" +
                         "public static object v_eval () {\n\t\t" +
                         "String ns = \"" + ns + "\", from = \"" + from + "\";\n\t\t" +
                         "Bot bot = Program.Bot, self = Program.Bot;\n\t\t" +
@@ -77,6 +79,7 @@ namespace lulzbot.Extensions
                     compilerParams.ReferencedAssemblies.Add("System.Xml.dll");
                     compilerParams.ReferencedAssemblies.Add("Newtonsoft.Json.dll");
                     compilerParams.ReferencedAssemblies.Add("SRCDSQuery.dll");
+                    compilerParams.ReferencedAssemblies.Add("MCQuery.dll");
                     compilerParams.ReferencedAssemblies.Add("mysql.data.dll");
                     compilerParams.GenerateExecutable = false;
                     compilerParams.GenerateInMemory = true;

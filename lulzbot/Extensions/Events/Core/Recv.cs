@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 
 namespace lulzbot.Extensions
 {
@@ -39,7 +40,8 @@ namespace lulzbot.Extensions
                 else
                     cmd_name = msg;
 
-                Events.CallCommand(cmd_name, packet);
+                //Events.CallCommand(cmd_name, packet);
+                new Thread (() => Events.CallCommand(cmd_name, packet)).Start ();
             }
         }
 

@@ -129,13 +129,8 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="mysql.data, Version=6.6.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Justin\Desktop\MySQL\v4\mysql.data.dll</HintPath>
-    </Reference>
-    <Reference Include="SRCDSQuery, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\SRCDSQuery.dll</HintPath>
+    <Reference Include="MCQuery">
+      <HintPath>.\MCQuery.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -156,6 +151,12 @@
     </Reference>
     <Reference Include="System.Net.Http.WebRequest">
       <HintPath>System.Net.Http.WebRequest.dll</HintPath>
+    </Reference>
+    <Reference Include="SRCDSQuery">
+      <HintPath>SRCDSQuery.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data">
+      <HintPath>mysql.data.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -179,6 +180,7 @@
     <Compile Include="Extensions\Commands\Core\Demote.cs" />
     <Compile Include="Extensions\Commands\Core\Disconnects.cs" />
     <Compile Include="Extensions\Commands\Core\Eval.cs" />
+    <Compile Include="Extensions\Commands\Core\Exec.cs" />
     <Compile Include="Extensions\Commands\Core\Help.cs" />
     <Compile Include="Extensions\Commands\Core\Kick.cs" />
     <Compile Include="Extensions\Commands\Core\Kill.cs" />
@@ -260,15 +262,11 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+    <BootstrapperPackage Include="..\..\..\GitHub\lulzBot\lulzbot\Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
     </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+    <BootstrapperPackage Include="..\..\..\GitHub\lulzBot\lulzbot\Microsoft.Net.Framework.3.5.SP1">
       <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>

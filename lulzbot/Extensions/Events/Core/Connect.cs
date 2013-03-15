@@ -6,10 +6,23 @@ namespace lulzbot.Extensions
     {
         public static void evt_connect (Bot bot, dAmnPacket packet)
         {
-            if (Program.Debug)
-                ConIO.Write("Connected to the server: " + bot.Endpoint());
+            try
+            {
+                if (bot == null)
+                {
+                    Program.wait_event.Set();
+                    return;
+                }
 
-            bot.Send(dAmnPackets.dAmnClient(0.3, Program.BotName, bot.Config.Owner));
+                if (Program.Debug)
+                    ConIO.Write("Connected to the server: " + bot.Endpoint());
+
+                bot.Send(dAmnPackets.dAmnClient(0.3, Program.BotName, bot.Config.Owner));
+            }
+            catch
+            {
+                bot.Close();
+            }
         }
     }
 }

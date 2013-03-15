@@ -25,8 +25,80 @@ namespace lulzbot
         // This is our configuration.
         private static Config Config = new Config();
 
+        private static string host = "chat.deviantart.com";
+        private static int port = 3900;
+
         // Our OS string
-        public static String OS = Environment.OSVersion.ToString();
+        public static String OS
+        {
+            get
+            {
+                var osi = Environment.OSVersion;
+                var plat = osi.Platform;
+                var maj = osi.Version.Major;
+                var min = osi.Version.Minor;
+                var rev = osi.Version.Revision.ToString();
+                var ret = osi.ToString();
+
+                if (plat == PlatformID.Win32Windows)
+                {
+                    if (min == 0)
+                        ret = "Windows 95";
+
+                    else if (min == 10)
+                    {
+                        if (rev == "2222A")
+                            ret = "Windows 98 Second Edition";
+                        else
+                            ret = "Windows 98";
+                    }
+
+                    else if (min == 90)
+                        ret = "Windows ME";
+                }
+
+                else if (plat == PlatformID.Win32NT)
+                {
+                    if (maj == 3)
+                        ret = "Windows NT 3.51";
+
+                    else if (maj == 4)
+                        ret = "Windows NT 4.0";
+
+                    else if (maj == 5)
+                    {
+                        if (min == 0)
+                            ret = "Windows 2000";
+                        else
+                            ret = "Windows XP";
+                    }
+
+                    else if (maj == 6)
+                    {
+                        if (min == 0)
+                            ret = "Windows Vista";
+                        else if (min == 1)
+                            ret = "Windows 7";
+                        else
+                            ret = "Windows 8";
+                    }
+                }
+
+                else if (plat == PlatformID.MacOSX)
+                {
+                    ret = String.Format("Mac OSX {0}.{1}.{2}", maj, min, rev);
+                }
+
+                else if (plat == PlatformID.Unix)
+                {
+                    ret = String.Format("Linux {0}.{1}.{2}", maj, min, rev);
+                }
+
+                return ret + (Mono != null ? Mono : "");
+            }
+        }
+
+        public static String Mono = null;
 
         // This is our bot object.
         public static Bot Bot = null;
@@ -46,7 +118,8 @@ namespace lulzbot
         public static ulong bytes_sent = 0, bytes_received = 0, packets_in = 0, packets_out = 0;
         public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations" };
         public const String BotName = "lulzBot";
-        public const String Version = "0.9 Development";
+        public const String Version = "1.01 Development";
+        public const String ReleaseName = "Synergy";
 
         static void Main (string[] args)
         {
@@ -67,7 +140,7 @@ namespace lulzbot
             //Console.OutputEncoding = System.Text.Encoding.UTF8;
 
             // Just a bit of a simple title.
-            ConIO.Write(String.Format("{0}, version {1}", BotName, Version));
+            ConIO.Write(String.Format("{0} [{1}], version {2}", BotName, ReleaseName, Version));
             ConIO.Write("Written and developed by DivinityArcane.");
 
             Type _monotype = Type.GetType("Mono.Runtime");
@@ -75,17 +148,35 @@ namespace lulzbot
             {
                 System.Reflection.MethodInfo _mono_dsp_name = _monotype.GetMethod("GetDisplayName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
                 if (null != _mono_dsp_name)
-                    OS += String.Format(" (Running in Mono {0})", _mono_dsp_name.Invoke(null, null));
+                    Mono = String.Format(" (Running in Mono {0})", _mono_dsp_name.Invoke(null, null));
                 else
-                    OS += " (Running in Mono)";
+                    Mono = " (Running in Mono)";
             }
+
+            string pk = null;
 
             // Check for debug mode!
             if (args.Length >= 1)
             {
-                foreach (String arg in args)
+                //foreach (String arg in args)
+                for (int i = 0; i < args.Length; i++)
                 {
-                    if (arg == "--debug")
+                    string arg = args[i];
+
+                    if (arg == "--server" && args.Length >= i + 1)
+                    {
+                        host = args[i + 1];
+                    }
+                    else if (arg == "--port" && args.Length >= i + 1)
+                    {
+                        if (!int.TryParse(args[i + 1], out port))
+                            port = 3900;
+                    }
+                    else if (arg == "--pk" && args.Length >= i + 1)
+                    {
+                        pk = args[i + 1];
+                    }
+                    else if (arg == "--debug")
                     {
                         ConIO.Write("Debug mode is enabled!");
                         Debug = true;
@@ -93,6 +184,8 @@ namespace lulzbot
                     else if (arg == "--help")
                     {
                         ConIO.Write("To enable debug mode use the command line switch --debug");
+                        ConIO.Write("To specify an authtoken to use (for example, on Ouroboros) use --pk");
+                        ConIO.Write("To set the server or port, use --server and --port");
                         Environment.Exit(0);
                     }
                 }
@@ -190,6 +283,8 @@ namespace lulzbot
                 ConIO.Write("To update, check http://j.mp/15ikMg1 or use " + Config.Trigger + "update");
             }
 
+            if (pk != null) Config.Authtoken = pk;
+
             // Initialize events system
             Events.InitEvents();
 
@@ -244,7 +339,7 @@ namespace lulzbot
         {
             if (!Program.Running || (Program.Bot != null && Program.Bot.Quitting)) return;
             Program.Bot = null;
-            Program.Bot = new Bot(Config);
+            Program.Bot = new Bot(Config, host, port);
         }
 
         public static void Change_Trigger (String trig)

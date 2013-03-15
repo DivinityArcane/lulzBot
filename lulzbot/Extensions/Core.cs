@@ -56,6 +56,7 @@ namespace lulzbot.Extensions
             Events.AddCommand("debug", new Command(this, "cmd_debug", "DivinityArcane", 100, "Toggles debug mode."));
             Events.AddCommand("demote", new Command(this, "cmd_demote", "DivinityArcane", 75, "Demotes the specified user in the specified channel."));
             Events.AddCommand("disconnects", new Command(this, "cmd_disconnects", "DivinityArcane", 25, "Displays how many times the bot has disconnected since startup."));
+            Events.AddCommand("exec", new Command(this, "cmd_exec", "DivinityArcane", 100, "Executes a system command."));
             Events.AddCommand("eval", new Command(this, "cmd_eval", "DivinityArcane", 100, "Evaluates C# code."));
             Events.AddCommand("event", new Command(this, "cmd_event", "DivinityArcane", 25, "Gets information on the events system."));
             Events.AddCommand("get", new Command(this, "cmd_get", "DivinityArcane", 50, "Gets the specified data for the specified channel."));

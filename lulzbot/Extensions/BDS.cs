@@ -20,7 +20,7 @@ namespace lulzbot.Extensions
         private static List<String> _botcheck_privclasses                           = new List<String>() { "Bots", "TestBots", "BrokenBots", "SuspiciousBots", "PoliceBot" };
         private static List<String> _clientcheck_privclasses                        = new List<String>() { "Clients", "BrokenClients", "Members", "Seniors", "CoreTeam" };
         private const int UPDATE_TIME = 604800;
-        public const double Version = 0.3;
+        public const double Version = 0.4;
 
         /// <summary>
         /// Set this to false to overwrite automated saving of the database.
@@ -329,6 +329,7 @@ namespace lulzbot.Extensions
                             String output = String.Format("<b>&raquo; Information on :dev{0}:</b><br/>", info.Name);
                             output += String.Format("<b>Client type:</b> {0}<br/>", info.Type);
                             output += String.Format("<b>Client version:</b> {0}<br/>", info.Version);
+                            output += String.Format("<b>BDS version:</b> {0}<br/>", info.BDSVersion);
                             output += String.Format("<b>Last modified:</b> {0} ago", Tools.FormatTime(ts).TrimEnd('.'));
                             bot.Say(ns, output);
                         }
@@ -609,7 +610,7 @@ namespace lulzbot.Extensions
             }
 
             // Not from DS? Ignore it.
-            if (packet.Parameter.ToLower() != "chat:datashare")
+            if (packet.Parameter.ToLower() != "chat:datashare" && packet.Parameter.ToLower() != "chat:dsgateway")
                 return;
 
             // Doesn't contain segments? Ignore it.
@@ -630,7 +631,15 @@ namespace lulzbot.Extensions
             {
                 if (bits.Length >= 3 && bits[1] == "BOTCHECK")
                 {
-                    if (bits[2] == "ALL" || (bits.Length >= 4 && bits[2] == "DIRECT" && bits[3].ToLower() == username.ToLower()))
+                    if (bits[2] == "OK" && bits.Length >= 4 && bits[3].ToLower() == username.ToLower())
+                    {
+                        if (!from_policebot)
+                            return;
+
+                        bot.Join("chat:DataShare");
+                        bot.Part("chat:DSGateWay");
+                    }
+                    else if (bits[2] == "ALL" || (bits.Length >= 4 && bits[2] == "DIRECT" && bits[3].ToLower() == username.ToLower()))
                     {
                         // If it's not a police bot, return.
                         if (!from_policebot)
@@ -757,11 +766,20 @@ namespace lulzbot.Extensions
                         if (data.Length < 4)
                             return;
 
-                        String name = data[1];
-                        String ver  = data[2];
-                        String hash = data[3];
+                        String name   = data[1];
+                        String[] vers = data[2].Split('/');
+                        String ver    = vers[0];
+                        String hash   = data[3];
 
-                        Types.ClientInfo client_info = new ClientInfo(from, name, ver, Bot.EpochTimestamp);
+                        double bdsver = 0.2;
+
+                        if (!Double.TryParse(vers[vers.Length - 1], out bdsver))
+                            bdsver = 0.2;
+
+                        if (vers.Length > 2)
+                            ver = data[2].Substring(0, data[2].LastIndexOf('/'));
+
+                        Types.ClientInfo client_info = new ClientInfo(from, name, ver, bdsver, Bot.EpochTimestamp);
 
                         String hashkey = Tools.md5((name + ver + from + data[0]).Replace(" ", "").ToLower()).ToLower();
 
@@ -898,9 +916,18 @@ namespace lulzbot.Extensions
                             return;
 
                         String name = data[1];
-                        String ver = data[2];
+                        String[] vers = data[2].Split('/');
+                        String ver = vers[0];
 
-                        Types.ClientInfo client_info = new ClientInfo(data[0], name, ver, Bot.EpochTimestamp);
+                        double bdsver = 0.2;
+
+                        if (!Double.TryParse(vers[vers.Length - 1], out bdsver))
+                            bdsver = 0.2;
+
+                        if (vers.Length > 2)
+                            ver = data[2].Substring(0, data[2].LastIndexOf('/'));
+
+                        Types.ClientInfo client_info = new ClientInfo(from, name, ver, bdsver, Bot.EpochTimestamp);
 
                         lock (_clientinfo_database)
                         {

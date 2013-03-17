@@ -8,7 +8,7 @@ namespace lulzbot.Extensions
         public static void evt_property (Bot bot, dAmnPacket packet)
         {
             // Only output this in debug mode.
-            if (Program.Debug && packet.Parameter.ToLower() != "chat:datashare")
+            if (Program.Debug && !Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                 ConIO.Write(String.Format("*** Got {0}", packet.Arguments["p"]), Tools.FormatChat(packet.Parameter));
 
             // Store data

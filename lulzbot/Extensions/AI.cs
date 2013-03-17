@@ -17,7 +17,7 @@ namespace lulzbot.Extensions
         public static AIConfig Config;
         //public static AIMLbot.Bot Alice;
         //public Dictionary<String, AIMLbot.User> Users;
-        private static List<String> blacklist = new List<String>() { "#botdom", "#datashare", "#dshost" };
+        private static List<String> blacklist = new List<String>() { "#botdom", "#datashare", "#dsgateway", "#dshost" };
 
         public AI ()
         {

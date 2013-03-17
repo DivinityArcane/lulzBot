@@ -22,6 +22,7 @@ namespace lulzbot
         public static void Write (String output, String ns = "Bot")
         {
             if (!Program.Running) return; // No need to output any queued data after this.
+            if (Program.NoDisplay.Contains(ns.ToLower())) return;
 
             // We're going to use colors, because why not? Makes it look nice.
             // Of course, in a threaded environment, colors can get messed up and
@@ -37,7 +38,7 @@ namespace lulzbot
             }
 
             // Log output event
-            if ((ns.StartsWith("#") || ns.StartsWith("@")) && ns.ToLower() != "#datashare")
+            if ((ns.StartsWith("#") || ns.StartsWith("@")))
                 Events.CallSpecialEvent("log_msg", new object[] { Program.Bot, ns, output });
         }
 

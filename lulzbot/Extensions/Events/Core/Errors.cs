@@ -7,7 +7,7 @@ namespace lulzbot.Extensions
         public static void evt_send_error (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
-            if (packet.Parameter.ToLower() == "chat:datashare") return;
+            if (Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel))) return;
 
             if (CommandChannels["send"].Count > 0)
             {
@@ -23,7 +23,7 @@ namespace lulzbot.Extensions
         public static void evt_kick_error (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
-            if (packet.Parameter.ToLower() == "chat:datashare") return;
+            if (Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel))) return;
 
             if (CommandChannels["kick"].Count > 0)
             {
@@ -39,7 +39,7 @@ namespace lulzbot.Extensions
         public static void evt_get_error (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
-            if (packet.Parameter.ToLower() == "chat:datashare") return;
+            if (Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel))) return;
 
             if (packet.Parameter.StartsWith("login:"))
             {
@@ -61,7 +61,7 @@ namespace lulzbot.Extensions
         public static void evt_set_error (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
-            if (packet.Parameter.ToLower() == "chat:datashare") return;
+            if (Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel))) return;
 
             if (CommandChannels["set"].Count > 0)
             {

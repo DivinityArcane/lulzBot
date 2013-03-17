@@ -7,7 +7,7 @@ namespace lulzbot.Extensions
         public static void evt_kicked (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
-            if (packet.Parameter.ToLower() != "chat:datashare")
+            if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
             {
                 if (packet.Body.Length > 0)
                     ConIO.Write(String.Format("*** Kicked by {0}: {1}", packet.Arguments["by"], packet.Body), Tools.FormatChat(packet.Parameter));

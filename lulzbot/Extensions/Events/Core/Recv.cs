@@ -8,7 +8,7 @@ namespace lulzbot.Extensions
         public static void evt_recv_msg (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
-            if (packet.Parameter.ToLower() != "chat:datashare")
+            if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                 ConIO.Write(String.Format("<{0}> {1}", packet.Arguments["from"], packet.Body), Tools.FormatChat(packet.Parameter));
 
             // Pong!
@@ -50,7 +50,7 @@ namespace lulzbot.Extensions
         public static void evt_recv_action (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
-            if (packet.Parameter.ToLower() != "chat:datashare")
+            if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                 ConIO.Write(String.Format("* {0} {1}", packet.Arguments["from"], packet.Body), Tools.FormatChat(packet.Parameter));
         }
 
@@ -68,7 +68,7 @@ namespace lulzbot.Extensions
             packet.PullBodyArguments();
 
             // Don't display DataShare messages.
-            if (packet.Parameter.ToLower() != "chat:datashare")
+            if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                 ConIO.Write(String.Format("** {0}{1} joined. [{2}]", packet.Arguments["symbol"], packet.SubParameter, packet.Arguments["pc"]), Tools.FormatChat(packet.Parameter));
 
             // Update channel data
@@ -100,7 +100,7 @@ namespace lulzbot.Extensions
         public static void evt_recv_part (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
-            if (packet.Parameter.ToLower() != "chat:datashare")
+            if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                 if (packet.Arguments.ContainsKey("r"))
                     ConIO.Write(String.Format("** {0} left. [{1}]", packet.SubParameter, packet.Arguments["r"]), Tools.FormatChat(packet.Parameter));
                 else
@@ -124,7 +124,7 @@ namespace lulzbot.Extensions
         public static void evt_recv_privchg (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
-            if (packet.Parameter.ToLower() != "chat:datashare")
+            if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                 ConIO.Write(String.Format("*** {0} has been made a member of {1} by {2}", packet.SubParameter, packet.Arguments["pc"], packet.Arguments["by"]), Tools.FormatChat(packet.Parameter));
 
             if (packet.Arguments["by"].ToLower() == bot.Config.Username.ToLower())
@@ -154,7 +154,7 @@ namespace lulzbot.Extensions
         public static void evt_recv_kicked (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
-            if (packet.Parameter.ToLower() != "chat:datashare")
+            if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                 if (packet.Body.Length > 0)
                     ConIO.Write(String.Format("*** {0} has been kicked by {1}: {2}", packet.SubParameter, packet.Arguments["by"], packet.Body), Tools.FormatChat(packet.Parameter));
                 else
@@ -208,7 +208,7 @@ namespace lulzbot.Extensions
                 if (packet.SubParameter == "create")
                 {
                     // Don't display DataShare messages.
-                    if (packet.Parameter.ToLower() != "chat:datashare")
+                    if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                         ConIO.Write(String.Format("*** {0} created privclass {1} with: {2}", packet.Arguments["by"], packet.Arguments["name"], packet.Arguments["privs"]), Tools.FormatChat(packet.Parameter));
 
                     // Update channel data
@@ -233,7 +233,7 @@ namespace lulzbot.Extensions
                 else if (packet.SubParameter == "update")
                 {
                     // Don't display DataShare messages.
-                    if (packet.Parameter.ToLower() != "chat:datashare")
+                    if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                         ConIO.Write(String.Format("*** {0} updated privclass {1} with: {2}", packet.Arguments["by"], packet.Arguments["name"], packet.Arguments["privs"]), Tools.FormatChat(packet.Parameter));
 
                     // Update channel data
@@ -258,7 +258,7 @@ namespace lulzbot.Extensions
                 else if (packet.SubParameter == "rename")
                 {
                     // Don't display DataShare messages.
-                    if (packet.Parameter.ToLower() != "chat:datashare")
+                    if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                         ConIO.Write(String.Format("*** {0} renamed privclass {1} to {2}", packet.Arguments["by"], packet.Arguments["prev"], packet.Arguments["name"]), Tools.FormatChat(packet.Parameter));
 
                     // Update channel data
@@ -275,13 +275,13 @@ namespace lulzbot.Extensions
                 else if (packet.SubParameter == "move")
                 {
                     // Don't display DataShare messages.
-                    if (packet.Parameter.ToLower() != "chat:datashare")
+                    if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                         ConIO.Write(String.Format("*** {0} moved all users of privclass {1} to {2}. {3} user(s) were affected", packet.Arguments["by"], packet.Arguments["prev"], packet.Arguments["name"], packet.Arguments["n"]), Tools.FormatChat(packet.Parameter));
                 }
                 else if (packet.SubParameter == "remove")
                 {
                     // Don't display DataShare messages.
-                    if (packet.Parameter.ToLower() != "chat:datashare")
+                    if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                         ConIO.Write(String.Format("*** {0} removed privclass {1}. {2} user(s) were affected", packet.Arguments["by"], packet.Arguments["name"], packet.Arguments["n"]), Tools.FormatChat(packet.Parameter));
 
                     // Update channel data
@@ -293,7 +293,7 @@ namespace lulzbot.Extensions
                 else if (packet.SubParameter == "privclass")
                 {
                     // Don't display DataShare messages.
-                    if (packet.Parameter.ToLower() != "chat:datashare")
+                    if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                         ConIO.Write(String.Format("*** Failed to {0} privclass: {1}", packet.Arguments["p"], packet.Arguments["e"]), Tools.FormatChat(packet.Parameter));
 
                     lock (CommandChannels["send"])

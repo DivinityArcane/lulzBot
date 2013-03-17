@@ -58,7 +58,7 @@ namespace lulzbot.Extensions
         {
             if (!Config.Enabled || Config.BlackList.Contains(Tools.FormatNamespace(ns.ToLower(), NamespaceFormat.Packet))) return;
             if (prop != "title" && prop != "topic") return;
-            if (ns.ToLower() == "#datashare") return;
+            if (!Program.NoDisplay.Contains(ns.ToLower())) return;
 
             Tools.WriteFile("Storage/Logs/" + ns + "/" + prop + ".txt", content);
         }

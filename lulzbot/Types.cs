@@ -76,6 +76,7 @@ namespace lulzbot.Types
         public String Name      = String.Empty;
         public String Type      = String.Empty;
         public String Version   = String.Empty;
+        public Double BDSVersion = 0.3;
         public int Modified     = 0;
 
         /// <summary>
@@ -85,12 +86,13 @@ namespace lulzbot.Types
         /// <param name="type">Client type</param>
         /// <param name="version">Client version</param>
         /// <param name="lastmod">Timestamp of last modification</param>
-        public ClientInfo (String name, String type, String version, int lastmod)
+        public ClientInfo (String name, String type, String version, Double bdsver, int lastmod)
         {
             Name = name;
             Type = type;
             Version = version;
             Modified = lastmod;
+            BDSVersion = bdsver;
         }
     }
     #endregion BDS relater

@@ -16,7 +16,7 @@ namespace lulzbot.Extensions
             else
             {
                 // Uncomment this later, when we add a BDS extension.
-                bot.Join("chat:datashare");
+                bot.Join("chat:DSGateWay");
                 foreach (String channel in bot.Config.Channels)
                 {
                     bot.Join(channel);

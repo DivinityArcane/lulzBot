@@ -175,6 +175,7 @@ namespace lulzbot
         /// <param name="packet">dAmnPacket object</param>
         public static void CallEvent (String event_name, dAmnPacket packet)
         {
+            if (Program.Bot == null) return;
             lock (_events)
             {
                 if (_events.ContainsKey(event_name))
@@ -184,6 +185,7 @@ namespace lulzbot
                     {
                         try
                         {
+                            if (Program.Bot == null) return;
                             callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet });
                         }
                         catch (Exception E)
@@ -210,6 +212,8 @@ namespace lulzbot
         /// <param name="packet"></param>
         private static void CallExternalEvent (String event_name, dAmnPacket packet)
         {
+            if (Program.Bot == null) return;
+
             // We will not let it see its own messages! This avoids infinite loops.
             if (event_name == "recv_msg" && packet.Arguments["from"].ToLower() == Program.Bot.Config.Username.ToLower())
                 return;
@@ -223,6 +227,7 @@ namespace lulzbot
                     {
                         try
                         {
+                            if (Program.Bot == null) return;
                             callback.Method.Invoke(callback.Class, new object[] { packet });
                         }
                         catch (Exception E)

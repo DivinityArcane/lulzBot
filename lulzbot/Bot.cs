@@ -184,14 +184,18 @@ namespace lulzbot
                     {
                         Program.packets_in++;
                         // Process the packet
-                        if (packet.Command == "recv")
+                        try
                         {
-                            new Thread (() => Events.CallEvent("recv_" + packet.SubCommand, packet)).Start ();
+                            if (packet.Command == "recv")
+                            {
+                                new Thread(() => Events.CallEvent("recv_" + packet.SubCommand, packet)).Start();
+                            }
+                            else
+                            {
+                                new Thread(() => Events.CallEvent(packet.Command, packet)).Start();
+                            }
                         }
-                        else
-                        {
-                            new Thread (() => Events.CallEvent(packet.Command, packet)).Start ();
-                        }
+                        catch { }
                     }
                 }
 

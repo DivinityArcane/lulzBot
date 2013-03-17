@@ -140,16 +140,16 @@ namespace lulzbot
             Events.ClearEvents();
 
             // Initialize the Core extensions
-            Core = new Core();
-            BDS = new BDS();
-            Logger = new Logger();
-            Extensions = new ExtensionContainer();
-            Users = new Users(this.Config.Owner);
-            Colors = new Colors();
-            AI = new AI();
+            Core        = new Core();
+            BDS         = new BDS();
+            Logger      = new Logger();
+            Extensions  = new ExtensionContainer();
+            Users       = new Users(this.Config.Owner);
+            Colors      = new Colors();
+            AI          = new AI();
 
             // Now, let's initialize the socket.
-            Socket = new SocketWrapper();
+            Socket      = new SocketWrapper();
             Socket.Connect(host, port);
 
             can_loop = true;

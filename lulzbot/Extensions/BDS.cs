@@ -1,6 +1,7 @@
 ﻿using lulzbot.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -21,6 +22,12 @@ namespace lulzbot.Extensions
         private static List<String> _clientcheck_privclasses                        = new List<String>() { "Clients", "BrokenClients", "Members", "Seniors", "CoreTeam" };
         private const int UPDATE_TIME = 604800;
         public const double Version = 0.4;
+
+        public static bool syncing = false;
+        public static string syncwith;
+        public static Stopwatch syncwatch;
+        private static string syncrns;
+        private static int synced = 0;
 
         /// <summary>
         /// Set this to false to overwrite automated saving of the database.
@@ -68,6 +75,8 @@ namespace lulzbot.Extensions
 
                 save_timer.Start();
             }
+
+            syncing = false;
         }
 
         public static void evt_onjoin (Bot bot, dAmnPacket packet)
@@ -477,7 +486,7 @@ namespace lulzbot.Extensions
             // First arg is the command
             if (args.Length == 1)
             {
-                bot.Say(ns, String.Format("<b>&raquo; Usage:</b><br/>{0}bds save<br/>{0}bds update", " &middot; " + bot.Config.Trigger));
+                bot.Say(ns, String.Format("<b>&raquo; Usage:</b><br/>{0}bds save<br/>{0}bds update<br/>{0}bds sync username", " &middot; " + bot.Config.Trigger));
             }
             else
             {
@@ -523,6 +532,16 @@ namespace lulzbot.Extensions
                     else
                         bot.Say(ns, "<b>&raquo; No data needs to be updated.</b>");
                 }
+
+                else if (arg == "sync" && args.Length == 3)
+                {
+                    syncing = true;
+                    syncrns = ns;
+                    bot.Say(ns, "<b>&raquo; Requesting sync with " + args[2] + "</b>");
+                    bot.NPSay("chat:DataShare", "BDS:SYNC:REQUEST:" + args[2]);
+                }
+
+                else bot.Say(ns, String.Format("<b>&raquo; Usage:</b><br/>{0}bds save<br/>{0}bds update<br/>{0}bds sync username", " &middot; " + bot.Config.Trigger));
             }
         }
 
@@ -595,6 +614,15 @@ namespace lulzbot.Extensions
             }
         }
 
+        public static string BDBHash ()
+        {
+            List<string> uns = new List<string>();
+            foreach (var u in _botinfo_database.Keys)
+                uns.Add(u.ToLower());
+            uns.Sort();
+            return Tools.md5(String.Join("", uns).Replace(" ", ""));
+        }
+
         /// <summary>
         /// Parses BDS messages
         /// </summary>
@@ -610,7 +638,7 @@ namespace lulzbot.Extensions
             }
 
             // Not from DS? Ignore it.
-            if (packet.Parameter.ToLower() != "chat:datashare" && packet.Parameter.ToLower() != "chat:dsgateway")
+            if (packet.Parameter.ToLower() != "chat:datashare" && packet.Parameter.ToLower() != "chat:dsgateway" && !syncing)
                 return;
 
             // Doesn't contain segments? Ignore it.
@@ -629,7 +657,151 @@ namespace lulzbot.Extensions
 
             if (bits[0] == "BDS")
             {
-                if (bits.Length >= 3 && bits[1] == "BOTCHECK")
+                if (bits.Length >= 3 && bits[1] == "SYNC")
+                {
+                    if (bits.Length == 4 && bits[2] == "REQUEST" && bits[3].ToLower() == username.ToLower())
+                    {
+                        if (!syncing && IsPoliceBot(username))
+                        {
+                            syncing = true;
+                            syncwith = from.ToLower();
+                            bot.NPSay(ns, String.Format("BDS:SYNC:RESPONSE:{0},{1},{2}", from, BDBHash(), _botinfo_database.Count));
+                        }
+                    }
+                    else if (bits[2] == "BEGIN" && ns.StartsWith("pchat:") && syncing && ns.ToLower().Contains(syncwith))
+                    {
+                        synced = 0;
+                        foreach (var x in _botinfo_database.Values)
+                        {
+                            bot.NPSay(ns, String.Format("BDS:SYNC:INFO:{0},{1},{2},{3}/{4},{5},{6}", x.Name, x.Owner, x.Type, x.Version, x.BDSVersion, x.Modified, x.Trigger));
+                            synced++;
+
+                            //if (synced % 25 == 0)
+                            System.Threading.Thread.Sleep(10);
+                        }
+                        bot.NPSay(ns, "BDS:SYNC:FINISHED");
+                        bot.NPSay(ns, "BDS:LINK:CLOSED");
+                        bot.Part(ns);
+                        syncwith = "";
+                        synced = 0;
+                    }
+                    else if (bits.Length == 4 && bits[2] == "RESPONSE")
+                    {
+                        if (!bits[3].Contains(","))
+                            return;
+
+                        String[] data = bits[3].Split(',');
+
+                        if (data.Length != 3)
+                            return;
+
+                        if (data[0].ToLower() != username.ToLower())
+                            return;
+
+                        if (data[1] != BDBHash())
+                        {
+                            syncwith = from.ToLower();
+                            bot.NPSay(ns, "BDS:LINK:REQUEST:" + from);
+                        }
+                        else bot.NPSay(ns, "BDS:SYNC:OKAY:" + from);
+                    }
+
+                    else if (bits[2] == "FINISHED")
+                    {
+                        if (syncrns != "")
+                        {
+                            syncwatch.Stop();
+                            bot.Say(syncrns, String.Format("<b>&raquo; Finished syncing for {0} bot{1} took <abbr title=\"{2}\">{3}</abbr></b>", synced, synced == 1 ? "" : "s", syncwatch.Elapsed, Tools.FormatTime((int)syncwatch.Elapsed.TotalSeconds)));
+                            syncwith = "";
+                            syncrns = "";
+                            synced = 0;
+                            bot.NPSay(ns, "BDS:LINK:CLOSED");
+                            bot.Part(ns);
+                        }
+                        syncing = false;
+                    }
+
+                    else if (bits.Length >= 4 && bits[2] == "INFO")
+                    {
+                        if (!bits[3].Contains(","))
+                            return;
+
+                        String input = String.Empty;
+
+                        for (byte b = 3; b < bits.Length; b++)
+                        {
+                            if (b >= bits.Length - 1)
+                                input += bits[b];
+                            else
+                                input += bits[b] + ":";
+                        }
+
+                        String[] data = input.Split(',');
+
+                        if (data.Length < 6 || !data[3].Contains("/"))
+                            return;
+
+                        String who = data[0].ToLower();
+                        String[] versions = data[3].Split('/');
+                        String botver = versions[0];
+                        int ts = 0;
+                        String trig = data[5];
+                        double bdsver = 0.0;
+
+                        if (!int.TryParse(data[4], out ts))
+                            ts = Tools.Timestamp();
+
+                        // trigger contains a comma?
+                        if (data.Length > 6)
+                        {
+                            trig = String.Empty;
+                            for (int b = 6; b < data.Length; b++)
+                            {
+                                if (b >= data.Length - 1)
+                                    trig += data[b];
+                                else
+                                    trig += data[b] + ",";
+                            }
+                        }
+
+                        if (!Double.TryParse(versions[1], out bdsver))
+                            bdsver = 0.2;
+
+                        Types.BotInfo bot_info = new Types.BotInfo(data[0], data[1], data[2], botver, trig, bdsver, ts);
+
+                        if (!_botinfo_database.ContainsKey(who))
+                            _botinfo_database.Add(who, bot_info);
+                        else
+                            _botinfo_database[who] = bot_info;
+
+                        if (Program.Debug)
+                            ConIO.Write("Updated information for bot: " + data[0], "BDS");
+
+                        synced++;
+                    }
+                }
+
+                else if (bits.Length >= 3 && bits[1] == "LINK" && syncing)
+                {
+                    if (bits.Length == 4 && bits[3].ToLower() == username.ToLower())
+                    {
+                        if (bits[2] == "ACCEPT" && from.ToLower() == syncwith)
+                        {
+                            bot.Join(Tools.FormatPCNS(from, username));
+                        }
+                        else if (bits[2] == "REJECT" && from.ToLower() == syncwith)
+                        {
+                            syncwith = "";
+                            syncing = false;
+                        }
+                        else if (bits[2] == "REQUEST" && syncing && from.ToLower() == syncwith)
+                        {
+                            bot.Join(Tools.FormatPCNS(from, username));
+                        }
+                    }
+                }
+
+                else if (bits.Length >= 3 && bits[1] == "BOTCHECK")
                 {
                     if (bits[2] == "OK" && bits.Length >= 4 && bits[3].ToLower() == username.ToLower())
                     {

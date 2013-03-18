@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace lulzbot.Extensions
 {
@@ -6,6 +7,13 @@ namespace lulzbot.Extensions
     {
         public static void evt_join (Bot bot, dAmnPacket packet)
         {
+            if (BDS.syncing && packet.Parameter.StartsWith("pchat:") && packet.Parameter.ToLower().Contains(BDS.syncwith))
+            {
+                BDS.syncwatch = Stopwatch.StartNew();
+                bot.NPSay(packet.Parameter, "BDS:SYNC:BEGIN");
+                return;
+            }
+
             // Don't display DataShare messages.
             if (Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel))) return;
 

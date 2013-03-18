@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace lulzbot.Extensions
@@ -7,6 +8,13 @@ namespace lulzbot.Extensions
     {
         public static void evt_recv_msg (Bot bot, dAmnPacket packet)
         {
+            if (BDS.syncing && packet.Parameter.StartsWith("pchat:"))
+            {
+                if (Program.Debug)
+                    ConIO.Write(String.Format("<{0}> {1}", packet.Arguments["from"], packet.Body), Tools.FormatChat(packet.Parameter));
+                return;
+            }
+
             // Don't display DataShare messages.
             if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                 ConIO.Write(String.Format("<{0}> {1}", packet.Arguments["from"], packet.Body), Tools.FormatChat(packet.Parameter));
@@ -61,6 +69,13 @@ namespace lulzbot.Extensions
             if (packet.Parameter.StartsWith("pchat:"))
             {
                 ConIO.Write(String.Format("** {0} joined.", packet.SubParameter));
+
+                if (BDS.syncing && packet.Parameter.StartsWith("pchat:") && packet.SubParameter.ToLower() == BDS.syncwith)
+                {
+                    BDS.syncwatch = Stopwatch.StartNew();
+                    bot.NPSay(packet.Parameter, "BDS:SYNC:BEGIN");
+                }
+
                 return;
             }
 
@@ -99,6 +114,12 @@ namespace lulzbot.Extensions
 
         public static void evt_recv_part (Bot bot, dAmnPacket packet)
         {
+            if (packet.Parameter.StartsWith("pchat:"))
+            {
+                ConIO.Write(String.Format("** {0} left.", packet.SubParameter), Tools.FormatNamespace(packet.Parameter, Types.NamespaceFormat.PrivateChat));
+                return;
+            }
+
             // Don't display DataShare messages.
             if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                 if (packet.Arguments.ContainsKey("r"))

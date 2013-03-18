@@ -796,7 +796,12 @@ namespace lulzbot.Extensions
                         }
                         else if (bits[2] == "REQUEST" && syncing && from.ToLower() == syncwith)
                         {
-                            bot.Join(Tools.FormatPCNS(from, username));
+                            if (!syncing)
+                            {
+                                bot.NPSay(ns, "BDS:LINK:ACCEPT:" + from);
+                                bot.Join(Tools.FormatPCNS(from, username));
+                            }
+                            else bot.NPSay(ns, "BDS:LinkedList:REJECT:" + from);
                         }
                     }
                 }

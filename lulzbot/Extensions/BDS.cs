@@ -668,7 +668,7 @@ namespace lulzbot.Extensions
                             bot.NPSay(ns, String.Format("BDS:SYNC:RESPONSE:{0},{1},{2}", from, BDBHash(), _botinfo_database.Count));
                         }
                     }
-                    else if (bits[2] == "BEGIN" && ns.StartsWith("pchat:") && syncing && ns.ToLower().Contains(syncwith))
+                    else if (bits[2] == "BEGIN" && ns.StartsWith("pchat:") && syncing && ns.ToLower().Contains(syncwith) && from.ToLower() != username.ToLower())
                     {
                         synced = 0;
                         foreach (var x in _botinfo_database.Values)

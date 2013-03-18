@@ -801,7 +801,7 @@ namespace lulzbot.Extensions
                                 bot.NPSay(ns, "BDS:LINK:ACCEPT:" + from);
                                 bot.Join(Tools.FormatPCNS(from, username));
                             }
-                            else bot.NPSay(ns, "BDS:LinkedList:REJECT:" + from);
+                            else bot.NPSay(ns, "BDS:LINK:REJECT:" + from);
                         }
                     }
                 }

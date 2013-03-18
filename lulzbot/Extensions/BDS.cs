@@ -639,6 +639,31 @@ namespace lulzbot.Extensions
                         bot.Join("chat:DataShare");
                         bot.Part("chat:DSGateWay");
                     }
+                    else if (bits[2] == "DENIED" && bits.Length >= 4 && bits[3].ToLower().StartsWith(username.ToLower() + ','))
+                    {
+                        if (!from_policebot)
+                            return;
+
+                        // Look for a valid string
+                        if (!bits[3].Contains(","))
+                            return;
+
+                        String input = String.Empty;
+
+                        for (byte b = 3; b < bits.Length; b++)
+                        {
+                            if (b >= bits.Length - 1)
+                                input += bits[b];
+                            else
+                                input += bits[b] + ":";
+                        }
+
+                        String reason = input.Substring(username.Length + 1);
+
+                        ConIO.Warning("#DataShare", "Denied access: " + reason);
+
+                        bot.Part("chat:DSGateway");
+                    }
                     else if (bits[2] == "ALL" || (bits.Length >= 4 && bits[2] == "DIRECT" && bits[3].ToLower() == username.ToLower()))
                     {
                         // If it's not a police bot, return.

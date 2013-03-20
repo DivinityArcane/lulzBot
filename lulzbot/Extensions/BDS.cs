@@ -303,6 +303,10 @@ namespace lulzbot.Extensions
                 else if (args[1] == "owner" && args.Length == 3)
                 {
                     var who = args[2].ToLower();
+                    int max = -1;
+
+                    if (Users.GetPrivs(from) < (int)Privs.Members)
+                        max = 50;
 
                     List<string> bots = new List<string>();
 
@@ -310,6 +314,8 @@ namespace lulzbot.Extensions
                     {
                         if (info.Owner.ToLower() == who)
                             bots.Add(info.Name);
+
+                        if (max != -1 && bots.Count >= max) break;
                     }
 
                     if (bots.Count == 0)
@@ -321,12 +327,16 @@ namespace lulzbot.Extensions
                     bots.Sort();
 
                     bot.Say(ns, String.Format("<b>&raquo; There's {0} bot{1} owned by :dev{2}: in my database:</b><br/> <b>(</b>{3}<b>)</b>",
-                        bots.Count, bots.Count == 1 ? "" : "s", args[2], String.Join("<b>)</b>, <b>(</b>", bots)));
+                        bots.Count, bots.Count == 1 ? "" : "s", args[2], String.Join("<b>)</b>, <b>(</b>", bots)) + (max == -1 ? "" : "<br/><br/><i>* Guests are limited to 50 or less results.</i>"));
                 }
 
                 else if (args[1] == "trigger" && args.Length == 3)
                 {
                     var trig = args[2].ToLower();
+                    int max = -1;
+
+                    if (Users.GetPrivs(from) < (int)Privs.Members)
+                        max = 50;
 
                     List<string> bots = new List<string>();
 
@@ -334,6 +344,8 @@ namespace lulzbot.Extensions
                     {
                         if (info.Trigger == trig)
                             bots.Add(info.Name);
+
+                        if (max != -1 && bots.Count >= max) break;
                     }
 
                     if (bots.Count == 0)
@@ -345,7 +357,7 @@ namespace lulzbot.Extensions
                     bots.Sort();
 
                     bot.Say(ns, String.Format("<b>&raquo; There's {0} bot{1} using trigger <code>{2}</code> in my database:</b><br/> <b>(</b>{3}<b>)</b>",
-                        bots.Count, bots.Count == 1 ? "" : "s", trig, String.Join("<b>)</b>, <b>(</b>", bots)));
+                        bots.Count, bots.Count == 1 ? "" : "s", trig, String.Join("<b>)</b>, <b>(</b>", bots)) + (max == -1 ? "" : "<br/><br/><i>* Guests are limited to 50 or less results.</i>"));
                 }
 
                 else

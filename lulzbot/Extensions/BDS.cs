@@ -129,7 +129,7 @@ namespace lulzbot.Extensions
         /// </summary>
         public void cmd_bot (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
-            String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>&raquo; {0}bot info [username]<br/>&raquo; {0}bot count<br/>&raquo; {0}bot online [type]", bot.Config.Trigger);
+            String helpmsg = String.Format("<b>&raquo; Usage:</b>{0}bot info username{0}bot count{0}bot online <i>[type]</i>{0}bot owner username{0}bot trigger trigger", "<br/>&raquo; " + bot.Config.Trigger);
 
             // First arg is the command
             if (args.Length == 1)
@@ -298,6 +298,59 @@ namespace lulzbot.Extensions
                         else
                             bot.Say(ns, String.Format("<b>&raquo; 0 known online bots of type {0}.</b>", type));
                     }
+                }
+
+                else if (args[1] == "owner" && args.Length == 3)
+                {
+                    var who = args[2].ToLower();
+
+                    List<string> bots = new List<string>();
+
+                    foreach (BotInfo info in _botinfo_database.Values)
+                    {
+                        if (info.Owner.ToLower() == who)
+                            bots.Add(info.Name);
+                    }
+
+                    if (bots.Count == 0)
+                    {
+                        bot.Say(ns, "<b>&raquo; It doesn't look like I have any bots owned by that user in my database.</b>");
+                        return;
+                    }
+
+                    bots.Sort();
+
+                    bot.Say(ns, String.Format("<b>&raquo; There's {0} bot{1} owned by :dev{2}: in my database:</b><br/> <b>(</b>{3}<b>)</b>",
+                        bots.Count, bots.Count == 1 ? "" : "s", args[2], String.Join("<b>)</b>, <b>(</b>", bots)));
+                }
+
+                else if (args[1] == "trigger" && args.Length == 3)
+                {
+                    var trig = args[2].ToLower();
+
+                    List<string> bots = new List<string>();
+
+                    foreach (BotInfo info in _botinfo_database.Values)
+                    {
+                        if (info.Trigger == trig)
+                            bots.Add(info.Name);
+                    }
+
+                    if (bots.Count == 0)
+                    {
+                        bot.Say(ns, "<b>&raquo; It doesn't look like I have any bots with that trigger in my database.</b>");
+                        return;
+                    }
+
+                    bots.Sort();
+
+                    bot.Say(ns, String.Format("<b>&raquo; There's {0} bot{1} using trigger <code>{2}</code> in my database:</b><br/> <b>(</b>{3}<b>)</b>",
+                        bots.Count, bots.Count == 1 ? "" : "s", trig, String.Join("<b>)</b>, <b>(</b>", bots)));
+                }
+
+                else
+                {
+                    bot.Say(ns, helpmsg);
                 }
             }
         }

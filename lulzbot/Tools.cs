@@ -485,7 +485,7 @@ namespace lulzbot
         {
             String output = String.Empty;
 
-            if (seconds == 0)
+            if (seconds <= 0)
                 return "0 seconds";
 
             int days = 0, hours = 0, minutes = 0;

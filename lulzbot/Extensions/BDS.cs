@@ -983,7 +983,7 @@ namespace lulzbot.Extensions
 
                         Types.ClientInfo client_info = new ClientInfo(from, name, ver, bdsver, Bot.EpochTimestamp);
 
-                        String hashkey = Tools.md5((name + ver + from + data[0]).Replace(" ", "").ToLower()).ToLower();
+                        String hashkey = Tools.md5((name + ver + "/" + bdsver + from + data[0]).Replace(" ", "").ToLower()).ToLower();
 
                         if (hashkey != hash)
                         {

@@ -486,7 +486,7 @@ namespace lulzbot
             String output = String.Empty;
 
             if (seconds == 0)
-                return "0 seconds.";
+                return "0 seconds";
 
             int days = 0, hours = 0, minutes = 0;
 
@@ -518,9 +518,9 @@ namespace lulzbot
                 output += minutes + " minute" + (minutes == 1 ? "" : "s") + ", ";
 
             if (seconds > 0)
-                output += seconds + " second" + (seconds == 1 ? "" : "s") + ".";
+                output += seconds + " second" + (seconds == 1 ? "" : "s");
             else if (output.Length > 0)
-                output = output.Substring(0, output.Length - 2) + ".";
+                output = output.Substring(0, output.Length - 2);
 
             return output;
         }
@@ -728,6 +728,7 @@ namespace lulzbot
 
                 HttpWebRequest page_request = (HttpWebRequest)HttpWebRequest.Create(new Uri(url).AbsoluteUri);
 
+                page_request.AllowAutoRedirect = true;
                 page_request.Method = "GET";
                 //page_request.KeepAlive = false;
                 page_request.Proxy = null;
@@ -750,7 +751,12 @@ namespace lulzbot
 
                 return strip_tags ? StripTags(content) : content;
             }
-            catch { return null; }
+            catch (Exception E)
+            {
+                if (Program.Debug)
+                    ConIO.Warning("GrabPage", E.Message);
+                return null;
+            }
         }
 
         private static bool ValidateRemoteCertificate (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors policyErrors)

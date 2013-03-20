@@ -87,7 +87,7 @@ namespace lulzbot
                 {
                     String buffer = String.Empty;
 
-                    using (Stream stream = new FileStream(n_filename, FileMode.Open))
+                    using (Stream stream = new FileStream(n_filename, FileMode.Open, FileAccess.Read, FileShare.None))
                     {
                         using (StreamReader file = new StreamReader(stream))
                         {
@@ -129,7 +129,7 @@ namespace lulzbot
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                 });
 
-            using (Stream stream = new FileStream(filename, FileMode.Create))
+            using (Stream stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 using (StreamWriter file = new StreamWriter(stream))
                 {

@@ -1,4 +1,5 @@
-﻿using lulzbot.Types;
+﻿using lulzbot.Networking;
+using lulzbot.Types;
 using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
@@ -188,6 +189,16 @@ namespace lulzbot.Extensions
         public static void Admin (String chan, String cmd)
         {
             Program.Bot.Admin(chan, cmd);
+        }
+
+        public static void Topic (String chan, String content)
+        {
+            Program.Bot.Send(dAmnPackets.Set(chan, "topic", content));
+        }
+
+        public static void Title (String chan, String content)
+        {
+            Program.Bot.Send(dAmnPackets.Set(chan, "title", content));
         }
 
         public static void Save (String filename, object data)

@@ -8,7 +8,7 @@ namespace lulzbot.Extensions
         {
             String output = String.Empty;
 
-            output += String.Format("<b>&raquo; I am a {0} v{1} <b><sup>{2}</sup></b>, written by :devDivinityArcane:<br/>&raquo;</b> I am owned by :dev{3}:<br/>", Program.BotName, Program.Version, Program.ReleaseName, bot.Config.Owner);
+            output += String.Format("<b>&raquo; I am a <a href=\"http://fav.me/d5uviwb\">{0}</a> v{1} <b><sup>{2}</sup></b>, written by :devDivinityArcane:<br/>&raquo;</b> I am owned by :dev{3}:<br/>", Program.BotName, Program.Version, Program.ReleaseName, bot.Config.Owner);
             output += String.Format("<b>&raquo;</b> I've disconnected {0} time{1}, while I've been running for {2}<br/>", Program.Disconnects, Program.Disconnects == 1 ? "" : "s", Tools.FormatTime(bot.uptime));
 
             bot.Act(ns, output);

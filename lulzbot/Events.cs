@@ -251,20 +251,31 @@ namespace lulzbot
         /// <param name="parameters">list of parameters to be passed to the events</param>
         public static void CallSpecialEvent (String event_name, object[] parameters)
         {
+            bool OK = false;
             lock (_events)
             {
                 if (_events.ContainsKey(event_name))
                 {
-                    HitCounts[event_name]++;
                     foreach (Event callback in _events[event_name])
                     {
                         callback.Method.Invoke(callback.Class, parameters);
                     }
+                    OK = true;
                 }
-                else
+
+                if (_external_events.ContainsKey(event_name))
                 {
-                    ConIO.Write("Unknown special event: " + event_name, "Events");
+                    foreach (Event callback in _external_events[event_name])
+                    {
+                        callback.Method.Invoke(callback.Class, parameters);
+                    }
+                    OK = true;
                 }
+
+                if (!OK)
+                    ConIO.Write("Unknown special event: " + event_name, "Events");
+                else
+                    HitCounts[event_name]++;
             }
         }
 

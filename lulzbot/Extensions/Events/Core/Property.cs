@@ -98,43 +98,44 @@ namespace lulzbot.Extensions
                 }
                 else if (type == "info")
                 {
-                    Events.CallEvent("whois", packet);
+                    WhoisData wd = new WhoisData();
+
+                    String[] data = packet.Body.Split(new char[] { '\n' });
+
+                    // Don't parse what we don't need!
+                    // Icon is 0
+                    wd.Name = packet.Parameter.Substring(6);
+                    //wd.Symbol   = data[1].Substring(7);
+                    wd.RealName = data[2].Substring(9);
+                    //wd.TypeName = data[3].Substring(9);
+                    wd.GPC = data[4].Substring(4);
+
+                    int conID = 0;
+                    wd.Connections.Add(new WhoisConnection());
+
+                    for (int i = 7; i < data.Length; i++)
+                    {
+                        if (data[i] == "conn")
+                        {
+                            conID++;
+                            wd.Connections.Add(new WhoisConnection() { ConnectionID = conID });
+                        }
+                        else if (data[i].StartsWith("online="))
+                            int.TryParse(data[i].Substring(7), out wd.Connections[conID].Online);
+                        else if (data[i].StartsWith("idle="))
+                            int.TryParse(data[i].Substring(5), out wd.Connections[conID].Idle);
+                        else if (data[i].StartsWith("ns ") && data[i] != "ns chat:DataShare")
+                            wd.Connections[conID].Channels.Add("#" + data[i].Substring(8));
+                    }
+
+                    Events.CallSpecialEvent("whois", new object[] { wd });
+
                     lock (CommandChannels["whois"])
                     {
                         if (CommandChannels["whois"].Count > 0)
                         {
                             String chan = CommandChannels["whois"][0];
                             CommandChannels["whois"].RemoveAt(0);
-
-                            WhoisData wd = new WhoisData();
-
-                            String[] data = packet.Body.Split(new char[] { '\n' });
-
-                            // Don't parse what we don't need!
-                            // Icon is 0
-                            wd.Name = packet.Parameter.Substring(6);
-                            //wd.Symbol   = data[1].Substring(7);
-                            wd.RealName = data[2].Substring(9);
-                            //wd.TypeName = data[3].Substring(9);
-                            wd.GPC = data[4].Substring(4);
-
-                            int conID = 0;
-                            wd.Connections.Add(new WhoisConnection());
-
-                            for (int i = 7; i < data.Length; i++)
-                            {
-                                if (data[i] == "conn")
-                                {
-                                    conID++;
-                                    wd.Connections.Add(new WhoisConnection() { ConnectionID = conID });
-                                }
-                                else if (data[i].StartsWith("online="))
-                                    int.TryParse(data[i].Substring(7), out wd.Connections[conID].Online);
-                                else if (data[i].StartsWith("idle="))
-                                    int.TryParse(data[i].Substring(5), out wd.Connections[conID].Idle);
-                                else if (data[i].StartsWith("ns ") && data[i] != "ns chat:DataShare")
-                                    wd.Connections[conID].Channels.Add("#" + data[i].Substring(8));
-                            }
 
                             String output = String.Format("<b>&raquo;</b> :icon{0}: :dev{0}:<br/><br/>", wd.Name);
 

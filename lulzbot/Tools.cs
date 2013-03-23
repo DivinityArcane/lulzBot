@@ -488,7 +488,19 @@ namespace lulzbot
             if (seconds <= 0)
                 return "0 seconds";
 
-            int days = 0, hours = 0, minutes = 0;
+            int years = 0, weeks = 0, days = 0, hours = 0, minutes = 0;
+
+            while (seconds >= 31556926)
+            {
+                ++years;
+                seconds -= 31556926;
+            }
+
+            while (seconds >= 604800)
+            {
+                ++weeks;
+                seconds -= 604800;
+            }
 
             while (seconds >= 86400)
             {
@@ -507,6 +519,12 @@ namespace lulzbot
                 ++minutes;
                 seconds -= 60;
             }
+
+            if (years > 0)
+                output += years + " year" + (years == 1 ? "" : "s") + ", ";
+
+            if (weeks > 0)
+                output += weeks + " week" + (weeks == 1 ? "" : "s") + ", ";
 
             if (days > 0)
                 output += days + " day" + (days == 1 ? "" : "s") + ", ";

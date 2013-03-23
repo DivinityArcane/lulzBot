@@ -116,7 +116,7 @@ namespace lulzbot
         public static DateTime StartTime            = DateTime.UtcNow;
         public static int Disconnects               = 0;
         public static ulong bytes_sent              = 0, bytes_received = 0, packets_in = 0, packets_out = 0;
-        public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations" };
+        public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations", "#damnidlers" };
         public static List<String> NoDisplay        = new List<String>() { "#datashare", "#dsgateway" };
         public const String BotName                 = "lulzBot";
         public const String Version                 = "1.04 Development";

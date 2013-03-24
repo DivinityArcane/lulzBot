@@ -119,7 +119,7 @@ namespace lulzbot
         public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations", "#damnidlers" };
         public static List<String> NoDisplay        = new List<String>() { "#datashare", "#dsgateway" };
         public const String BotName                 = "lulzBot";
-        public const String Version                 = "1.04 Development";
+        public const String Version                 = "1.06";
         public const String ReleaseName             = "Synergy";
 
         static void Main (string[] args)
@@ -314,6 +314,7 @@ namespace lulzbot
                 if (ForceReconnect)
                 {
                     ForceReconnect = false;
+                    Timers.Clear();
                     _thread.Abort();
                     if (!Running)
                         break;

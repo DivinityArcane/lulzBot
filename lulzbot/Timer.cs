@@ -27,19 +27,38 @@ namespace lulzbot
                     t.Stop();
                     Remove(id);
                 };
-            timers.Add(id, t);
-            t.Start();
-            return id;
+
+            lock (timers)
+            {
+                timers.Add(id, t);
+                t.Start();
+                return id;
+            }
         }
 
         public static bool Remove (String id)
         {
             if (timers.ContainsKey(id))
             {
-                timers[id].Dispose();
-                return timers.Remove(id);
+                lock (timers)
+                {
+                    timers[id].Dispose();
+                    return timers.Remove(id);
+                }
             }
             return false;
+        }
+
+        public static void Clear ()
+        {
+            lock (timers)
+            {
+                foreach (var T in timers)
+                {
+                    T.Value.Dispose();
+                }
+                timers.Clear();
+            }
         }
     }
 }

@@ -49,6 +49,7 @@ namespace lulzbot.Extensions
             Events.AddCommand("ban", new Command(this, "cmd_ban", "DivinityArcane", 75, "Bans the specified user in the specified channel."));
             Events.AddCommand("chat", new Command(this, "cmd_chat", "DivinityArcane", 75, "Makes the bot join a private chat."));
             Events.AddCommand("channels", new Command(this, "cmd_channels", "DivinityArcane", 50, "Displays the channels the bot has joined."));
+            Events.AddCommand("clear", new Command(this, "cmd_clear", "DivinityArcane", 100, "Clears the console."));
             Events.AddCommand("cycle", new Command(this, "cmd_cycle", "DivinityArcane", 75, "Makes the bot part and join a channel."));
             Events.AddCommand("command", new Command(this, "cmd_command", "DivinityArcane", 100, "Disables certain commands."));
             Events.AddCommand("commands", new Command(this, "cmd_commands", "DivinityArcane", 25, "Displays commands available to the user."));

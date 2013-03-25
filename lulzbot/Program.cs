@@ -119,7 +119,7 @@ namespace lulzbot
         public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations", "#damnidlers" };
         public static List<String> NoDisplay        = new List<String>() { "#datashare", "#dsgateway" };
         public const String BotName                 = "lulzBot";
-        public const String Version                 = "1.07 Development";
+        public const String Version                 = "1.08 Development";
         public const String ReleaseName             = "Synergy";
 
         static void Main (string[] args)
@@ -342,6 +342,22 @@ namespace lulzbot
             if (!Program.Running || (Program.Bot != null && Program.Bot.Quitting)) return;
             Program.Bot = null;
             Program.Bot = new Bot(Config, host, port);
+        }
+
+        public static bool RenewToken ()
+        {
+            var at = Networking.AuthToken.Grab(Config.Username, Config.Password);
+
+            if (at == null)
+            {
+                ConIO.Warning("dAmn", "Unable to grab a new authtoken!");
+                return false;
+            }
+
+            Config.Authtoken = Networking.AuthToken.Grab(Config.Username, Config.Password);
+            Config.Save("./Config.dat");
+            ConIO.Write("Got a new authtoken!");
+            return true;
         }
 
         public static void Change_Trigger (String trig)

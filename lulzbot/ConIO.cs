@@ -11,8 +11,8 @@ namespace lulzbot
         private static readonly object OutputLock = new object();
 
         // You can change the global timestamp and namespace colors here.
-        private const ConsoleColor TimestampColor = ConsoleColor.DarkCyan;
-        private const ConsoleColor NamespaceColor = ConsoleColor.DarkGray;
+        private const ConsoleColor TimestampColor = ConsoleColor.Gray;
+        private const ConsoleColor NamespaceColor = ConsoleColor.Blue;
 
         /// <summary>
         /// Static method to write a line to the console.

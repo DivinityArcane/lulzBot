@@ -212,17 +212,15 @@ namespace lulzbot
 
         public static String HtmlEncode (String msg)
         {
-            String ret = "";
-
-            foreach (char c in msg)
+            var x = "";
+            foreach (char c in msg.ToCharArray())
             {
-                if (!Char.IsLetterOrDigit(c))
-                    ret += "&#" + (int)c + ";";
+                if ((int)c > 127)
+                    x += "&#" + (int)c + ";";
                 else
-                    ret += c;
+                    x += c;
             }
-
-            return ret;
+            return x;
         }
 
         public static String UnicodeString (byte[] data)
@@ -736,13 +734,13 @@ namespace lulzbot
             return new String(a, 0, i);
         }
 
-        public static String GrabPage (String url, bool strip_tags = false, bool gzip = true, String accept = null)
+        public static String GrabPage (String url, bool strip_tags = false, bool gzip = true, String accept = null, String encoding = "ASCII")
         {
             try
             {
                 ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback(ValidateRemoteCertificate);
                 String content = String.Empty;
-                Encoding enc = Encoding.GetEncoding("ASCII", new EncoderReplacementFallback(""), new DecoderReplacementFallback(""));
+                Encoding enc = Encoding.GetEncoding(encoding, new EncoderReplacementFallback(""), new DecoderReplacementFallback(""));
 
                 HttpWebRequest page_request = (HttpWebRequest)HttpWebRequest.Create(new Uri(url).AbsoluteUri);
 

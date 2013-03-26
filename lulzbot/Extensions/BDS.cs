@@ -1330,7 +1330,7 @@ namespace lulzbot.Extensions
                             int id = _translate_requests.IndexOf(data[1]);
                             String chan = _translate_requests[id];
                             _translate_requests.RemoveAt(id);
-                            bot.Say(chan, "<b>&raquo; Translated text:</b> " + WebUtility.HtmlEncode(Encoding.UTF8.GetString(Convert.FromBase64String(data[2]))));
+                            bot.Say(chan, "<b>&raquo; Translated text:</b> " + Tools.HtmlEncode(Encoding.UTF8.GetString(Convert.FromBase64String(data[2]))));
                         }
                     }
                 }

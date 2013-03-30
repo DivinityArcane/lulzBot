@@ -190,7 +190,7 @@ namespace lulzbot
                         }
                         catch (Exception E)
                         {
-                            ConIO.Warning("Extension", String.Format("Failed to call event {0}.{1}: {2}", callback.ClassName, callback.Method.Name, E.ToString()));
+                            ConIO.Warning("Extension", String.Format("Failed to call event {0}.{1}: {2}", callback.ClassName, callback.Method.Name, E.InnerException.Message));
                         }
                     }
 
@@ -232,7 +232,7 @@ namespace lulzbot
                         }
                         catch (Exception E)
                         {
-                            ConIO.Warning("Extension", String.Format("Extension bound to event [{0}] threw exception: {1}", event_name, E.ToString()));
+                            ConIO.Warning("Extension", String.Format("Extension bound to event [{0}] threw exception: {1}", event_name, E.InnerException.Message));
                         }
                     }
                 }
@@ -375,7 +375,7 @@ namespace lulzbot
                     }
                     catch (Exception E)
                     {
-                        ConIO.Warning("Extension", String.Format("Failed to call command {0} ({1}): {2}", callback.Method.Name, callback.Description, E.ToString()));
+                        ConIO.Warning("Extension", String.Format("Failed to call command {0} ({1}): {2}", callback.Method.Name, callback.Description, E.InnerException.Message));
                     }
                 }
 
@@ -421,7 +421,7 @@ namespace lulzbot
                 }
                 catch (Exception E)
                 {
-                    ConIO.Warning("Extension", String.Format("Failed to call command {0} ({1}): {2}", callback.Method.Name, callback.Description, E.ToString()));
+                    ConIO.Warning("Extension", String.Format("Failed to call command {0} ({1}): {2}", callback.Method.Name, callback.Description, E.InnerException.Message));
                 }
             }
             else
@@ -478,7 +478,13 @@ namespace lulzbot
             List<String> list = new List<string>();
 
             int pl = 25;
-            String who = username.ToLower();
+            String who = "";
+
+            if (username == null)
+                pl = byte.MaxValue;
+            else
+                who = username.ToLower();
+
             List<String> whitelist = null, blacklist = null;
 
             if (Users.userdata.ContainsKey(who))
@@ -526,6 +532,14 @@ namespace lulzbot
             if (!ValidateCommandName(cmd)) return String.Empty;
             else if (_commands.ContainsKey(cmd)) return _commands[cmd].Description;
             else if (_external_commands.ContainsKey(cmd)) return _external_commands[cmd].Description;
+            return null;
+        }
+
+        public static Command CommandInfo (string cmd)
+        {
+            if (!ValidateCommandName(cmd)) return null;
+            else if (_commands.ContainsKey(cmd)) return _commands[cmd];
+            else if (_external_commands.ContainsKey(cmd)) return _external_commands[cmd];
             return null;
         }
     }

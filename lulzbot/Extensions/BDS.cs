@@ -36,13 +36,15 @@ namespace lulzbot.Extensions
 
         public BDS ()
         {
-            Events.AddEvent("recv_msg", new Event(this, "ParseBDS", "Parses BDS messages."));
-            Events.AddEvent("join", new Event(this, "evt_onjoin", "Handles BDS related actions on joining datashare."));
+            var info = new ExtensionInfo("BDS", "DivinityArcane", "1.0");
 
-            Events.AddCommand("bot", new Command(this, "cmd_bot", "DivinityArcane", 25, "Gets information from the database."));
-            Events.AddCommand("client", new Command(this, "cmd_client", "DivinityArcane", 25, "Gets information from the database."));
-            Events.AddCommand("bds", new Command(this, "cmd_bds", "DivinityArcane", 75, "Manage BDS database."));
-            Events.AddCommand("translate", new Command(this, "cmd_translate", "DivinityArcane", 25, "Translates text using BDS."));
+            Events.AddEvent("recv_msg", new Event(this, "ParseBDS", "Parses BDS messages.", ext: info));
+            Events.AddEvent("join", new Event(this, "evt_onjoin", "Handles BDS related actions on joining datashare.", ext: info));
+
+            Events.AddCommand("bot", new Command(this, "cmd_bot", "DivinityArcane", 25, "Gets information from the database.", ext: info));
+            Events.AddCommand("client", new Command(this, "cmd_client", "DivinityArcane", 25, "Gets information from the database.", ext: info));
+            Events.AddCommand("bds", new Command(this, "cmd_bds", "DivinityArcane", 75, "Manage BDS database.", ext: info));
+            Events.AddCommand("translate", new Command(this, "cmd_translate", "DivinityArcane", 25, "Translates text using BDS.", ext: info));
 
             if (Program.Debug)
                 ConIO.Write("Loading databases...", "BDS");

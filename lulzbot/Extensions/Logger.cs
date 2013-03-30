@@ -16,8 +16,10 @@ namespace lulzbot.Extensions
 
         public Logger ()
         {
-            Events.AddEvent("log_msg", new Event(this, "handle_log_msg", "Handles logging messages."));
-            Events.AddCommand("logs", new Command(this, "cmd_logs", "DivinityArcane", 100, "Manages logging."));
+            var info = new ExtensionInfo("Logger", "DivinityArcane; OrrinFox", "1.0");
+
+            Events.AddEvent("log_msg", new Event(this, "handle_log_msg", "Handles logging messages.", ext: info));
+            Events.AddCommand("logs", new Command(this, "cmd_logs", "DivinityArcane", 100, "Manages logging.", ext: info));
 
             // Load saved data, if we can.
             Config = Storage.Load<LogConfig>("logging");

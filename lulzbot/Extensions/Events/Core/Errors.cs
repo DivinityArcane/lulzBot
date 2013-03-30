@@ -38,9 +38,6 @@ namespace lulzbot.Extensions
 
         public static void evt_get_error (Bot bot, dAmnPacket packet)
         {
-            // Don't display DataShare messages.
-            if (Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel))) return;
-
             if (packet.Parameter.StartsWith("login:"))
             {
                 lock (CommandChannels["whois"])
@@ -55,7 +52,11 @@ namespace lulzbot.Extensions
                 }
             }
             else
+            {
+                if (Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel))) return;
+
                 ConIO.Write(String.Format("*** Failed to get {0} in {1} [{2}]", packet.Arguments["p"], Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
+            }
         }
 
         public static void evt_set_error (Bot bot, dAmnPacket packet)

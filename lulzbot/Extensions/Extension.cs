@@ -92,7 +92,7 @@ namespace lulzbot.Extensions
                                     BindCommand cmd_info = potential as BindCommand;
                                     if (cmd_info != null)
                                     {
-                                        Events.AddExternalCommand(cmd_info.Command, new Command(class_instance, method.Name, ext_info.Author, cmd_info.Privileges, cmd_info.Description));
+                                        Events.AddExternalCommand(cmd_info.Command, new Command(class_instance, method.Name, ext_info.Author, cmd_info.Privileges, cmd_info.Description, ext_info));
                                     }
                                 }
                             }
@@ -105,7 +105,7 @@ namespace lulzbot.Extensions
                                     BindEvent evt_info = potential as BindEvent;
                                     if (evt_info != null)
                                     {
-                                        Events.AddExternalEvent(evt_info.Event, new Event(class_instance, method.Name, evt_info.Description, ext_info.Name));
+                                        Events.AddExternalEvent(evt_info.Event, new Event(class_instance, method.Name, evt_info.Description, ext_info.Name, ext_info));
                                     }
                                 }
                             }

@@ -13,8 +13,10 @@ namespace lulzbot.Extensions
         /// </summary>
         public Users (String owner)
         {
-            Events.AddCommand("users", new Command(this, "cmd_users", "DivinityArcane", 75, "Manages bot users."));
-            Events.AddCommand("access", new Command(this, "cmd_access", "DivinityArcane", 75, "Manages individual command access."));
+            var info = new ExtensionInfo("Users", "DivinityArcane", "1.0");
+
+            Events.AddCommand("users", new Command(this, "cmd_users", "DivinityArcane", 75, "Manages bot users.", ext: info));
+            Events.AddCommand("access", new Command(this, "cmd_access", "DivinityArcane", 75, "Manages individual command access.", ext: info));
 
             userdata = Storage.Load<Dictionary<String, UserData>>("users");
 

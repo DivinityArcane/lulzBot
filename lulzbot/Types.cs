@@ -1,4 +1,5 @@
-﻿using System;
+﻿using lulzbot.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -214,12 +215,17 @@ namespace lulzbot.Types
         public String Description = String.Empty;
 
         /// <summary>
+        /// Information on the parent extension.
+        /// </summary>
+        public ExtensionInfo Extension = null;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="class_obj">Class pointer (i.e. "this")</param>
         /// <param name="method_name">Callback method name</param>
         /// <param name="desc">Description</param>
-        public Event (object class_obj, String method_name, String desc = "", String class_name = null)
+        public Event (object class_obj, String method_name, String desc = "", String class_name = null, ExtensionInfo ext = null)
         {
             Class = class_obj;
             Method = Class.GetType().GetMethod(method_name);
@@ -228,6 +234,7 @@ namespace lulzbot.Types
                 ClassName = Class.ToString();
             else
                 ClassName = class_name;
+            Extension = ext;
         }
     }
 
@@ -263,19 +270,25 @@ namespace lulzbot.Types
         public int MinimumPrivs = 25;
 
         /// <summary>
+        /// Information on the parent extension.
+        /// </summary>
+        public ExtensionInfo Extension = null;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="class_obj">Class pointer (i.e. "this")</param>
         /// <param name="method_name">Callback method name</param>
         /// <param name="desc">Description</param>
         public Command (object class_obj, String method_name,
-            String author = "", int privs = 25, String desc = "")
+            String author = "", int privs = 25, String desc = "", ExtensionInfo ext = null)
         {
             Class = class_obj;
             Method = Class.GetType().GetMethod(method_name);
             Author = author;
             Description = desc;
             MinimumPrivs = privs;
+            Extension = ext;
         }
     }
     #endregion Events

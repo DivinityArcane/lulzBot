@@ -196,11 +196,6 @@ namespace lulzbot
             if (!message.Contains("&"))
                 return message;
 
-            if (message.Contains("RESPONSE"))
-            {
-                var x = 0;
-            }
-
             String parsed = message;
 
             // The basics

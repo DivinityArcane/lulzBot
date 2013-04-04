@@ -131,7 +131,7 @@ namespace lulzbot.Extensions
         /// </summary>
         public void cmd_bot (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
-            String helpmsg = String.Format("<b>&raquo; Usage:</b>{0}bot info username{0}bot count{0}bot online <i>[type]</i>{0}bot owner username{0}bot trigger trigger", "<br/>&raquo; " + bot.Config.Trigger);
+            String helpmsg = String.Format("<b>&raquo; Usage:</b>{0}bot info username{0}bot count{0}bot online <i>[type]</i>{0}bot owner username <i>[online]</i>{0}bot trigger trigger", "<br/>&raquo; " + bot.Config.Trigger);
 
             // First arg is the command
             if (args.Length == 1)
@@ -302,7 +302,7 @@ namespace lulzbot.Extensions
                     }
                 }
 
-                else if (args[1] == "owner" && args.Length == 3)
+                else if (args[1] == "owner" && args.Length >= 3)
                 {
                     var who = args[2].ToLower();
                     int max = -1;
@@ -328,8 +328,35 @@ namespace lulzbot.Extensions
 
                     bots.Sort();
 
-                    bot.Say(ns, String.Format("<b>&raquo; There's {0} bot{1} owned by :dev{2}: in my database:</b><br/> <b>(</b>{3}<b>)</b>",
-                        bots.Count, bots.Count == 1 ? "" : "s", args[2], String.Join("<b>)</b>, <b>(</b>", bots)) + (max == -1 ? "" : "<br/><br/><i>* Guests are limited to 50 or less results.</i>"));
+                    if (args.Length == 4 && args[3] == "online")
+                    {
+                        List<string> online = new List<string>();
+
+                        if (Core.ChannelData.ContainsKey("chat:datashare"))
+                        {
+                            ChatData cd = Core.ChannelData["chat:datashare"];
+
+                            foreach (var b in bots)
+                            {
+                                if (cd.Members.ContainsKey(b.ToLower()))
+                                    online.Add(b);
+                            }
+                        }
+
+                        if (online.Count == 0)
+                        {
+                            bot.Say(ns, "<b>&raquo; It doesn't look like I have any bots owned by that user in my database.</b>");
+                            return;
+                        }
+
+                        bot.Say(ns, String.Format("<b>&raquo; There's {0} bot{1} owned by :dev{2}: in my database that are online:</b><br/> <b>(</b>{3}<b>)</b>",
+                            online.Count, online.Count == 1 ? "" : "s", args[2], String.Join("<b>)</b>, <b>(</b>", online)) + (max == -1 ? "" : "<br/><br/><i>* Guests are limited to 50 or less results.</i>"));
+                    }
+                    else
+                    {
+                        bot.Say(ns, String.Format("<b>&raquo; There's {0} bot{1} owned by :dev{2}: in my database:</b><br/> <b>(</b>{3}<b>)</b>",
+                            bots.Count, bots.Count == 1 ? "" : "s", args[2], String.Join("<b>)</b>, <b>(</b>", bots)) + (max == -1 ? "" : "<br/><br/><i>* Guests are limited to 50 or less results.</i>"));
+                    }
                 }
 
                 else if (args[1] == "trigger" && args.Length == 3)

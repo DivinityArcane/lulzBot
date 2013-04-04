@@ -1220,7 +1220,7 @@ namespace lulzbot.Extensions
                         if (vers.Length > 2)
                             ver = data[2].Substring(0, data[2].LastIndexOf('/'));
 
-                        Types.ClientInfo client_info = new ClientInfo(from, name, ver, bdsver, Bot.EpochTimestamp);
+                        Types.ClientInfo client_info = new ClientInfo(data[0], name, ver, bdsver, Bot.EpochTimestamp);
 
                         lock (_clientinfo_database)
                         {

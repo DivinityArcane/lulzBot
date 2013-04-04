@@ -14,6 +14,7 @@ namespace lulzbot.Extensions
         public static Dictionary<String, List<String>> CommandChannels = new Dictionary<String, List<String>>();
 
         public static List<String> _disabled_commands;
+        public static List<String> _disabled_extensions;
 
         /// <summary>
         /// Constructor. Add basic events.
@@ -60,6 +61,7 @@ namespace lulzbot.Extensions
             Events.AddCommand("demote", new Command(this, "cmd_demote", "DivinityArcane", 75, "Demotes the specified user in the specified channel.", ext: info));
             Events.AddCommand("disconnects", new Command(this, "cmd_disconnects", "DivinityArcane", 25, "Displays how many times the bot has disconnected since startup.", ext: info));
             Events.AddCommand("exec", new Command(this, "cmd_exec", "DivinityArcane", 100, "Executes a system command.", ext: info));
+            Events.AddCommand("ext", new Command(this, "cmd_ext", "DivinityArcane", 100, "Manages disabled extensions.", ext: info));
             Events.AddCommand("eval", new Command(this, "cmd_eval", "DivinityArcane", 100, "Evaluates C# code.", ext: info));
             Events.AddCommand("event", new Command(this, "cmd_event", "DivinityArcane", 25, "Gets information on the events system.", ext: info));
             Events.AddCommand("get", new Command(this, "cmd_get", "DivinityArcane", 50, "Gets the specified data for the specified channel.", ext: info));
@@ -94,11 +96,17 @@ namespace lulzbot.Extensions
 
             if (_disabled_commands == null)
                 _disabled_commands = new List<String>();
+
+            _disabled_extensions = Storage.Load<List<String>>("disabled_extensions");
+
+            if (_disabled_extensions == null)
+                _disabled_extensions = new List<String>();
         }
 
         private static void SaveDisabled ()
         {
             Storage.Save("disabled_commands", _disabled_commands);
+            Storage.Save("disabled_extensions", _disabled_extensions);
         }
     }
 }

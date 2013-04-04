@@ -190,11 +190,16 @@ namespace lulzbot
             throw new NotSupportedException("Unsupported namespace format.");
         }
 
-        public static String ParseEntities (String message)
+        public static String ParseEntities (String message, bool amp = false)
         {
             // Doesn't need to be parsed?
             if (!message.Contains("&"))
                 return message;
+
+            if (message.Contains("RESPONSE"))
+            {
+                var x = 0;
+            }
 
             String parsed = message;
 
@@ -206,7 +211,13 @@ namespace lulzbot
             parsed = parsed.Replace("&middot;", "·");
             parsed = parsed.Replace("&nbsp;", " ");
 
-            //message = message.Replace("&amp;", "&");
+            if (amp)
+            {
+                // I don't even...
+                parsed = parsed.Replace("&amp;", "&");
+                parsed = parsed.Replace("&amp;", "&");
+            }
+
             return parsed;
         }
 
@@ -302,7 +313,7 @@ namespace lulzbot
 
             // If there's no ampersand or tab, there's no tablumps.
             if (!message.Contains("&") || !message.Contains("\t"))
-                return message;
+                return ParseEntities(message, true);
 
             // Split the message by \t, into an array of bits. (chunks)
             String[] bits = message.Split('\t');
@@ -433,6 +444,8 @@ namespace lulzbot
                     parsed += bit;
                 }
             }
+
+            parsed = ParseEntities(parsed, true);
 
             // Unfortunately, this has to be done.
             int start;

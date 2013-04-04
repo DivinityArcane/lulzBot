@@ -186,6 +186,7 @@ namespace lulzbot
                         try
                         {
                             if (Program.Bot == null) return;
+                            if (Core._disabled_extensions.Contains(callback.Extension.Name.ToLower())) return;
                             callback.Method.Invoke(callback.Class, new object[] { Program.Bot, packet });
                         }
                         catch (Exception E)
@@ -228,6 +229,7 @@ namespace lulzbot
                         try
                         {
                             if (Program.Bot == null) return;
+                            if (Core._disabled_extensions.Contains(callback.Extension.Name.ToLower())) return;
                             callback.Method.Invoke(callback.Class, new object[] { packet });
                         }
                         catch (Exception E)
@@ -258,6 +260,7 @@ namespace lulzbot
                 {
                     foreach (Event callback in _events[event_name])
                     {
+                        if (Core._disabled_extensions.Contains(callback.Extension.Name.ToLower())) return;
                         callback.Method.Invoke(callback.Class, parameters);
                     }
                     OK = true;
@@ -267,6 +270,7 @@ namespace lulzbot
                 {
                     foreach (Event callback in _external_events[event_name])
                     {
+                        if (Core._disabled_extensions.Contains(callback.Extension.Name.ToLower())) return;
                         callback.Method.Invoke(callback.Class, parameters);
                     }
                     OK = true;
@@ -352,7 +356,7 @@ namespace lulzbot
                 if (Environment.TickCount - _last_command[from] < 1000) return;
 
                 String[] cmd_args;
-                String msg = packet.Body.Substring(Program.Bot.Config.Trigger.Length);//.TrimEnd(new char[] { ' ' });
+                String msg = packet.Body.Substring(Program.Bot.Config.Trigger.Length);
 
                 if (packet.Body.Contains(" "))
                     cmd_args = msg.Split(' ');
@@ -362,6 +366,8 @@ namespace lulzbot
                 if (a)
                 {
                     callback = _commands[cmd_name.ToLower()];
+
+                    if (Core._disabled_extensions.Contains(callback.Extension.Name.ToLower())) return;
 
                     // Access denied
                     if (!Users.CanAccess(from, callback.MinimumPrivs, cmd_name.ToLower()))
@@ -408,6 +414,8 @@ namespace lulzbot
             if (_external_commands.ContainsKey(cmd_name.ToLower()))
             {
                 Command callback = _external_commands[cmd_name.ToLower()];
+
+                if (Core._disabled_extensions.Contains(callback.Extension.Name.ToLower())) return;
 
                 // Access denied
                 if (!Users.CanAccess(from, callback.MinimumPrivs, cmd_name.ToLower()))
@@ -506,6 +514,7 @@ namespace lulzbot
                 {
                     if (blacklist.Contains(KVP.Key)) continue;
                     if (Core._disabled_commands.Contains(KVP.Key)) continue;
+                    if (Core._disabled_extensions.Contains(KVP.Value.Extension.Name.ToLower())) continue;
                     if (KVP.Value.MinimumPrivs <= pl || whitelist.Contains(KVP.Key))
                         list.Add(KVP.Key);
                 }
@@ -517,6 +526,7 @@ namespace lulzbot
                 {
                     if (blacklist.Contains(KVP.Key)) continue;
                     if (Core._disabled_commands.Contains(KVP.Key)) continue;
+                    if (Core._disabled_extensions.Contains(KVP.Value.Extension.Name.ToLower())) continue;
                     if (KVP.Value.MinimumPrivs <= pl || whitelist.Contains(KVP.Key))
                         list.Add(KVP.Key);
                 }

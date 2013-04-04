@@ -10,7 +10,7 @@ namespace lulzbot.Extensions
         {
             if (args.Length == 2 && args[1] == "all")
             {
-                List<String> commands = Events.GetAvailableCommands(from);
+                List<String> commands = Events.GetAvailableCommands(null);
 
                 if (commands.Count > 0)
                 {
@@ -83,7 +83,7 @@ namespace lulzbot.Extensions
             }
             else
             {
-                List<String> commands = Events.GetAvailableCommands(null);
+                List<String> commands = Events.GetAvailableCommands(from);
 
                 bot.Say(ns, String.Format("<b>&raquo; {0} command{1}:<br/>&raquo;</b> <b>[</b>{2}<b>]</b>", commands.Count, (commands.Count == 1 ? "" : "s"), String.Join("<b>] &middot; [</b>", commands)));
             }

@@ -98,9 +98,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>bin\Debug\</OutputPath>
-    <DebugType>none</DebugType>
+    <DebugType>full</DebugType>
     <WarningLevel>4</WarningLevel>
     <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -182,6 +184,7 @@
     <Compile Include="Extensions\Commands\Core\Disconnects.cs" />
     <Compile Include="Extensions\Commands\Core\Eval.cs" />
     <Compile Include="Extensions\Commands\Core\Exec.cs" />
+    <Compile Include="Extensions\Commands\Core\Ext.cs" />
     <Compile Include="Extensions\Commands\Core\Help.cs" />
     <Compile Include="Extensions\Commands\Core\Kick.cs" />
     <Compile Include="Extensions\Commands\Core\Kill.cs" />

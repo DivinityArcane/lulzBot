@@ -3,6 +3,7 @@ using lulzbot.Types;
 using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -11,6 +12,7 @@ namespace lulzbot.Extensions
     public class ExtensionContainer
     {
         public static String CurrentFile = String.Empty;
+        public static List<ExtensionInfo> Extensions = new List<ExtensionInfo>();
 
         public ExtensionContainer ()
         {
@@ -25,6 +27,8 @@ namespace lulzbot.Extensions
                 Directory.CreateDirectory("./Extensions/Enabled");
                 return;
             }
+
+            Extensions.Clear();
 
             Events.ClearExternalEvents();
 
@@ -80,6 +84,7 @@ namespace lulzbot.Extensions
                     else
                     {
                         ConIO.Write(String.Format("Loaded extension: {0} v{1} by {2}.", ext_info.Name, ext_info.Version, ext_info.Author));
+                        Extensions.Add(ext_info);
                         object class_instance = Activator.CreateInstance(compiled_type);
 
                         foreach (MethodInfo method in compiled_type.GetMethods(BindingFlags.Instance | BindingFlags.Public))

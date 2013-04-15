@@ -86,6 +86,15 @@ namespace lulzbot.Extensions
             if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                 ConIO.Write(String.Format("** {0}{1} joined. [{2}]", packet.Arguments["symbol"], packet.SubParameter, packet.Arguments["pc"]), Tools.FormatChat(packet.Parameter));
 
+            // Police bot stuff.
+            if (packet.Parameter == "chat:DSGateway" && BDS.IsPoliceBot(bot.Config.Username, packet.Parameter))
+            {
+                bot.NPSay(packet.Parameter, "BDS:BOTCHECK:DIRECT:" + packet.SubParameter);
+
+                BDS.ClearKickTimers(packet.SubParameter);
+                BDS.KickAfter(packet.Parameter, packet.SubParameter, 30, "No response to or invalid BDS:BOTCHECK. If you are not a bot, please do not join this room. Thanks.");
+            }
+
             // Update channel data
             lock (ChannelData[packet.Parameter.ToLower()])
             {
@@ -118,6 +127,14 @@ namespace lulzbot.Extensions
             {
                 ConIO.Write(String.Format("** {0} left.", packet.SubParameter), Tools.FormatNamespace(packet.Parameter, Types.NamespaceFormat.PrivateChat));
                 return;
+            }
+
+            // Police bot stuff.
+            if (packet.Parameter == "chat:DSGateway" && BDS.IsPoliceBot(bot.Config.Username, packet.Parameter))
+            {
+                bot.NPSay(packet.Parameter, "BDS:BOTCHECK:DIRECT:" + packet.SubParameter);
+
+                BDS.ClearKickTimers(packet.SubParameter);
             }
 
             // Don't display DataShare messages.

@@ -14,7 +14,7 @@ namespace lulzbot.Extensions
 
                 if (commands.Count > 0)
                 {
-                    var output = "<b>&raquo; " + commands.Count + " command" + (commands.Count == 1 ? "" : "s") + " available for :dev" + from + ":</b><br/>";
+                    var output = "<b>&raquo; " + commands.Count + " command" + (commands.Count == 1 ? "" : "s") + "</b><br/>";
 
                     var mods = new Dictionary<string, List<string>>();
 
@@ -85,7 +85,7 @@ namespace lulzbot.Extensions
             {
                 List<String> commands = Events.GetAvailableCommands(from);
 
-                bot.Say(ns, String.Format("<b>&raquo; {0} command{1}:<br/>&raquo;</b> <b>[</b>{2}<b>]</b>", commands.Count, (commands.Count == 1 ? "" : "s"), String.Join("<b>] &middot; [</b>", commands)));
+                bot.Say(ns, String.Format("<b>&raquo; {0} command{1} available for :dev" + from + "::<br/>&raquo;</b> <b>[</b>{2}<b>]</b>", commands.Count, (commands.Count == 1 ? "" : "s"), String.Join("<b>] &middot; [</b>", commands)));
             }
         }
     }

@@ -20,7 +20,9 @@ namespace lulzbot.Extensions
         private static List<String> _translate_requests                             = new List<String>();
         private static List<String> _botcheck_privclasses                           = new List<String>() { "Bots", "TestBots", "BrokenBots", "SuspiciousBots", "PoliceBot" };
         private static List<String> _clientcheck_privclasses                        = new List<String>() { "Clients", "BrokenClients", "Members", "Seniors", "CoreTeam" };
+        private static Dictionary<string, string> KickTimers                        = new Dictionary<string, string>();
         private const int UPDATE_TIME = 604800;
+        private static bool Policing = false;
         public const double Version = 0.4;
 
         public static bool syncing = false;
@@ -45,6 +47,7 @@ namespace lulzbot.Extensions
             Events.AddCommand("client", new Command(this, "cmd_client", "DivinityArcane", 25, "Gets information from the database.", ext: info));
             Events.AddCommand("bds", new Command(this, "cmd_bds", "DivinityArcane", 75, "Manage BDS database.", ext: info));
             Events.AddCommand("translate", new Command(this, "cmd_translate", "DivinityArcane", 25, "Translates text using BDS.", ext: info));
+            Events.AddCommand("police", new Command(this, "cmd_police", "DivinityArcane", (int)Privs.Admins, "Changes policebot status.", info));
 
             if (Program.Debug)
                 ConIO.Write("Loading databases...", "BDS");
@@ -78,6 +81,10 @@ namespace lulzbot.Extensions
                 save_timer.Start();
             }
 
+            Policing = Storage.Load<bool>("pbstatus");
+
+            if (Policing == null) Policing = false;
+
             syncing = false;
         }
 
@@ -110,7 +117,7 @@ namespace lulzbot.Extensions
         /// <param name="username">Username to check</param>
         /// <param name="channel">Channel to check. Default: #DataShare</param>
         /// <returns>true if PoliceBot, false otherwise.</returns>
-        private static bool IsPoliceBot (String username, String channel = "chat:datashare")
+        public static bool IsPoliceBot (String username, String channel = "chat:datashare", bool pboverride = false)
         {
             channel = channel.ToLower();
 
@@ -118,6 +125,9 @@ namespace lulzbot.Extensions
                 return false;
 
             if (!Core.ChannelData[channel].Members.ContainsKey(username.ToLower()))
+                return false;
+
+            if (username.ToLower() == Program.Bot.Config.Username.ToLower() && (!Policing && !pboverride))
                 return false;
 
             if (Core.ChannelData[channel].Members[username.ToLower()].Privclass.ToLower() == "policebot")
@@ -708,6 +718,37 @@ namespace lulzbot.Extensions
             }
         }
 
+        public void cmd_police (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        {
+            String helpmsg = String.Format("<b>&raquo; Usage:</b><br/>{0}police status<br/>{0}police on|off", " &middot; " + bot.Config.Trigger);
+            
+            if (args.Length == 1)
+            {
+                bot.Say(ns, helpmsg);
+            }
+            else
+            {
+                var cmd = args[1].ToLower();
+
+                if (cmd == "status")
+                {
+                    bool ipba = IsPoliceBot(bot.Config.Username, "chat:DSGateway"), ipbb = IsPoliceBot(bot.Config.Username);
+
+                    bot.Say(ns, String.Format("<b>&raquo; Policing is {2}</b><br/><b> &middot; Policing for #DSGateway is:</b> {0}<br/><b> &middot; Policing for #DataShare is:</b> {1}", ipba == true ? "enabled" : "disabled", ipbb == true ? "enabled" : "disabled", Policing == true ? "enabled" : "disabled"));
+                }
+                else if (cmd == "on" || cmd == "off")
+                {
+                    Policing = cmd == "on";
+
+                    Storage.Save("pbstatus", Policing);
+
+                    bot.Say(ns, "<b>&raquo; Policing has been turned " + cmd + "</b>");
+                }
+                else
+                    bot.Say(ns, helpmsg);
+            }
+        }
+
         public static string BDBHash ()
         {
             List<string> uns = new List<string>();
@@ -901,11 +942,13 @@ namespace lulzbot.Extensions
                 {
                     if (bits[2] == "OK" && bits.Length >= 4 && bits[3].ToLower() == username.ToLower())
                     {
-                        if (!from_policebot)
+                        if (!from_policebot || from.ToLower() == username.ToLower())
                             return;
 
                         bot.Join("chat:DataShare");
-                        bot.Part("chat:DSGateWay");
+
+                        if (!IsPoliceBot(username, "chat:DSGateway", true))
+                            bot.Part("chat:DSGateWay");
                     }
                     else if (bits[2] == "DENIED" && bits.Length >= 4 && bits[3].ToLower().StartsWith(username.ToLower() + ','))
                     {
@@ -1011,11 +1054,30 @@ namespace lulzbot.Extensions
                             // Invalid hash supplied
                             // For now, we ignore this. Though I'd like to see policebots send and error like:
                             //  BDS:BOTCHECK:ERROR:INVALID_RESPONSE_HASH
+
+                            // Police bot stuff.
+                            if (ns == "chat:DSGateway" && IsPoliceBot(username, ns))
+                            {
+                                bot.NPSay(ns, "BDS:BOTCHECK:DENIED:" + from + ",Invalid BDS:BOTCHECK");
+
+                                ClearKickTimers(from);
+                                KickAfter(ns, from, 30, "No response to or invalid BDS:BOTCHECK. If you are not a bot, please do not join this room. Thanks.");
+                            }
+
                             if (Program.Debug)
                                 ConIO.Warning("BDS", "Invalid hash for bot: " + from);
                         }
                         else
                         {
+                            // Police bot stuff.
+                            if (ns == "chat:DSGateway" && IsPoliceBot(username, ns))
+                            {
+                                bot.NPSay(ns, "BDS:BOTCHECK:OK:" + from);
+
+                                ClearKickTimers(from);
+                                KickAfter(ns, from, 60, "No response to or invalid BDS:BOTCHECK. If you are not a bot, please do not join this room. Thanks.");
+                            }
+
                             lock (_botinfo_database)
                             {
                                 if (_botinfo_database.ContainsKey(from.ToLower()))
@@ -1081,11 +1143,30 @@ namespace lulzbot.Extensions
                             // Invalid hash supplied
                             // For now, we ignore this. Though I'd like to see policebots send and error like:
                             //  BDS:BOTCHECK:ERROR:INVALID_RESPONSE_HASH
+
+                            // Police bot stuff.
+                            if (ns == "chat:DSGateway" && IsPoliceBot(username, ns))
+                            {
+                                bot.NPSay(ns, "BDS:BOTCHECK:DENIED:" + from + ",Invalid BDS:BOTCHECK");
+
+                                ClearKickTimers(from);
+                                KickAfter(ns, from, 30, "No response to or invalid BDS:BOTCHECK. If you are not a bot, please do not join this room. Thanks.");
+                            }
+
                             if (Program.Debug)
                                 ConIO.Warning("BDS", "Invalid hash for client: " + from);
                         }
                         else
                         {
+                            // Police bot stuff.
+                            if (ns == "chat:DSGateway" && IsPoliceBot(username, ns))
+                            {
+                                bot.NPSay(ns, "BDS:BOTCHECK:OK:" + from);
+
+                                ClearKickTimers(from);
+                                KickAfter(ns, from, 60, "No response to or invalid BDS:BOTCHECK. If you are not a bot, please do not join this room. Thanks.");
+                            }
+
                             lock (_clientinfo_database)
                             {
                                 if (_clientinfo_database.ContainsKey(from.ToLower()))
@@ -1411,6 +1492,28 @@ namespace lulzbot.Extensions
                             from, owner, Program.BotName, Program.Version, bot.uptime, Program.Disconnects, Program.bytes_sent, Program.bytes_received));
                     }
                 }
+            }
+        }
+
+        public static void KickAfter (string chan, string who, int delay, string reason = null)
+        {
+            var stamp = Timers.Add(1000 * delay, delegate
+            {
+                Program.Bot.Kick(chan, who, reason);
+                ClearKickTimers(who);
+            });
+
+            if (!KickTimers.ContainsKey(who.ToLower()))
+                KickTimers.Add(who.ToLower(), stamp);
+        }
+
+        public static void ClearKickTimers (string who)
+        {
+            if (KickTimers.ContainsKey(who.ToLower()))
+            {
+                var stamp = KickTimers[who.ToLower()];
+                Timers.Remove(stamp);
+                KickTimers.Remove(who.ToLower());
             }
         }
     }

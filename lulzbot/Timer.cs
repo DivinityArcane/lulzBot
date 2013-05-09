@@ -18,7 +18,7 @@ namespace lulzbot
 
         public static String Add (int delay, ElapsedEventHandler action, bool repeat = false)
         {
-            String id = Tools.md5(String.Format("{0}", Environment.TickCount + timers.Count));
+            String id = Tools.md5(String.Format("{0}", Bot.EpochTimestampMS + (ulong)timers.Count));
             Timer t = new Timer(delay);
             t.Elapsed += action;
             if (!repeat)

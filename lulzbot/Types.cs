@@ -45,7 +45,7 @@ namespace lulzbot.Types
         public String Version       = String.Empty;
         public String Trigger       = String.Empty;
         public double BDSVersion    = 0.0;
-        public int Modified         = 0;
+        public ulong Modified         = 0;
 
         /// <summary>
         /// Constructor
@@ -57,7 +57,7 @@ namespace lulzbot.Types
         /// <param name="trigger">Bot's trigger</param>
         /// <param name="bdsver">Bot's BDS version</param>
         /// <param name="lastmod">Timestamp of last modification</param>
-        public BotInfo (String name, String owner, String type, String version, String trigger, double bdsver, int lastmod)
+        public BotInfo (String name, String owner, String type, String version, String trigger, double bdsver, ulong lastmod)
         {
             Name = name;
             Owner = owner;
@@ -78,7 +78,7 @@ namespace lulzbot.Types
         public String Type      = String.Empty;
         public String Version   = String.Empty;
         public Double BDSVersion = 0.3;
-        public int Modified     = 0;
+        public ulong Modified     = 0;
 
         /// <summary>
         /// Constructor
@@ -87,7 +87,7 @@ namespace lulzbot.Types
         /// <param name="type">Client type</param>
         /// <param name="version">Client version</param>
         /// <param name="lastmod">Timestamp of last modification</param>
-        public ClientInfo (String name, String type, String version, Double bdsver, int lastmod)
+        public ClientInfo (String name, String type, String version, Double bdsver, ulong lastmod)
         {
             Name = name;
             Type = type;

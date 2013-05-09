@@ -7,12 +7,12 @@ namespace lulzbot.Extensions
         public static void cmd_reload (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             bot.Say(ns, "<b>&raquo; Reloading extensions...</b>");
-            int start = Environment.TickCount;
+            ulong start = Bot.EpochTimestampMS;
 
             Events.ClearExternalEvents();
             Bot.Extensions.Load();
 
-            bot.Say(ns, "<b>&raquo; Done!</b> Took " + Tools.FormatTime((int)(Environment.TickCount - start) / 1000));
+            bot.Say(ns, "<b>&raquo; Done!</b> Took " + Tools.FormatTime((int)(Bot.EpochTimestampMS - start) / 1000));
         }
     }
 }

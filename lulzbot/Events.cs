@@ -18,7 +18,7 @@ namespace lulzbot
         private static Dictionary<String, Command> _commands            = new Dictionary<string, Command>();
         private static Dictionary<String, Command> _external_commands   = new Dictionary<string, Command>();
         public static Dictionary<String, UInt32> HitCounts              = new Dictionary<string, uint>();
-        private static Dictionary<String, int> _last_command            = new Dictionary<string, int>();
+        private static Dictionary<String, UInt64> _last_command            = new Dictionary<string, ulong>();
 
         /// <summary>
         /// Adds the default event names and lists.
@@ -353,7 +353,7 @@ namespace lulzbot
                 if (!_last_command.ContainsKey(from))
                     _last_command.Add(from, 0);
 
-                if (Environment.TickCount - _last_command[from] < 1000) return;
+                if (Bot.EpochTimestampMS - _last_command[from] < 1000) return;
 
                 String[] cmd_args;
                 String msg = packet.Body.Substring(Program.Bot.Config.Trigger.Length);
@@ -373,7 +373,7 @@ namespace lulzbot
                     if (!Users.CanAccess(from, callback.MinimumPrivs, cmd_name.ToLower()))
                         return;
 
-                    _last_command[from] = Environment.TickCount;
+                    _last_command[from] = Bot.EpochTimestampMS;
 
                     try
                     {
@@ -409,7 +409,7 @@ namespace lulzbot
             if (!_last_command.ContainsKey(from))
                 _last_command.Add(from, 0);
 
-            if (Environment.TickCount - _last_command[from] < 1000) return;
+            if (Bot.EpochTimestampMS - _last_command[from] < 1000) return;
 
             if (_external_commands.ContainsKey(cmd_name.ToLower()))
             {
@@ -421,7 +421,7 @@ namespace lulzbot
                 if (!Users.CanAccess(from, callback.MinimumPrivs, cmd_name.ToLower()))
                     return;
 
-                _last_command[from] = Environment.TickCount;
+                _last_command[from] = Bot.EpochTimestampMS;
 
                 try
                 {

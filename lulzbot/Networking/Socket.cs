@@ -50,7 +50,7 @@ namespace lulzbot.Networking
 
         // We need to check for timeouts.
         private Timer timeout_timer;
-        private int LastPacket = Environment.TickCount;
+        private ulong LastPacket = Bot.EpochTimestampMS;
 
         // Our server variables
         private String _host;
@@ -127,7 +127,7 @@ namespace lulzbot.Networking
         {
             if (_socket == null) return;
 
-            if ((!IsConnected && !Closed) || Environment.TickCount - LastPacket >= 120000)
+            if ((!IsConnected && !Closed) || Bot.EpochTimestampMS - LastPacket >= 120000)
             {
                 Closed = true;
                 on_disconnect();
@@ -223,7 +223,7 @@ namespace lulzbot.Networking
 
                 Program.bytes_received += (ulong)received_bytes;
 
-                LastPacket = Environment.TickCount;
+                LastPacket = Bot.EpochTimestampMS;
 
                 // Create a temporary buffer, and get only the amount of bytes from the buffer that
                 //  are actual data, and not null chars used for padding (which would screw up our

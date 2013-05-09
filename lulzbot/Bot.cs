@@ -74,11 +74,11 @@ namespace lulzbot
         /// <summary>
         /// Seconds since the unix epoch
         /// </summary>
-        public static int EpochTimestamp
+        public static ulong EpochTimestamp
         {
             get
             {
-                return Convert.ToInt32((DateTime.UtcNow - _epoch).TotalSeconds);
+                return Convert.ToUInt64((DateTime.UtcNow - _epoch).TotalSeconds);
             }
 
             set { }
@@ -87,11 +87,11 @@ namespace lulzbot
         /// <summary>
         /// Milliseconds since the unix epoch
         /// </summary>
-        public static int EpochTimestampMS
+        public static ulong EpochTimestampMS
         {
             get
             {
-                return Convert.ToInt32((DateTime.UtcNow - _epoch).TotalMilliseconds);
+                return Convert.ToUInt64((DateTime.UtcNow - _epoch).TotalMilliseconds);
             }
 
             set { }
@@ -100,7 +100,7 @@ namespace lulzbot
         /// <summary>
         /// Ticks when we were pinged.
         /// </summary>
-        public int _pinged = 0;
+        public ulong _pinged = 0;
 
 
         /// <summary>

@@ -22,7 +22,7 @@ namespace lulzbot.Extensions
             // Pong!
             if (bot._pinged != 0 && packet.Body == "Ping..." && packet.Arguments["from"].ToLower() == bot.Config.Username.ToLower())
             {
-                bot.Say(packet.Parameter, String.Format("Pong! {0}ms.", Environment.TickCount - bot._pinged));
+                bot.Say(packet.Parameter, String.Format("Pong! {0}ms.", Bot.EpochTimestampMS - bot._pinged));
                 bot._pinged = 0;
             }
 
@@ -48,8 +48,7 @@ namespace lulzbot.Extensions
                 else
                     cmd_name = msg;
 
-                //Events.CallCommand(cmd_name, packet);
-                new Thread (() => Events.CallCommand(cmd_name, packet)).Start ();
+                new Thread(() => Events.CallCommand(cmd_name, packet)).Start();
             }
         }
 

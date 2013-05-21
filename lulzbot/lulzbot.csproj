@@ -132,10 +132,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MCQuery">
-      <HintPath>.\MCQuery.dll</HintPath>
+      <HintPath>MCQuery.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Posix">
-      <HintPath>C:\Program Files (x86)\Mono-3.0.3\lib\mono\4.0\Mono.Posix.dll</HintPath>
+      <HintPath>Mono.Posix.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />

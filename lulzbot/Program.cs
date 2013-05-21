@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Mono.Unix.Native;
 
 namespace lulzbot
 {
@@ -143,6 +144,16 @@ namespace lulzbot
             // Just a bit of a simple title.
             ConIO.Write(String.Format("{0} [{1}], version {2}", BotName, ReleaseName, Version));
             ConIO.Write("Written and developed by DivinityArcane.");
+
+            try
+            {
+                if (Syscall.getuid() == 0)
+                {
+                    ConIO.Warning("System", "The bot cannot be run as root!");
+                    Environment.Exit(-1);
+                }
+            }
+            catch { } // Windows, without Mono.
 
             Type _monotype = Type.GetType("Mono.Runtime");
             if (null != _monotype)

@@ -14,7 +14,7 @@ namespace lulzbot.Extensions
             try
             {
                 foreach (var cd in Core.ChannelData.Values)
-                    if (cd.Name != "chat:DataShare" && !cd.Name.StartsWith("pchat"))
+                    if (cd.Name != "chat:DataShare" && !cd.Name.StartsWith("pchat") && !cd.Name.StartsWith("login"))
                         chans.Add(Tools.FormatNamespace(cd.Name, Types.NamespaceFormat.Channel));
 
                 chans.Sort();

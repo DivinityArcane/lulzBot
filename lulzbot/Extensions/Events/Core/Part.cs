@@ -7,14 +7,17 @@ namespace lulzbot.Extensions
         public static void evt_part (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
-            if (Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel))) return;
+            var disp = true;
+
+            if (Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel))) disp = false;
 
             if (packet.Arguments["e"] == "ok")
             {
                 // Change output depending on whether or not we have a reason
                 if (packet.Arguments.ContainsKey("r"))
                 {
-                    ConIO.Write(String.Format("** Left [{0}] ({1})", packet.Arguments["e"], packet.Arguments["r"]), Tools.FormatChat(packet.Parameter));
+                    if (disp)
+                        ConIO.Write(String.Format("** Left [{0}] ({1})", packet.Arguments["e"], packet.Arguments["r"]), Tools.FormatChat(packet.Parameter));
 
                     // If we parted with a reason, that means we disconnected or timed out!
                     if (bot.Quitting)
@@ -28,7 +31,8 @@ namespace lulzbot.Extensions
                 }
                 else
                 {
-                    ConIO.Write(String.Format("** Left [{0}]", packet.Arguments["e"]), Tools.FormatChat(packet.Parameter));
+                    if (disp)
+                        ConIO.Write(String.Format("** Left [{0}]", packet.Arguments["e"]), Tools.FormatChat(packet.Parameter));
                 }
 
                 // Remove channel data
@@ -44,7 +48,8 @@ namespace lulzbot.Extensions
                     {
                         String chan = CommandChannels["part"][0];
 
-                        bot.Say(chan, String.Format("<b>&raquo; Left {0} [ok]</b>", Tools.FormatChat(packet.Parameter)));
+                        if (disp)
+                            bot.Say(chan, String.Format("<b>&raquo; Left {0} [ok]</b>", Tools.FormatChat(packet.Parameter)));
 
                         CommandChannels["part"].RemoveAt(0);
                     }
@@ -52,7 +57,8 @@ namespace lulzbot.Extensions
             }
             else
             {
-                ConIO.Write(String.Format("** Failed to leave [{0}]", packet.Arguments["e"]), Tools.FormatChat(packet.Parameter));
+                if (disp)
+                    ConIO.Write(String.Format("** Failed to leave [{0}]", packet.Arguments["e"]), Tools.FormatChat(packet.Parameter));
 
                 lock (CommandChannels["part"])
                 {
@@ -60,7 +66,8 @@ namespace lulzbot.Extensions
                     {
                         String chan = CommandChannels["part"][0];
 
-                        bot.Say(chan, String.Format("<b>&raquo; Failed to leave {0} [{1}]</b>", Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
+                        if (disp)
+                            bot.Say(chan, String.Format("<b>&raquo; Failed to leave {0} [{1}]</b>", Tools.FormatChat(packet.Parameter), packet.Arguments["e"]));
 
                         CommandChannels["part"].RemoveAt(0);
                     }

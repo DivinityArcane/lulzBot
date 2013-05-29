@@ -1,6 +1,7 @@
 ﻿using lulzbot.Extensions;
 using lulzbot.Networking;
 using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace lulzbot
@@ -101,6 +102,7 @@ namespace lulzbot
         /// Ticks when we were pinged.
         /// </summary>
         public ulong _pinged = 0;
+        public Stopwatch PingTimer = new Stopwatch();
 
 
         /// <summary>

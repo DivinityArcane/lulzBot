@@ -7,7 +7,7 @@ namespace lulzbot.Extensions
         public static void cmd_ping (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
             bot.Say(ns, "Ping...");
-            bot._pinged = Bot.EpochTimestampMS;
+            bot.PingTimer.Start();
         }
     }
 }

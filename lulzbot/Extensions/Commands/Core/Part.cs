@@ -6,9 +6,12 @@ namespace lulzbot.Extensions
     {
         public static void cmd_part (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
+            var c = ns;
+
             if (args.Length != 2)
             {
-                bot.Say(ns, String.Format("<b>&raquo; Usage:</b> {0}part #channel", bot.Config.Trigger));
+                // Ignore this for now.
+                //bot.Say(ns, String.Format("<b>&raquo; Usage:</b> {0}part #channel", bot.Config.Trigger));
             }
             else
             {
@@ -18,13 +21,15 @@ namespace lulzbot.Extensions
                     return;
                 }
 
-                lock (CommandChannels["part"])
-                {
-                    CommandChannels["part"].Add(ns);
-                }
-
-                bot.Part(args[1]);
+                c = args[1];
             }
+
+            lock (CommandChannels["part"])
+            {
+                CommandChannels["part"].Add(ns);
+            }
+
+            bot.Part(c);
         }
     }
 }

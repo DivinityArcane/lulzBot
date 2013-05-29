@@ -20,10 +20,11 @@ namespace lulzbot.Extensions
                 ConIO.Write(String.Format("<{0}> {1}", packet.Arguments["from"], packet.Body), Tools.FormatChat(packet.Parameter));
 
             // Pong!
-            if (bot._pinged != 0 && packet.Body == "Ping..." && packet.Arguments["from"].ToLower() == bot.Config.Username.ToLower())
+            if (bot.PingTimer.IsRunning && packet.Body == "Ping..." && packet.Arguments["from"].ToLower() == bot.Config.Username.ToLower())
             {
-                bot.Say(packet.Parameter, String.Format("Pong! {0}ms.", Bot.EpochTimestampMS - bot._pinged));
-                bot._pinged = 0;
+                bot.PingTimer.Stop();
+                bot.Say(packet.Parameter, String.Format("Pong! {0}ms.", bot.PingTimer.ElapsedMilliseconds));
+                bot.PingTimer.Reset();
             }
 
             // Check for trigcheck, etc

@@ -7,7 +7,7 @@ namespace lulzbot.Extensions
         public static void evt_part (Bot bot, dAmnPacket packet)
         {
             // Don't display DataShare messages.
-            if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel))) return;
+            if (Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel))) return;
 
             if (packet.Arguments["e"] == "ok")
             {

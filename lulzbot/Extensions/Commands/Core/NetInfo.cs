@@ -32,6 +32,7 @@ namespace lulzbot.Extensions
             output += String.Format("&raquo; Data recv : {0}\n", Tools.FormatBytes(Program.bytes_received, verbose));
             output += String.Format("&raquo; Packets   : OUT: {0}\t\tIN: {1}\n", Program.packets_out, Program.packets_in);
             output += String.Format("&raquo; Queues    : OUT: {0}\t\tIN: {1}\n", bot.QueuedOut, bot.QueuedIn);
+            output += String.Format("&raquo; Disconnects: {0}\n", Program.Disconnects);
             output += "</bcode>";
 
             bot.Say(ns, output);

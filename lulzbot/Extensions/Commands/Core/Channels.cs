@@ -11,17 +11,25 @@ namespace lulzbot.Extensions
 
             List<String> chans = new List<String>();
 
-            foreach (var cd in Core.ChannelData.Values)
-                if (cd.Name != "chat:DataShare")
-                    chans.Add(Tools.FormatNamespace(cd.Name, Types.NamespaceFormat.Channel));
+            try
+            {
+                foreach (var cd in Core.ChannelData.Values)
+                    if (cd.Name != "chat:DataShare" && !cd.Name.StartsWith("pchat"))
+                        chans.Add(Tools.FormatNamespace(cd.Name, Types.NamespaceFormat.Channel));
 
-            chans.Sort();
+                chans.Sort();
 
-            output += String.Format("<b>&raquo; I am currently residing in {0} channel{1}:</b><br/>", chans.Count, chans.Count == 1 ? "" : "s");
+                output += String.Format("<b>&raquo; I am currently residing in {0} channel{1}:</b><br/>", chans.Count, chans.Count == 1 ? "" : "s");
 
-            output += String.Format("<b> &middot; [</b>{0}<b>]</b>", String.Join("<b>]</b>, <b>[</b>", chans));
+                output += String.Format("<b> &middot; [</b>{0}<b>]</b>", String.Join("<b>]</b>, <b>[</b>", chans));
 
-            bot.Act(ns, output);
+                bot.Act(ns, output);
+            }
+            catch (Exception Ex)
+            {
+                if (Program.Debug)
+                    bot.Say(ns, "Error: " + Ex.Message);
+            }
         }
     }
 }

@@ -143,16 +143,31 @@ namespace lulzbot.Extensions
 
         public static void Say (String chan, String msg)
         {
+            var c = Tools.FormatNamespace(chan, NamespaceFormat.Channel).ToLower();
+            if (
+                Program.OfficialChannels.Contains(c) ||
+                Program.NoDisplay.Contains(c)) return;
+
             Program.Bot.Say(chan, msg);
         }
 
         public static void NPSay (String chan, String msg)
         {
+            var c = Tools.FormatNamespace(chan, NamespaceFormat.Channel).ToLower();
+            if (
+                Program.OfficialChannels.Contains(c) ||
+                Program.NoDisplay.Contains(c)) return;
+
             Program.Bot.NPSay(chan, msg);
         }
 
         public static void Act (String chan, String msg)
         {
+            var c = Tools.FormatNamespace(chan, NamespaceFormat.Channel).ToLower();
+            if (
+                Program.OfficialChannels.Contains(c) ||
+                Program.NoDisplay.Contains(c)) return;
+
             Program.Bot.Act(chan, msg);
         }
 

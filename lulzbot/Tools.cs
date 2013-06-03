@@ -9,6 +9,7 @@ using System.Net.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace lulzbot
 {
@@ -783,6 +784,69 @@ namespace lulzbot
             }
         }
 
+        private static Regex _devinfo_regex = new Regex(@"(<title>(?<username>[^\s]+) on deviantART</title>)|(<strong>(?<number>[^<]+)</strong>(?<type>[^\t]+))|(<div id=""super-secret-\w+""[^>]*>(?<tagline>[^<]+))|(<d. class=""f h"">(?<item>[^<]+)</d.>)|(<div>Deviant for (?<years>[^<]+)</div><div>(?<member>[^<]+)</div>)", RegexOptions.Compiled);
+        private static Regex _multispace_regex = new Regex(@"\s+", RegexOptions.Compiled);
+        public static Dictionary<string, string> DeviantInfo (string who)
+        {
+            var page = GrabPage("http://" + who + ".deviantart.com/");
+
+            if (page == null) return null;
+
+            var data    = new Dictionary<string, string>();
+            var lines   = page.Split('\n');
+            var type    = 0;
+
+            try
+            {
+                foreach (var line in lines)
+                {
+                    if (line.Length > 0)
+                    {
+                        var match = _devinfo_regex.Match(line);
+
+                        if (!match.Success) continue;
+
+                        if (match.Groups["username"].Success)
+                        {
+                            data.Add("Username", match.Groups["username"].Value.Replace("#", ""));
+                        }
+                        else if (match.Groups["tagline"].Success)
+                        {
+                            data.Add("Tagline", match.Groups["tagline"].Value);
+                        }
+                        else if (match.Groups["item"].Length > 0)
+                        {
+                            if (match.Groups["item"].Captures.Count > 1 && match.Groups["item"].Captures[0].Value.Length > 5 && match.Groups["item"].Captures[0].Value.Length <= 32)
+                                data.Add(match.Groups["item"].Captures[0].Value, match.Groups["item"].Captures[1].Value);
+                            else
+                            {
+                                var t = (type == 0 ? "Type" : type == 1 ? "Name" : "ASL");
+
+                                if (!data.ContainsKey(t))
+                                    data.Add(t, match.Groups["item"].Value);
+                            }
+                        }
+                        else if (match.Groups["number"].Success)
+                        {
+                            var nt = StripTags(match.Groups["type"].Captures[0].Value.Trim());
+                            if (nt.Length < 1) continue;
+                            if (nt.Contains("   ")) nt = nt.Substring(0, nt.IndexOf("   "));
+                            if (nt.Length > 5 && nt.Length <= 32 && !data.ContainsKey(nt))
+                                data.Add(nt, match.Groups["number"].Value);
+                        }
+                        else if (match.Groups["years"].Success)
+                        {
+                            data.Add("Joined", "Deviant for " + _multispace_regex.Replace(match.Groups["years"].Value, " "));
+                            data.Add("Member", match.Groups["member"].Value);
+                        }
+                    }
+                }
+            }
+            catch { return null; }
+
+            return data;
+        }
+
         private static bool ValidateRemoteCertificate (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors policyErrors)
         {
             return true;
@@ -790,7 +854,7 @@ namespace lulzbot
 
         public static String RegexReplace (String haystack, String what, String with)
         {
-            return System.Text.RegularExpressions.Regex.Replace(haystack, what, with);
+            return Regex.Replace(haystack, what, with);
         }
     }
 }

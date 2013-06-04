@@ -68,12 +68,9 @@ namespace lulzbot
             }
 
             // Six args
-            // None
-
-            // Seven args
             foreach (String lump in new List<String>() { "thumb" })
             {
-                lump_arg_count.Add(lump, 7);
+                lump_arg_count.Add(lump, 6);
             }
         }
 

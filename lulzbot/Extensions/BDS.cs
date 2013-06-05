@@ -1054,9 +1054,10 @@ namespace lulzbot.Extensions
                             //  BDS:BOTCHECK:ERROR:INVALID_RESPONSE_HASH
 
                             // Police bot stuff.
-                            if (ns == "chat:DSGateway" && IsPoliceBot(username, ns))
+                            if ((ns == "chat:DSGateway" || ns == "chat:DataShare") && IsPoliceBot(username, ns))
                             {
-                                bot.NPSay(ns, "BDS:BOTCHECK:DENIED:" + from + ",Invalid BDS:BOTCHECK");
+                                if (ns == "chat:DSGateway")
+                                    bot.NPSay(ns, "BDS:BOTCHECK:DENIED:" + from + ",Invalid BDS:BOTCHECK");
 
                                 ClearKickTimers(from);
                                 KickAfter(ns, from, 30, "No response to or invalid BDS:BOTCHECK. If you are not a bot, please do not join this room. Thanks.");
@@ -1068,9 +1069,10 @@ namespace lulzbot.Extensions
                         else
                         {
                             // Police bot stuff.
-                            if (ns == "chat:DSGateway" && IsPoliceBot(username, ns))
+                            if ((ns == "chat:DSGateway" || ns == "chat:DataShare") && IsPoliceBot(username, ns))
                             {
-                                bot.NPSay(ns, "BDS:BOTCHECK:OK:" + from);
+                                if (ns == "chat:DSGateway")
+                                    bot.NPSay(ns, "BDS:BOTCHECK:OK:" + from);
 
                                 ClearKickTimers(from);
                                 KickAfter(ns, from, 60, "No response to or invalid BDS:BOTCHECK. If you are not a bot, please do not join this room. Thanks.");

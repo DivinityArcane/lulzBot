@@ -87,7 +87,7 @@ namespace lulzbot.Extensions
                 ConIO.Write(String.Format("** {0}{1} joined. [{2}]", packet.Arguments["symbol"], packet.SubParameter, packet.Arguments["pc"]), Tools.FormatChat(packet.Parameter));
 
             // Police bot stuff.
-            if (packet.Parameter == "chat:DSGateway" && BDS.IsPoliceBot(bot.Config.Username, packet.Parameter))
+            if ((packet.Parameter == "chat:DSGateway" || packet.Parameter == "chat:DataShare") && BDS.IsPoliceBot(bot.Config.Username, packet.Parameter))
             {
                 bot.NPSay(packet.Parameter, "BDS:BOTCHECK:DIRECT:" + packet.SubParameter);
 
@@ -127,14 +127,6 @@ namespace lulzbot.Extensions
             {
                 ConIO.Write(String.Format("** {0} left.", packet.SubParameter), Tools.FormatNamespace(packet.Parameter, Types.NamespaceFormat.PrivateChat));
                 return;
-            }
-
-            // Police bot stuff.
-            if (packet.Parameter == "chat:DSGateway" && BDS.IsPoliceBot(bot.Config.Username, packet.Parameter))
-            {
-                bot.NPSay(packet.Parameter, "BDS:BOTCHECK:DIRECT:" + packet.SubParameter);
-
-                BDS.ClearKickTimers(packet.SubParameter);
             }
 
             // Don't display DataShare messages.

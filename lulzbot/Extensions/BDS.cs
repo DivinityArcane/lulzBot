@@ -29,7 +29,8 @@ namespace lulzbot.Extensions
         public static string syncwith;
         public static Stopwatch syncwatch;
         private static string syncrns;
-        private static int synced = 0;
+        private static int bots_synced = 0;
+        private static int clients_synced = 0;
 
         /// <summary>
         /// Set this to false to overwrite automated saving of the database.
@@ -803,11 +804,20 @@ namespace lulzbot.Extensions
                     }
                     else if (bits[2] == "BEGIN" && ns.StartsWith("pchat:") && syncing && ns.ToLower().Contains(syncwith) && from.ToLower() != username.ToLower())
                     {
-                        synced = 0;
+                        bots_synced = 0;
+                        clients_synced = 0;
                         foreach (var x in _botinfo_database.Values)
                         {
                             bot.NPSay(ns, String.Format("BDS:SYNC:INFO:{0},{1},{2},{3}/{4},{5},{6}", x.Name, x.Owner, x.Type, x.Version, x.BDSVersion, x.Modified, x.Trigger));
-                            synced++;
+                            bots_synced++;
+
+                            //if (synced % 25 == 0)
+                            System.Threading.Thread.Sleep(10);
+                        }
+                        foreach (var x in _clientinfo_database.Values)
+                        {
+                            bot.NPSay(ns, String.Format("BDS:SYNC:CLIENTINFO:{0},{1},{2}/{3},{4}", x.Name, x.Type, x.Version, x.BDSVersion, x.Modified));
+                            clients_synced++;
 
                             //if (synced % 25 == 0)
                             System.Threading.Thread.Sleep(10);
@@ -816,7 +826,8 @@ namespace lulzbot.Extensions
                         bot.NPSay(ns, "BDS:LINK:CLOSED");
                         bot.Part(ns);
                         syncwith = "";
-                        synced = 0;
+                        bots_synced = 0;
+                        clients_synced = 0;
                     }
                     else if (bits.Length == 4 && bits[2] == "RESPONSE")
                     {
@@ -844,10 +855,11 @@ namespace lulzbot.Extensions
                         if (syncrns != "")
                         {
                             syncwatch.Stop();
-                            bot.Say(syncrns, String.Format("<b>&raquo; Finished syncing for {0} bot{1} took <abbr title=\"{2}\">{3}</abbr></b>", synced, synced == 1 ? "" : "s", syncwatch.Elapsed, Tools.FormatTime((int)syncwatch.Elapsed.TotalSeconds)));
+                            bot.Say(syncrns, String.Format("<b>&raquo; Finished syncing for {0} bot{1} and {2} client{3} took <abbr title=\"{4}\">{5}</abbr></b>", bots_synced, bots_synced == 1 ? "" : "s", clients_synced, clients_synced == 1 ? "" : "s", syncwatch.Elapsed, Tools.FormatTime((int)syncwatch.Elapsed.TotalSeconds)));
                             syncwith = "";
                             syncrns = "";
-                            synced = 0;
+                            bots_synced = 0;
+                            clients_synced = 0;
                             bot.NPSay(ns, "BDS:LINK:CLOSED");
                             bot.Part(ns);
                         }
@@ -907,7 +919,49 @@ namespace lulzbot.Extensions
                         if (Program.Debug)
                             ConIO.Write("Updated information for bot: " + data[0], "BDS");
 
-                        synced++;
+                        bots_synced++;
+                    }
+
+                    else if (bits.Length >= 4 && bits[2] == "CLIENTINFO")
+                    {
+                        if (!bits[3].Contains(","))
+                            return;
+
+                        String input = String.Empty;
+
+                        for (byte b = 3; b < bits.Length; b++)
+                        {
+                            if (b >= bits.Length - 1)
+                                input += bits[b];
+                            else
+                                input += bits[b] + ":";
+                        }
+
+                        String[] data = input.Split(',');
+
+                        if (data.Length < 4 || !data[2].Contains("/"))
+                            return;
+
+                        String who = data[0].ToLower();
+                        String[] versions = data[2].Split('/');
+                        String clientver = versions[0];
+                        ulong ts = Bot.EpochTimestamp;
+                        double bdsver = 0.0;
+
+                        if (!Double.TryParse(versions[1], out bdsver))
+                            bdsver = 0.2;
+
+                        Types.ClientInfo client_info = new Types.ClientInfo(data[0], data[1], clientver, bdsver, ts);
+
+                        if (!_clientinfo_database.ContainsKey(who))
+                            _clientinfo_database.Add(who, client_info);
+                        else
+                            _clientinfo_database[who] = client_info;
+
+                        if (Program.Debug)
+                            ConIO.Write("Updated information for client: " + data[0], "BDS");
+
+                        clients_synced++;
                     }
                 }
 

@@ -174,7 +174,7 @@ namespace lulzbot.Extensions
                             output += String.Format("<b>Bot owner:</b> :dev{0}:<br/>", info.Owner);
                             output += String.Format("<b>Bot trigger:</b> <b><code>{0}</code></b><br/>", info.Trigger.Replace("&", "&amp;"));
                             output += String.Format("<b>BDS version:</b> {0}<br/>", info.BDSVersion);
-                            output += String.Format("<b>Last modified:</b> {0} ago", Tools.FormatTime((int)ts));
+                            output += String.Format("<b>Last modified:</b> {0} ago", Tools.FormatTime(ts));
                             bot.Say(ns, output);
                         }
                         else if (_clientinfo_database.ContainsKey(args[2].ToLower()))
@@ -442,7 +442,7 @@ namespace lulzbot.Extensions
                             output += String.Format("<b>Client type:</b> {0}<br/>", info.Type);
                             output += String.Format("<b>Client version:</b> {0}<br/>", info.Version);
                             output += String.Format("<b>BDS version:</b> {0}<br/>", info.BDSVersion);
-                            output += String.Format("<b>Last modified:</b> {0} ago", Tools.FormatTime((int)ts));
+                            output += String.Format("<b>Last modified:</b> {0} ago", Tools.FormatTime(ts));
                             bot.Say(ns, output);
                         }
                         else if (_botinfo_database.ContainsKey(args[2].ToLower()))
@@ -855,7 +855,7 @@ namespace lulzbot.Extensions
                         if (syncrns != "")
                         {
                             syncwatch.Stop();
-                            bot.Say(syncrns, String.Format("<b>&raquo; Finished syncing for {0} bot{1} and {2} client{3} took <abbr title=\"{4}\">{5}</abbr></b>", bots_synced, bots_synced == 1 ? "" : "s", clients_synced, clients_synced == 1 ? "" : "s", syncwatch.Elapsed, Tools.FormatTime((int)syncwatch.Elapsed.TotalSeconds)));
+                            bot.Say(syncrns, String.Format("<b>&raquo; Finished syncing for {0} bot{1} and {2} client{3} took <abbr title=\"{4}\">{5}</abbr></b>", bots_synced, bots_synced == 1 ? "" : "s", clients_synced, clients_synced == 1 ? "" : "s", syncwatch.Elapsed, Tools.FormatTime((ulong)syncwatch.Elapsed.TotalSeconds)));
                             syncwith = "";
                             syncrns = "";
                             bots_synced = 0;
@@ -1520,7 +1520,7 @@ namespace lulzbot.Extensions
                                     bool ok = int.TryParse(pars[2], out secs);
                                     if (ok)
                                     {
-                                        ConIO.Notice(String.Format("A new version of lulzBot is available: version {0} (Released {1} ago)", pars[1], Tools.FormatTime(Tools.Timestamp() - secs)));
+                                        ConIO.Notice(String.Format("A new version of lulzBot is available: version {0} (Released {1} ago)", pars[1], Tools.FormatTime((ulong)(Tools.Timestamp() - secs))));
                                         //ConIO.Notice(String.Format("To update, use the update command."));
                                     }
                                 }

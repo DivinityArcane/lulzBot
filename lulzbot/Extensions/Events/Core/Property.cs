@@ -121,9 +121,9 @@ namespace lulzbot.Extensions
                             wd.Connections.Add(new WhoisConnection() { ConnectionID = conID });
                         }
                         else if (data[i].StartsWith("online="))
-                            int.TryParse(data[i].Substring(7), out wd.Connections[conID].Online);
+                            ulong.TryParse(data[i].Substring(7), out wd.Connections[conID].Online);
                         else if (data[i].StartsWith("idle="))
-                            int.TryParse(data[i].Substring(5), out wd.Connections[conID].Idle);
+                            ulong.TryParse(data[i].Substring(5), out wd.Connections[conID].Idle);
                         else if (data[i].StartsWith("ns ") && data[i] != "ns chat:DataShare")
                             wd.Connections[conID].Channels.Add("#" + data[i].Substring(8));
                     }

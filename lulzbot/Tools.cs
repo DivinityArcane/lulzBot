@@ -485,14 +485,32 @@ namespace lulzbot
         /// </summary>
         /// <param name="seconds">Amount of seconds</param>
         /// <returns>Human readable string</returns>
-        public static String FormatTime (int seconds)
+        public static String FormatTime (ulong seconds)
         {
             String output = String.Empty;
 
             if (seconds <= 0)
                 return "0 seconds";
 
-            int years = 0, weeks = 0, days = 0, hours = 0, minutes = 0;
+            int millennia = 0, centuries = 0, decades = 0, years = 0, weeks = 0, days = 0, hours = 0, minutes = 0;
+
+            while (seconds >= 31556926000)
+            {
+                ++millennia;
+                seconds -= 31556926000;
+            }
+
+            while (seconds >= 3155692600)
+            {
+                ++centuries;
+                seconds -= 3155692600;
+            }
+
+            while (seconds >= 315569260)
+            {
+                ++decades;
+                seconds -= 315569260;
+            }
 
             while (seconds >= 31556926)
             {
@@ -524,6 +542,15 @@ namespace lulzbot
                 seconds -= 60;
             }
 
+            if (millennia > 0)
+                output += millennia + " millenni" + (millennia == 1 ? "um" : "a") + ", ";
+
+            if (centuries > 0)
+                output += centuries + " centur" + (centuries == 1 ? "y" : "ies") + ", ";
+
+            if (decades > 0)
+                output += decades + " decade" + (decades == 1 ? "" : "s") + ", ";
+
             if (years > 0)
                 output += years + " year" + (years == 1 ? "" : "s") + ", ";
 
@@ -546,6 +573,8 @@ namespace lulzbot
 
             return output;
         }
+
+        public static String FormatTime (int seconds) { return FormatTime((ulong)seconds); }
 
         /// <summary>
         /// Formats a specified amount of bytes into a human readable string.

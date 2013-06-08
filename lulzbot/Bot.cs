@@ -62,11 +62,11 @@ namespace lulzbot
         /// <summary>
         /// Bot uptime in seconds.
         /// </summary>
-        public int uptime
+        public ulong uptime
         {
             get
             {
-                return Convert.ToInt32((DateTime.UtcNow - Program.StartTime).TotalSeconds);
+                return Convert.ToUInt64((DateTime.UtcNow - Program.StartTime).TotalSeconds);
             }
 
             set { }

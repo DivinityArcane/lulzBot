@@ -158,7 +158,8 @@ namespace lulzbot.Types
 
     public class WhoisConnection
     {
-        public int ConnectionID = 0, Online = 0, Idle = 0;
+        public int ConnectionID = 0;
+        public ulong Online = 0, Idle = 0;
         public List<String> Channels = new List<String>();
     }
 

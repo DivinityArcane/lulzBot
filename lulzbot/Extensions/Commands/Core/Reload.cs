@@ -12,7 +12,7 @@ namespace lulzbot.Extensions
             Events.ClearExternalEvents();
             Bot.Extensions.Load();
 
-            bot.Say(ns, "<b>&raquo; Done!</b> Took " + Tools.FormatTime((int)(Bot.EpochTimestampMS - start) / 1000));
+            bot.Say(ns, "<b>&raquo; Done!</b> Took " + Tools.FormatTime((ulong)(Bot.EpochTimestampMS - start) / 1000));
         }
     }
 }

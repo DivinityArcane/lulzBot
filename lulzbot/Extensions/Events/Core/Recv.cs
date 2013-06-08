@@ -105,7 +105,6 @@ namespace lulzbot.Extensions
                     member.Name = packet.SubParameter;
                     member.Privclass = packet.Arguments["pc"];
                     member.RealName = packet.Arguments["realname"];
-                    member.TypeName = packet.Arguments["typename"];
                     member.Symbol = packet.Arguments["symbol"];
                     member.GPC = packet.Arguments["gpc"];
                     member.ConnectionCount = 1;

@@ -86,7 +86,7 @@ namespace lulzbot.Extensions
 
                         member.Symbol = data[++x].Substring(7);
                         member.RealName = data[++x].Substring(9);
-                        member.TypeName = data[++x].Substring(9);
+                        //member.TypeName = data[++x].Substring(9);
                         member.GPC = data[++x].Substring(4);
                         member.ConnectionCount = 1;
 
@@ -108,7 +108,7 @@ namespace lulzbot.Extensions
                     //wd.Symbol   = data[1].Substring(7);
                     wd.RealName = data[2].Substring(9);
                     //wd.TypeName = data[3].Substring(9);
-                    wd.GPC = data[4].Substring(4);
+                    wd.GPC = data[3].Substring(4);
 
                     int conID = 0;
                     wd.Connections.Add(new WhoisConnection());

@@ -116,7 +116,7 @@ namespace lulzbot.Types
         public String Name      = String.Empty;
         public String Symbol    = String.Empty;
         public String RealName  = String.Empty;
-        public String TypeName  = String.Empty;
+        //public String TypeName  = String.Empty;
         public String GPC       = String.Empty;
         public String Privclass = String.Empty;
         public int ConnectionCount = 0;
@@ -167,7 +167,7 @@ namespace lulzbot.Types
         public String Name      = String.Empty;
         public String Symbol    = String.Empty;
         public String RealName  = String.Empty;
-        public String TypeName  = String.Empty;
+        //public String TypeName  = String.Empty;
         public String GPC       = String.Empty;
         public List<WhoisConnection> Connections = new List<WhoisConnection>();
     }

@@ -113,7 +113,7 @@ namespace lulzbot.Extensions
                     int conID = 0;
                     wd.Connections.Add(new WhoisConnection());
 
-                    for (int i = 7; i < data.Length; i++)
+                    for (int i = 6; i < data.Length; i++)
                     {
                         if (data[i] == "conn")
                         {

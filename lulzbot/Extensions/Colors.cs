@@ -28,7 +28,7 @@ namespace lulzbot.Extensions
         {
             var info = new ExtensionInfo("Colors", "DivinityArcane", "1.0");
 
-            Events.AddCommand("colors", new Command(this, "cmd_colors", "DivinityArcane", 100, "Changes the bot's colors.", ext: info));
+            Events.AddCommand("colors", new Command(this, "cmd_colors", "DivinityArcane", 100, "Changes the bot's colors.", "[trig]colors on/off<br/>[trig]colors username/message #html_color_code", ext: info));
 
             // Load saved data, if we can.
             Config = Storage.Load<ColorConfig>("colors");

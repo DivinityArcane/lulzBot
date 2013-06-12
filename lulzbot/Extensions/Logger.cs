@@ -19,7 +19,7 @@ namespace lulzbot.Extensions
             var info = new ExtensionInfo("Logger", "DivinityArcane; OrrinFox", "1.0");
 
             Events.AddEvent("log_msg", new Event(this, "handle_log_msg", "Handles logging messages.", ext: info));
-            Events.AddCommand("logs", new Command(this, "cmd_logs", "DivinityArcane", 100, "Manages logging.", ext: info));
+            Events.AddCommand("logs", new Command(this, "cmd_logs", "DivinityArcane", 100, "Manages logging.", "[trig]logs enable/disable<br/>[trig]logs blacklist<br/>[trig]logs blacklist add/del #chan", ext: info));
 
             // Load saved data, if we can.
             Config = Storage.Load<LogConfig>("logging");
@@ -67,7 +67,7 @@ namespace lulzbot.Extensions
 
         public void cmd_logs (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
         {
-            String helpmsg = String.Format("<b>&raquo; Usage: {0}logs enable/disable{0}logs blacklist{0}logs blacklist add/remove #channel", "<br/> <b>&middot;</b> " + bot.Config.Trigger);
+            String helpmsg = String.Format("<b>&raquo; Usage:</b> {0}logs enable/disable{0}logs blacklist{0}logs blacklist add/del #channel", "<br/> <b>&middot;</b> " + bot.Config.Trigger);
 
             if (args.Length == 1)
                 bot.Say(ns, helpmsg);
@@ -123,7 +123,7 @@ namespace lulzbot.Extensions
 
                         bot.Say(ns, "<b>&raquo; Added channel to blacklist:</b> " + args[3]);
                     }
-                    else if (par == "remove")
+                    else if (par == "del")
                     {
                         if (!Config.BlackList.Contains(chan))
                         {

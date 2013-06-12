@@ -97,7 +97,7 @@ namespace lulzbot.Extensions
                                     BindCommand cmd_info = potential as BindCommand;
                                     if (cmd_info != null)
                                     {
-                                        Events.AddExternalCommand(cmd_info.Command, new Command(class_instance, method.Name, ext_info.Author, cmd_info.Privileges, cmd_info.Description, ext_info));
+                                        Events.AddExternalCommand(cmd_info.Command, new Command(class_instance, method.Name, ext_info.Author, cmd_info.Privileges, cmd_info.Description, cmd_info.Usage, ext_info));
                                     }
                                 }
                             }

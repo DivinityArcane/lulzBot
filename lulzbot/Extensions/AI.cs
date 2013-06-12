@@ -40,7 +40,7 @@ namespace lulzbot.Extensions
 
             var info = new ExtensionInfo("AI", "DivinityArcane", "1.0");
 
-            Events.AddCommand("ai", new Command(this, "cmd_ai", "DivinityArcane", 100, "AI settings.", ext: info));
+            Events.AddCommand("ai", new Command(this, "cmd_ai", "DivinityArcane", 100, "AI settings.", "[trig]ai on/off<br/>[trig]ai enable/disable #chan", ext: info));
             Events.AddEvent("recv_msg", new Event(this, "e_onmsg", "Parses and handles AI requests.", "AI", ext: info));
 
             // Load saved data, if we can.

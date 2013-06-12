@@ -120,7 +120,7 @@ namespace lulzbot
         public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations", "#damnidlers" };
         public static List<String> NoDisplay        = new List<String>() { "#datashare", "#dsgateway" };
         public const String BotName                 = "lulzBot";
-        public const String Version                 = "1.16";
+        public const String Version                 = "1.17";
         public const String ReleaseName             = "Synergy";
 
         static void Main (string[] args)
@@ -293,6 +293,22 @@ namespace lulzbot
             {
                 ConIO.Notice(uptodate);
                 ConIO.Write("To update, check http://j.mp/15ikMg1 or use " + Config.Trigger + "update");
+                ConIO.Warning("LulzBot", "This bot is out of date, and may not work correctly. Either update the bot or confirm below.");
+                
+                var ans = ConIO.Read("Continue starting the bot anyway [y/n]").ToLower();
+                while (ans != "y" && ans != "n")
+                {
+                    ConIO.Notice("Invalid input. Please answer with Y or N.");
+                    ans = ConIO.Read("Continue starting the bot anyway").ToLower();
+                }
+
+                if (ans == "n")
+                {
+                    ConIO.Write("Shutting down.");
+                    Environment.Exit(0);
+                }
+
+                ConIO.Write("Starting anyway. You've been warned!");
             }
 
             if (pk != null) Config.Authtoken = pk;

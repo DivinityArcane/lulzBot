@@ -44,11 +44,11 @@ namespace lulzbot.Extensions
             Events.AddEvent("recv_msg", new Event(this, "ParseBDS", "Parses BDS messages.", ext: info));
             Events.AddEvent("join", new Event(this, "evt_onjoin", "Handles BDS related actions on joining datashare.", ext: info));
 
-            Events.AddCommand("bot", new Command(this, "cmd_bot", "DivinityArcane", 25, "Gets information from the database.", ext: info));
-            Events.AddCommand("client", new Command(this, "cmd_client", "DivinityArcane", 25, "Gets information from the database.", ext: info));
-            Events.AddCommand("bds", new Command(this, "cmd_bds", "DivinityArcane", 75, "Manage BDS database.", ext: info));
-            Events.AddCommand("translate", new Command(this, "cmd_translate", "DivinityArcane", 25, "Translates text using BDS.", ext: info));
-            Events.AddCommand("police", new Command(this, "cmd_police", "DivinityArcane", (int)Privs.Admins, "Changes policebot status.", info));
+            Events.AddCommand("bot", new Command(this, "cmd_bot", "DivinityArcane", 25, "Gets information from the database.", "[trig]bot info username<br/>[trig]bot count<br/>[trig]bot online <i>type</i><br/>[trig]bot owner username <i>online</i><br/>[trig]bot trigger trig", ext: info));
+            Events.AddCommand("client", new Command(this, "cmd_client", "DivinityArcane", 25, "Gets information from the database.", "[trig]client info username<br/>[trig]client count<br/>[trig]client online <i>type</i>", ext: info));
+            Events.AddCommand("bds", new Command(this, "cmd_bds", "DivinityArcane", 75, "Manage BDS database.", "[trig]bds save<br/>[trig]bds sync username<br/>[trig]bds update", ext: info));
+            Events.AddCommand("translate", new Command(this, "cmd_translate", "DivinityArcane", 25, "Translates text using BDS.", "[trig]translate languages<br/>[trig]translate from_lang to_lang msg", ext: info));
+            Events.AddCommand("police", new Command(this, "cmd_police", "DivinityArcane", 99, "Changes policebot status.", "[trig]police status<br/>[trig]police on/off", ext: info));
 
             if (Program.Debug)
                 ConIO.Write("Loading databases...", "BDS");
@@ -602,6 +602,12 @@ namespace lulzbot.Extensions
                 }
                 else if (arg == "update")
                 {
+                    if (!IsPoliceBot(bot.Config.Username))
+                    {
+                        bot.Say(ns, "<b>&raquo; Only policebots can do that.</b>");
+                        return;
+                    }
+
                     List<String> datas = new List<String>();
 
                     if (Core.ChannelData.ContainsKey("chat:datashare"))
@@ -1559,6 +1565,12 @@ namespace lulzbot.Extensions
 
             if (!KickTimers.ContainsKey(who.ToLower()))
                 KickTimers.Add(who.ToLower(), stamp);
+
+            else
+            {
+                ClearKickTimers(who);
+                KickTimers.Add(who.ToLower(), stamp);
+            }
         }
 
         public static void ClearKickTimers (string who)

@@ -369,6 +369,12 @@ namespace lulzbot
 
                     if (Core._disabled_extensions.Contains(callback.Extension.Name.ToLower())) return;
 
+                    if (cmd_args.Length >= 2 && (cmd_args[1] == "?" || cmd_args[1] == "-?"))
+                    {
+                        Program.Bot.Say(packet.Parameter, "<b>&raquo; Help for command <i>" + cmd_name.ToLower() + "</i>:</b><br/>" + callback.Help.Replace("[trig]", Program.Bot.Config.Trigger));
+                        return;
+                    }
+
                     // Access denied
                     if (!Users.CanAccess(from, callback.MinimumPrivs, cmd_name.ToLower()))
                         return;
@@ -416,6 +422,12 @@ namespace lulzbot
                 Command callback = _external_commands[cmd_name.ToLower()];
 
                 if (Core._disabled_extensions.Contains(callback.Extension.Name.ToLower())) return;
+
+                if (args.Length >= 2 && (args[1] == "?" || args[1] == "-?"))
+                {
+                    Program.Bot.Say(chan, "<b>&raquo; Help for command <i>" + cmd_name.ToLower() + "</i>:</b><br/>" + callback.Help.Replace("[trig]", Program.Bot.Config.Trigger));
+                    return;
+                }
 
                 // Access denied
                 if (!Users.CanAccess(from, callback.MinimumPrivs, cmd_name.ToLower()))

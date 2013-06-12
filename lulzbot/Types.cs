@@ -276,20 +276,29 @@ namespace lulzbot.Types
         public ExtensionInfo Extension = null;
 
         /// <summary>
+        /// Help/usage for the command.
+        /// </summary>
+        public String Help = String.Empty;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="class_obj">Class pointer (i.e. "this")</param>
         /// <param name="method_name">Callback method name</param>
         /// <param name="desc">Description</param>
         public Command (object class_obj, String method_name,
-            String author = "", int privs = 25, String desc = "", ExtensionInfo ext = null)
+            String author = "", int privs = 25, String desc = "", String help = "", ExtensionInfo ext = null)
         {
             Class = class_obj;
             Method = Class.GetType().GetMethod(method_name);
             Author = author;
             Description = desc;
             MinimumPrivs = privs;
+            Help = help.Length == 0 ? "No help available." : help;
             Extension = ext;
+
+            if (String.IsNullOrWhiteSpace(Help))
+                Help = "No help available.";
         }
     }
     #endregion Events
@@ -316,9 +325,9 @@ namespace lulzbot.Extensions
     [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true)]
     public class BindCommand : System.Attribute
     {
-        public String Command, Description = String.Empty;
+        public String Command, Description = String.Empty, Usage = String.Empty;
         public int Privileges;
-        public BindCommand (String cmd, String desc, Privs privs)
+        public BindCommand (String cmd, String desc, Privs privs, String usage = "")
         {
             Command = cmd;
             Description = desc;

@@ -332,6 +332,7 @@ namespace lulzbot.Extensions
             Command = cmd;
             Description = desc;
             Privileges = (int)privs;
+            Usage = usage;
         }
     }
 

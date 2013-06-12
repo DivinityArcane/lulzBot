@@ -59,7 +59,7 @@ namespace lulzbot.Extensions
             compilerParams.ReferencedAssemblies.Add("Newtonsoft.Json.dll");
             compilerParams.ReferencedAssemblies.Add("SRCDSQuery.dll");
             compilerParams.ReferencedAssemblies.Add("MCQuery.dll");
-            compilerParams.ReferencedAssemblies.Add("mysql.data.dll");
+            compilerParams.ReferencedAssemblies.Add("MySql.Data.dll");
 
             CompilerResults results = codeDomProvider.CompileAssemblyFromFile(compilerParams, filename);
 

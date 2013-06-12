@@ -204,7 +204,7 @@ namespace lulzbot
                 // Go back to waiting.
                 //wait_event.Reset();
 
-                Thread.Sleep(1);
+                Thread.Sleep(Program.OldPC ? 55 : 1);
             }
         }
 

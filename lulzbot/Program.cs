@@ -22,6 +22,7 @@ namespace lulzbot
 
         // Are we in debug mode?
         public static bool Debug = false;
+        public static bool OldPC = false;
 
         // This is our configuration.
         private static Config Config = new Config();
@@ -192,6 +193,11 @@ namespace lulzbot
                     {
                         ConIO.Write("Debug mode is enabled!");
                         Debug = true;
+                    }
+                    else if (arg == "--oldpc")
+                    {
+                        ConIO.Write("Upping loop delay.");
+                        OldPC = true;
                     }
                     else if (arg == "--help")
                     {

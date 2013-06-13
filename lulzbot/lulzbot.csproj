@@ -181,6 +181,7 @@
     <Compile Include="Extensions\Commands\Core\Chat.cs" />
     <Compile Include="Extensions\Commands\Core\Clear.cs" />
     <Compile Include="Extensions\Commands\Core\Command.cs" />
+    <Compile Include="Extensions\Commands\Core\Credits.cs" />
     <Compile Include="Extensions\Commands\Core\CTrig.cs" />
     <Compile Include="Extensions\Commands\Core\Cycle.cs" />
     <Compile Include="Extensions\Commands\Core\Debug.cs" />

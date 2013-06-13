@@ -57,6 +57,7 @@ namespace lulzbot.Extensions
             Events.AddCommand("command", new Command(this, "cmd_command", "DivinityArcane", 100, "Disables certain commands.", "[trig]command list<br/>[trig]command enable/disable command_name", ext: info));
             Events.AddCommand("commands", new Command(this, "cmd_commands", "DivinityArcane", 25, "Displays commands available to the user.", "[trig]commands <i>all/mods</i>", ext: info));
             Events.AddCommand("ctrig", new Command(this, "cmd_ctrig", "DivinityArcane", 100, "Changes the bot's trigger.", "[trig]ctrig new_trigger", ext: info));
+            Events.AddCommand("credits", new Command(this, "cmd_credits", "DivinityArcane", 25, "Bot credits", ext: info));
             Events.AddCommand("debug", new Command(this, "cmd_debug", "DivinityArcane", 100, "Toggles debug mode.", "[trig]debug on/off", ext: info));
             Events.AddCommand("demote", new Command(this, "cmd_demote", "DivinityArcane", 75, "Demotes the specified user in the specified channel.", "[trig]demote <i>#chan</i> username <i>privclass</i>", ext: info));
             Events.AddCommand("disconnects", new Command(this, "cmd_disconnects", "DivinityArcane", 25, "Displays how many times the bot has disconnected since startup.", "", ext: info));

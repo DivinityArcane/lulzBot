@@ -15,8 +15,8 @@ namespace lulzbot.Extensions
         {
             var info = new ExtensionInfo("Users", "DivinityArcane", "1.0");
 
-            Events.AddCommand("users", new Command(this, "cmd_users", "DivinityArcane", 75, "Manages bot users.", "[trig]users list<br/>[trig]users add/del username <i>privs</i>", ext: info));
-            Events.AddCommand("access", new Command(this, "cmd_access", "DivinityArcane", 75, "Manages individual command access.", "[trig]access username list<br/>[trig]access username add/del command_name<br/>[trig]access username ban/unban command_name", ext: info));
+            Events.AddCommand("users", new Command(this, "cmd_users", "DivinityArcane", 99, "Manages bot users.", "[trig]users list<br/>[trig]users add/del username <i>privs</i>", ext: info));
+            Events.AddCommand("access", new Command(this, "cmd_access", "DivinityArcane", 99, "Manages individual command access.", "[trig]access username list<br/>[trig]access username add/del command_name<br/>[trig]access username ban/unban command_name", ext: info));
 
             userdata = Storage.Load<Dictionary<String, UserData>>("users");
 

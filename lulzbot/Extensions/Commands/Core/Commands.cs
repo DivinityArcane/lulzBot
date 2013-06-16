@@ -16,7 +16,7 @@ namespace lulzbot.Extensions
                 {
                     var output = "<b>&raquo; " + commands.Count + " command" + (commands.Count == 1 ? "" : "s") + "</b><br/>";
 
-                    var mods = new Dictionary<string, List<string>>();
+                    var mods = new Dictionary<int, List<string>>();
 
                     foreach (var cmd in commands)
                     {
@@ -24,7 +24,7 @@ namespace lulzbot.Extensions
 
                         if (info != null)
                         {
-                            var ps = ((Privs)info.MinimumPrivs).ToString();
+                            var ps = info.MinimumPrivs;
                             if (!mods.ContainsKey(ps))
                                 mods.Add(ps, new List<string>());
                             mods[ps].Add(cmd);
@@ -38,7 +38,7 @@ namespace lulzbot.Extensions
                         if (pair.Value != null)
                         {
                             pair.Value.Sort();
-                            output += "<br/> <b>&middot; " + pair.Key + ":</b> <b>[</b>" + String.Join("<b>] &middot; [</b>", pair.Value) + "<b>]</b>";
+                            output += "<br/> <b>&middot; " + ((Privs)pair.Key).ToString() + ":</b> <b>[</b>" + String.Join("<b>] &middot; [</b>", pair.Value) + "<b>]</b>";
                         }
                     }
 

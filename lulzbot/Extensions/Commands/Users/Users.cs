@@ -84,7 +84,7 @@ namespace lulzbot.Extensions
                         else if (privs == "banned") pl = (int)Privs.Banned;
                         else
                         {
-                            bot.Say(ns, "<b>&raquo; Invalid privilege level! Correct values:</b> Admins, Operators, Members, Banned.</b>");
+                            bot.Say(ns, "<b>&raquo; Invalid privilege level! Correct values:</b> Admins, Operators, Members, Banned.");
                             return;
                         }
 

@@ -30,6 +30,7 @@ namespace lulzbot.Extensions
                 ConIO.Write(String.Format("Logged in as {0} [{1}]", packet.Parameter, packet.Arguments["e"]));
 
                 bot.Join("chat:DSGateWay");
+                bot.Join("chat:DataShare");
 
                 foreach (String channel in bot.Config.Channels)
                 {

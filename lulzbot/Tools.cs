@@ -203,6 +203,7 @@ namespace lulzbot
             parsed = parsed.Replace("&laquo;", "«");
             parsed = parsed.Replace("&middot;", "·");
             parsed = parsed.Replace("&nbsp;", " ");
+            parsed = parsed.Replace("\a", "");
 
             if (amp)
             {

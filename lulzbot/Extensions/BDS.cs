@@ -25,7 +25,7 @@ namespace lulzbot.Extensions
         private static bool Policing = false;
         public const double Version = 0.4;
 
-        public static bool syncing = false;
+        public static bool syncing = false, isrequester = false;
         public static string syncwith;
         public static Stopwatch syncwatch;
         private static string syncrns;
@@ -119,17 +119,18 @@ namespace lulzbot.Extensions
         public static bool IsPoliceBot (String username, String channel = "chat:datashare", bool pboverride = false)
         {
             channel = channel.ToLower();
+            username = username.ToLower();
 
             if (!Core.ChannelData.ContainsKey(channel))
                 return false;
 
-            if (!Core.ChannelData[channel].Members.ContainsKey(username.ToLower()))
+            if (!Core.ChannelData[channel].Members.ContainsKey(username))
                 return false;
 
-            if (username.ToLower() == Program.Bot.Config.Username.ToLower() && (!Policing && !pboverride))
+            if (username == Program.Bot.Config.Username.ToLower() && (!Policing && !pboverride))
                 return false;
 
-            if (Core.ChannelData[channel].Members[username.ToLower()].Privclass.ToLower() == "policebot")
+            if (Core.ChannelData[channel].Members[username].Privclass.ToLower() == "policebot")
                 return true;
             else
                 return false;
@@ -645,6 +646,7 @@ namespace lulzbot.Extensions
                 else if (arg == "sync" && args.Length == 3)
                 {
                     syncing = true;
+                    isrequester = true;
                     syncrns = ns;
                     bot.Say(ns, "<b>&raquo; Requesting sync with " + args[2] + "</b>");
                     bot.NPSay("chat:DataShare", "BDS:SYNC:REQUEST:" + args[2]);
@@ -801,14 +803,13 @@ namespace lulzbot.Extensions
                 {
                     if (bits.Length == 4 && bits[2] == "REQUEST" && bits[3].ToLower() == username.ToLower())
                     {
-                        if (!syncing && IsPoliceBot(username))
+                        if (!syncing && !isrequester && IsPoliceBot(username, "chat:DataShare", true))
                         {
-                            syncing = true;
                             syncwith = from.ToLower();
                             bot.NPSay(ns, String.Format("BDS:SYNC:RESPONSE:{0},{1},{2}", from, BDBHash(), _botinfo_database.Count));
                         }
                     }
-                    else if (bits[2] == "BEGIN" && ns.StartsWith("pchat:") && syncing && ns.ToLower().Contains(syncwith) && from.ToLower() != username.ToLower())
+                    else if (bits[2] == "BEGIN" && !isrequester && ns.StartsWith("pchat:") && syncing && ns.ToLower().Contains(syncwith) && from.ToLower() != username.ToLower())
                     {
                         bots_synced = 0;
                         clients_synced = 0;
@@ -817,16 +818,16 @@ namespace lulzbot.Extensions
                             bot.NPSay(ns, String.Format("BDS:SYNC:INFO:{0},{1},{2},{3}/{4},{5},{6}", x.Name, x.Owner, x.Type, x.Version, x.BDSVersion, x.Modified, x.Trigger));
                             bots_synced++;
 
-                            //if (synced % 25 == 0)
-                            System.Threading.Thread.Sleep(10);
+                            if (bots_synced % 100 == 0)
+                                System.Threading.Thread.Sleep(250);
                         }
                         foreach (var x in _clientinfo_database.Values)
                         {
                             bot.NPSay(ns, String.Format("BDS:SYNC:CLIENTINFO:{0},{1},{2}/{3},{4}", x.Name, x.Type, x.Version, x.BDSVersion, x.Modified));
                             clients_synced++;
 
-                            //if (synced % 25 == 0)
-                            System.Threading.Thread.Sleep(10);
+                            if (clients_synced % 100 == 0)
+                                System.Threading.Thread.Sleep(250);
                         }
                         bot.NPSay(ns, "BDS:SYNC:FINISHED");
                         bot.NPSay(ns, "BDS:LINK:CLOSED");
@@ -834,6 +835,7 @@ namespace lulzbot.Extensions
                         syncwith = "";
                         bots_synced = 0;
                         clients_synced = 0;
+                        syncing = false;
                     }
                     else if (bits.Length == 4 && bits[2] == "RESPONSE")
                     {
@@ -853,7 +855,11 @@ namespace lulzbot.Extensions
                             syncwith = from.ToLower();
                             bot.NPSay(ns, "BDS:LINK:REQUEST:" + from);
                         }
-                        else bot.NPSay(ns, "BDS:SYNC:OKAY:" + from);
+                        else
+                        {
+                            bot.NPSay(ns, "BDS:SYNC:OKAY:" + from);
+                            syncing = false;
+                        }
                     }
 
                     else if (bits[2] == "FINISHED")
@@ -862,14 +868,15 @@ namespace lulzbot.Extensions
                         {
                             syncwatch.Stop();
                             bot.Say(syncrns, String.Format("<b>&raquo; Finished syncing for {0} bot{1} and {2} client{3} took <abbr title=\"{4}\">{5}</abbr></b>", bots_synced, bots_synced == 1 ? "" : "s", clients_synced, clients_synced == 1 ? "" : "s", syncwatch.Elapsed, Tools.FormatTime((ulong)syncwatch.Elapsed.TotalSeconds)));
-                            syncwith = "";
-                            syncrns = "";
-                            bots_synced = 0;
-                            clients_synced = 0;
-                            bot.NPSay(ns, "BDS:LINK:CLOSED");
-                            bot.Part(ns);
                         }
+                        syncwith = "";
+                        syncrns = "";
+                        bots_synced = 0;
+                        clients_synced = 0;
+                        bot.NPSay(ns, "BDS:LINK:CLOSED");
+                        bot.Part(ns);
                         syncing = false;
+                        isrequester = false;
                     }
 
                     else if (bits.Length >= 4 && bits[2] == "INFO")
@@ -971,7 +978,7 @@ namespace lulzbot.Extensions
                     }
                 }
 
-                else if (bits.Length >= 3 && bits[1] == "LINK" && syncing)
+                else if (bits.Length >= 3 && bits[1] == "LINK")
                 {
                     if (bits.Length == 4 && bits[3].ToLower() == username.ToLower())
                     {
@@ -983,15 +990,13 @@ namespace lulzbot.Extensions
                         {
                             syncwith = "";
                             syncing = false;
+                            isrequester = false;
                         }
                         else if (bits[2] == "REQUEST" && syncing && from.ToLower() == syncwith)
                         {
-                            if (!syncing)
-                            {
-                                bot.NPSay(ns, "BDS:LINK:ACCEPT:" + from);
-                                bot.Join(Tools.FormatPCNS(from, username));
-                            }
-                            else bot.NPSay(ns, "BDS:LINK:REJECT:" + from);
+                            syncing = true;
+                            bot.NPSay(ns, "BDS:LINK:ACCEPT:" + from);
+                            bot.Join(Tools.FormatPCNS(from, username));
                         }
                     }
                 }

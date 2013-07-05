@@ -9,6 +9,17 @@ namespace lulzbot.Types
 
     #region BDS related
     /// <summary>
+    /// Information on a username for BDS:SEEN.
+    /// </summary>
+    public class SeenInfo
+    {
+        public String Name      = String.Empty;
+        public String Channel   = String.Empty;
+        public UInt64 Timestamp = 0;
+        public Byte Type        = 0;
+    }
+
+    /// <summary>
     /// BotDef object. Holds information on a bot type definition.
     /// </summary>
     public class BotDef
@@ -135,6 +146,15 @@ namespace lulzbot.Types
         public Dictionary<String, ChatMember> Members       = new Dictionary<String, ChatMember>();
     }
     #endregion Channel related
+
+    public enum SeenType : byte
+    {
+        None    = 0,
+        Joining = 1,
+        Parting = 2,
+        Talking = 3,
+        Kicked  = 4,
+    }
 
     public enum NamespaceFormat : byte
     {

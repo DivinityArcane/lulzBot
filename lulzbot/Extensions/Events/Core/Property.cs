@@ -62,6 +62,7 @@ namespace lulzbot.Extensions
                     ChannelData[ns.ToLower()].Members.Clear();
 
                     String[] data = packet.Body.Split('\n');
+                    var who = "";
 
                     for (int x = 0; x < data.Length; x++)
                     {
@@ -71,11 +72,12 @@ namespace lulzbot.Extensions
                         Types.ChatMember member = new Types.ChatMember();
 
                         member.Name = data[x].Substring(7);
+                        who = member.Name.ToLower();
 
                         // We get duplicates on multiple connections.
-                        if (ChannelData[ns.ToLower()].Members.ContainsKey(member.Name.ToLower()))
+                        if (ChannelData[ns.ToLower()].Members.ContainsKey(who))
                         {
-                            ChannelData[ns.ToLower()].Members[member.Name.ToLower()].ConnectionCount++;
+                            ChannelData[ns.ToLower()].Members[who].ConnectionCount++;
                             continue;
                         }
 
@@ -90,7 +92,27 @@ namespace lulzbot.Extensions
                         member.GPC = data[++x].Substring(4);
                         member.ConnectionCount = 1;
 
-                        ChannelData[ns.ToLower()].Members.Add(member.Name.ToLower(), member);
+                        ChannelData[ns.ToLower()].Members.Add(who, member);
+
+                        lock (BDS._seen_database)
+                        {
+                            if (BDS._seen_database.ContainsKey(who))
+                            {
+                                BDS._seen_database[who].Channel = ns;
+                                BDS._seen_database[who].Type = (byte)Types.SeenType.None;
+                                BDS._seen_database[who].Timestamp = Bot.EpochTimestamp;
+                            }
+                            else
+                            {
+                                BDS._seen_database.Add(who, new SeenInfo()
+                                    {
+                                        Name = member.Name,
+                                        Channel = ns,
+                                        Type = (byte)Types.SeenType.None,
+                                        Timestamp = Bot.EpochTimestamp
+                                    });
+                            }
+                        }
 
                         // Increment x for the blank line.
                         x++;

@@ -1,3 +1,4 @@
+using lulzbot.Types;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -51,6 +52,26 @@ namespace lulzbot.Extensions
 
                 new Thread(() => Events.CallCommand(cmd_name, packet)).Start();
             }
+
+            lock (BDS._seen_database)
+            {
+                if (BDS._seen_database.ContainsKey(packet.Arguments["from"].ToLower()))
+                {
+                    BDS._seen_database[packet.Arguments["from"].ToLower()].Channel = packet.Parameter;
+                    BDS._seen_database[packet.Arguments["from"].ToLower()].Type = (byte)Types.SeenType.Talking;
+                    BDS._seen_database[packet.Arguments["from"].ToLower()].Timestamp = Bot.EpochTimestamp;
+                }
+                else
+                {
+                    BDS._seen_database.Add(packet.Arguments["from"].ToLower(), new SeenInfo()
+                    {
+                        Name = packet.Arguments["from"],
+                        Channel = packet.Parameter,
+                        Type = (byte)Types.SeenType.Talking,
+                        Timestamp = Bot.EpochTimestamp
+                    });
+                }
+            }
         }
 
 
@@ -60,6 +81,26 @@ namespace lulzbot.Extensions
             // Don't display DataShare messages.
             if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
                 ConIO.Write(String.Format("* {0} {1}", packet.Arguments["from"], packet.Body), Tools.FormatChat(packet.Parameter));
+
+            lock (BDS._seen_database)
+            {
+                if (BDS._seen_database.ContainsKey(packet.Arguments["from"].ToLower()))
+                {
+                    BDS._seen_database[packet.Arguments["from"].ToLower()].Channel = packet.Parameter;
+                    BDS._seen_database[packet.Arguments["from"].ToLower()].Type = (byte)Types.SeenType.Talking;
+                    BDS._seen_database[packet.Arguments["from"].ToLower()].Timestamp = Bot.EpochTimestamp;
+                }
+                else
+                {
+                    BDS._seen_database.Add(packet.Arguments["from"].ToLower(), new SeenInfo()
+                    {
+                        Name = packet.Arguments["from"],
+                        Channel = packet.Parameter,
+                        Type = (byte)Types.SeenType.Talking,
+                        Timestamp = Bot.EpochTimestamp
+                    });
+                }
+            }
         }
 
 
@@ -116,6 +157,26 @@ namespace lulzbot.Extensions
                     ChannelData[packet.Parameter.ToLower()].Members[packet.SubParameter.ToLower()].ConnectionCount++;
                 }
             }
+
+            lock (BDS._seen_database)
+            {
+                if (BDS._seen_database.ContainsKey(packet.SubParameter.ToLower()))
+                {
+                    BDS._seen_database[packet.SubParameter.ToLower()].Channel = packet.Parameter;
+                    BDS._seen_database[packet.SubParameter.ToLower()].Type = (byte)Types.SeenType.Joining;
+                    BDS._seen_database[packet.SubParameter.ToLower()].Timestamp = Bot.EpochTimestamp;
+                }
+                else
+                {
+                    BDS._seen_database.Add(packet.SubParameter.ToLower(), new SeenInfo()
+                    {
+                        Name = packet.SubParameter,
+                        Channel = packet.Parameter,
+                        Type = (byte)Types.SeenType.Joining,
+                        Timestamp = Bot.EpochTimestamp
+                    });
+                }
+            }
         }
 
 
@@ -144,6 +205,26 @@ namespace lulzbot.Extensions
 
                     if (ChannelData[packet.Parameter.ToLower()].Members[packet.SubParameter.ToLower()].ConnectionCount <= 0)
                         ChannelData[packet.Parameter.ToLower()].Members.Remove(packet.SubParameter.ToLower());
+                }
+            }
+
+            lock (BDS._seen_database)
+            {
+                if (BDS._seen_database.ContainsKey(packet.SubParameter.ToLower()))
+                {
+                    BDS._seen_database[packet.SubParameter.ToLower()].Channel = packet.Parameter;
+                    BDS._seen_database[packet.SubParameter.ToLower()].Type = (byte)Types.SeenType.Parting;
+                    BDS._seen_database[packet.SubParameter.ToLower()].Timestamp = Bot.EpochTimestamp;
+                }
+                else
+                {
+                    BDS._seen_database.Add(packet.SubParameter.ToLower(), new SeenInfo()
+                    {
+                        Name = packet.SubParameter,
+                        Channel = packet.Parameter,
+                        Type = (byte)Types.SeenType.Parting,
+                        Timestamp = Bot.EpochTimestamp
+                    });
                 }
             }
         }
@@ -210,6 +291,26 @@ namespace lulzbot.Extensions
 
                     if (ChannelData[packet.Parameter.ToLower()].Members[packet.SubParameter.ToLower()].ConnectionCount <= 0)
                         ChannelData[packet.Parameter.ToLower()].Members.Remove(packet.SubParameter.ToLower());
+                }
+            }
+
+            lock (BDS._seen_database)
+            {
+                if (BDS._seen_database.ContainsKey(packet.SubParameter.ToLower()))
+                {
+                    BDS._seen_database[packet.SubParameter.ToLower()].Channel = packet.Parameter;
+                    BDS._seen_database[packet.SubParameter.ToLower()].Type = (byte)Types.SeenType.Kicked;
+                    BDS._seen_database[packet.SubParameter.ToLower()].Timestamp = Bot.EpochTimestamp;
+                }
+                else
+                {
+                    BDS._seen_database.Add(packet.SubParameter.ToLower(), new SeenInfo()
+                    {
+                        Name = packet.SubParameter,
+                        Channel = packet.Parameter,
+                        Type = (byte)Types.SeenType.Kicked,
+                        Timestamp = Bot.EpochTimestamp
+                    });
                 }
             }
         }

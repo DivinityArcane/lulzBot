@@ -14,6 +14,7 @@ namespace lulzbot.Extensions
         public static Dictionary<String, Types.BotDef> _botdef_database             = new Dictionary<String, Types.BotDef>();
         public static Dictionary<String, Types.BotInfo> _botinfo_database           = new Dictionary<String, Types.BotInfo>();
         public static Dictionary<String, Types.ClientInfo> _clientinfo_database     = new Dictionary<String, Types.ClientInfo>();
+        public static Dictionary<String, Types.SeenInfo> _seen_database             = new Dictionary<String, Types.SeenInfo>();
         private static Dictionary<String, String> _info_requests                    = new Dictionary<String, String>();
         public static List<String> TranslateLangs                                   = new List<String>() { "ar", "bg", "zh-CN", "hr", "cs", "da", "nl", "en", "fi", "fr", "de", "el", "hi", "it", "ja", "ko", "no", "pl", "pt", "ro", "ru", "es", "sv" };
         public static Dictionary<String, String> LanguageAliases                    = new Dictionary<String, String>() { { "arabic", "ar" }, { "bulgarian", "bg" }, { "chinese", "zh-CN" }, { "croatian", "hr" }, { "czech", "cs" }, { "danish", "da" }, { "dutch", "nl" }, { "english", "en" }, { "finnish", "fi" }, { "french", "fr" }, { "german", "de" }, { "greek", "el" }, { "hindi", "hi" }, { "italian", "it" }, { "japanese", "ja" }, { "korean", "ko" }, { "norwegian", "no" }, { "polish", "pl" }, { "portugese", "pt" }, { "romanian", "ro" }, { "russian", "ru" }, { "spanish", "es" }, { "swedish", "sv" } };
@@ -47,6 +48,7 @@ namespace lulzbot.Extensions
             Events.AddCommand("bot", new Command(this, "cmd_bot", "DivinityArcane", 25, "Gets information from the database.", "[trig]bot info username<br/>[trig]bot count<br/>[trig]bot online <i>type</i><br/>[trig]bot owner username <i>online</i><br/>[trig]bot trigger trig", ext: info));
             Events.AddCommand("client", new Command(this, "cmd_client", "DivinityArcane", 25, "Gets information from the database.", "[trig]client info username<br/>[trig]client count<br/>[trig]client online <i>type</i>", ext: info));
             Events.AddCommand("bds", new Command(this, "cmd_bds", "DivinityArcane", 75, "Manage BDS database.", "[trig]bds save<br/>[trig]bds sync username<br/>[trig]bds update", ext: info));
+            Events.AddCommand("seen", new Command(this, "cmd_seen", "DivinityArcane", 25, "Retreives information on the last time a username was seen", "[trig]seen username", ext: info));
             Events.AddCommand("translate", new Command(this, "cmd_translate", "DivinityArcane", 25, "Translates text using BDS.", "[trig]translate languages<br/>[trig]translate from_lang to_lang msg", ext: info));
             Events.AddCommand("police", new Command(this, "cmd_police", "DivinityArcane", 99, "Changes policebot status.", "[trig]police status<br/>[trig]police on/off", ext: info));
 
@@ -57,6 +59,7 @@ namespace lulzbot.Extensions
             _botdef_database = Storage.Load<Dictionary<String, Types.BotDef>>("bds_botdef_database");
             _botinfo_database = Storage.Load<Dictionary<String, Types.BotInfo>>("bds_botinfo_database");
             _clientinfo_database = Storage.Load<Dictionary<String, Types.ClientInfo>>("bds_clientinfo_database");
+            _seen_database = Storage.Load<Dictionary<String, Types.SeenInfo>>("bds_seen_database");
 
             // Values can be null if the file is empty or doesn't exist.
             if (_botdef_database == null)
@@ -68,8 +71,11 @@ namespace lulzbot.Extensions
             if (_clientinfo_database == null)
                 _clientinfo_database = new Dictionary<string, Types.ClientInfo>();
 
+            if (_seen_database == null)
+                _seen_database = new Dictionary<string, Types.SeenInfo>();
+
             if (Program.Debug)
-                ConIO.Write(String.Format("Loaded databases. Got {0} BotDEF entries, {1} BotINFO entries, and {2} ClientINFO entries.", _botdef_database.Count, _botinfo_database.Count, _clientinfo_database.Count), "BDS");
+                ConIO.Write(String.Format("Loaded databases. Got {0} BotDEF entries, {1} BotINFO entries, {2} ClientINFO entries, and {3} SEEN entries.", _botdef_database.Count, _botinfo_database.Count, _clientinfo_database.Count, _seen_database.Count), "BDS");
 
             // We will save on a timer. 
             if (AutoSave)
@@ -108,6 +114,7 @@ namespace lulzbot.Extensions
             Storage.Save("bds_botdef_database", _botdef_database);
             Storage.Save("bds_botinfo_database", _botinfo_database);
             Storage.Save("bds_clientinfo_database", _clientinfo_database);
+            Storage.Save("bds_seen_database", _seen_database);
         }
 
         /// <summary>
@@ -134,6 +141,49 @@ namespace lulzbot.Extensions
                 return true;
             else
                 return false;
+        }
+
+        private string SeenMsg (SeenType type)
+        {
+            switch (type)
+            {
+                case SeenType.Joining:
+                    return "joining";
+
+                case SeenType.Parting:
+                    return "leaving";
+
+                case SeenType.Talking:
+                    return "talking in";
+
+                case SeenType.Kicked:
+                    return "being kicked from";
+
+                case SeenType.None:
+                default:
+                    return "in";
+            }
+        }
+
+        /// <summary>
+        /// BDS command
+        /// </summary>
+        public void cmd_seen (Bot bot, String ns, String[] args, String msg, String from, dAmnPacket packet)
+        {
+            if (args.Length == 1)
+                bot.Say(ns, "<b>&raquo; Usage:</b> " + bot.Config.Trigger + "seen username");
+            else
+            {
+                var who = args[1].ToLower();
+
+                if (!_seen_database.ContainsKey(who))
+                    bot.Say(ns, "<b>&raquo; I haven't seen that user before, sorry.</b>");
+                else
+                {
+                    var info = _seen_database[who];
+                    bot.Say(ns, String.Format("<b>&raquo; :dev{0}:</b> was last seen {1} {2}, {3} ago.", info.Name, SeenMsg((SeenType)info.Type), Tools.FormatNamespace(info.Channel, NamespaceFormat.Channel), Tools.FormatTime(Bot.EpochTimestamp - info.Timestamp)));
+                }
+            }
         }
 
         /// <summary>
@@ -997,6 +1047,27 @@ namespace lulzbot.Extensions
                             syncing = true;
                             bot.NPSay(ns, "BDS:LINK:ACCEPT:" + from);
                             bot.Join(Tools.FormatPCNS(from, username));
+                        }
+                    }
+                }
+
+                else if (bits.Length >= 4 && bits[1] == "SEEN" && IsPoliceBot(username, pboverride: true))
+                {
+                    if (bits[2] == "REQUEST" && bits[3].Contains(','))
+                    {
+                        var payload = bits[3].Split(',');
+
+                        if (payload.Length >= 2)
+                        {
+                            var who = payload[1].ToLower();
+
+                            if (!BDS._seen_database.ContainsKey(who))
+                                bot.NPSay(ns, "BDS:SEEN:NODATA:" + from + "," + payload[1]);
+                            else
+                            {
+                                var info = BDS._seen_database[who];
+                                bot.NPSay(ns, String.Format("BDS:SEEN:RESPONSE:{0},{1},{2},{3}", from, info.Name, info.Type, info.Timestamp));
+                            }
                         }
                     }
                 }

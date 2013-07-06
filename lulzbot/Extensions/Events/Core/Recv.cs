@@ -18,7 +18,29 @@ namespace lulzbot.Extensions
 
             // Don't display DataShare messages.
             if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
+            {
                 ConIO.Write(String.Format("<{0}> {1}", packet.Arguments["from"], packet.Body), Tools.FormatChat(packet.Parameter));
+
+                lock (BDS._seen_database)
+                {
+                    if (BDS._seen_database.ContainsKey(packet.Arguments["from"].ToLower()))
+                    {
+                        BDS._seen_database[packet.Arguments["from"].ToLower()].Channel = packet.Parameter;
+                        BDS._seen_database[packet.Arguments["from"].ToLower()].Type = (byte)Types.SeenType.Talking;
+                        BDS._seen_database[packet.Arguments["from"].ToLower()].Timestamp = Bot.EpochTimestamp;
+                    }
+                    else
+                    {
+                        BDS._seen_database.Add(packet.Arguments["from"].ToLower(), new SeenInfo()
+                        {
+                            Name = packet.Arguments["from"],
+                            Channel = packet.Parameter,
+                            Type = (byte)Types.SeenType.Talking,
+                            Timestamp = Bot.EpochTimestamp
+                        });
+                    }
+                }
+            }
 
             // Pong!
             if (bot.PingTimer.IsRunning && packet.Body == "Ping..." && packet.Arguments["from"].ToLower() == bot.Config.Username.ToLower())
@@ -52,26 +74,6 @@ namespace lulzbot.Extensions
 
                 new Thread(() => Events.CallCommand(cmd_name, packet)).Start();
             }
-
-            lock (BDS._seen_database)
-            {
-                if (BDS._seen_database.ContainsKey(packet.Arguments["from"].ToLower()))
-                {
-                    BDS._seen_database[packet.Arguments["from"].ToLower()].Channel = packet.Parameter;
-                    BDS._seen_database[packet.Arguments["from"].ToLower()].Type = (byte)Types.SeenType.Talking;
-                    BDS._seen_database[packet.Arguments["from"].ToLower()].Timestamp = Bot.EpochTimestamp;
-                }
-                else
-                {
-                    BDS._seen_database.Add(packet.Arguments["from"].ToLower(), new SeenInfo()
-                    {
-                        Name = packet.Arguments["from"],
-                        Channel = packet.Parameter,
-                        Type = (byte)Types.SeenType.Talking,
-                        Timestamp = Bot.EpochTimestamp
-                    });
-                }
-            }
         }
 
 
@@ -80,25 +82,27 @@ namespace lulzbot.Extensions
         {
             // Don't display DataShare messages.
             if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
+            {
                 ConIO.Write(String.Format("* {0} {1}", packet.Arguments["from"], packet.Body), Tools.FormatChat(packet.Parameter));
 
-            lock (BDS._seen_database)
-            {
-                if (BDS._seen_database.ContainsKey(packet.Arguments["from"].ToLower()))
+                lock (BDS._seen_database)
                 {
-                    BDS._seen_database[packet.Arguments["from"].ToLower()].Channel = packet.Parameter;
-                    BDS._seen_database[packet.Arguments["from"].ToLower()].Type = (byte)Types.SeenType.Talking;
-                    BDS._seen_database[packet.Arguments["from"].ToLower()].Timestamp = Bot.EpochTimestamp;
-                }
-                else
-                {
-                    BDS._seen_database.Add(packet.Arguments["from"].ToLower(), new SeenInfo()
+                    if (BDS._seen_database.ContainsKey(packet.Arguments["from"].ToLower()))
                     {
-                        Name = packet.Arguments["from"],
-                        Channel = packet.Parameter,
-                        Type = (byte)Types.SeenType.Talking,
-                        Timestamp = Bot.EpochTimestamp
-                    });
+                        BDS._seen_database[packet.Arguments["from"].ToLower()].Channel = packet.Parameter;
+                        BDS._seen_database[packet.Arguments["from"].ToLower()].Type = (byte)Types.SeenType.Talking;
+                        BDS._seen_database[packet.Arguments["from"].ToLower()].Timestamp = Bot.EpochTimestamp;
+                    }
+                    else
+                    {
+                        BDS._seen_database.Add(packet.Arguments["from"].ToLower(), new SeenInfo()
+                        {
+                            Name = packet.Arguments["from"],
+                            Channel = packet.Parameter,
+                            Type = (byte)Types.SeenType.Talking,
+                            Timestamp = Bot.EpochTimestamp
+                        });
+                    }
                 }
             }
         }
@@ -125,7 +129,29 @@ namespace lulzbot.Extensions
 
             // Don't display DataShare messages.
             if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
+            {
                 ConIO.Write(String.Format("** {0}{1} joined. [{2}]", packet.Arguments["symbol"], packet.SubParameter, packet.Arguments["pc"]), Tools.FormatChat(packet.Parameter));
+
+                lock (BDS._seen_database)
+                {
+                    if (BDS._seen_database.ContainsKey(packet.SubParameter.ToLower()))
+                    {
+                        BDS._seen_database[packet.SubParameter.ToLower()].Channel = packet.Parameter;
+                        BDS._seen_database[packet.SubParameter.ToLower()].Type = (byte)Types.SeenType.Joining;
+                        BDS._seen_database[packet.SubParameter.ToLower()].Timestamp = Bot.EpochTimestamp;
+                    }
+                    else
+                    {
+                        BDS._seen_database.Add(packet.SubParameter.ToLower(), new SeenInfo()
+                        {
+                            Name = packet.SubParameter,
+                            Channel = packet.Parameter,
+                            Type = (byte)Types.SeenType.Joining,
+                            Timestamp = Bot.EpochTimestamp
+                        });
+                    }
+                }
+            }
 
             // Police bot stuff.
             if ((packet.Parameter == "chat:DSGateway" || packet.Parameter == "chat:DataShare") && BDS.IsPoliceBot(bot.Config.Username, packet.Parameter))
@@ -157,26 +183,6 @@ namespace lulzbot.Extensions
                     ChannelData[packet.Parameter.ToLower()].Members[packet.SubParameter.ToLower()].ConnectionCount++;
                 }
             }
-
-            lock (BDS._seen_database)
-            {
-                if (BDS._seen_database.ContainsKey(packet.SubParameter.ToLower()))
-                {
-                    BDS._seen_database[packet.SubParameter.ToLower()].Channel = packet.Parameter;
-                    BDS._seen_database[packet.SubParameter.ToLower()].Type = (byte)Types.SeenType.Joining;
-                    BDS._seen_database[packet.SubParameter.ToLower()].Timestamp = Bot.EpochTimestamp;
-                }
-                else
-                {
-                    BDS._seen_database.Add(packet.SubParameter.ToLower(), new SeenInfo()
-                    {
-                        Name = packet.SubParameter,
-                        Channel = packet.Parameter,
-                        Type = (byte)Types.SeenType.Joining,
-                        Timestamp = Bot.EpochTimestamp
-                    });
-                }
-            }
         }
 
 
@@ -191,10 +197,32 @@ namespace lulzbot.Extensions
 
             // Don't display DataShare messages.
             if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
+            {
                 if (packet.Arguments.ContainsKey("r"))
                     ConIO.Write(String.Format("** {0} left. [{1}]", packet.SubParameter, packet.Arguments["r"]), Tools.FormatChat(packet.Parameter));
                 else
                     ConIO.Write(String.Format("** {0} left.", packet.SubParameter), Tools.FormatChat(packet.Parameter));
+
+                lock (BDS._seen_database)
+                {
+                    if (BDS._seen_database.ContainsKey(packet.SubParameter.ToLower()))
+                    {
+                        BDS._seen_database[packet.SubParameter.ToLower()].Channel = packet.Parameter;
+                        BDS._seen_database[packet.SubParameter.ToLower()].Type = (byte)Types.SeenType.Parting;
+                        BDS._seen_database[packet.SubParameter.ToLower()].Timestamp = Bot.EpochTimestamp;
+                    }
+                    else
+                    {
+                        BDS._seen_database.Add(packet.SubParameter.ToLower(), new SeenInfo()
+                        {
+                            Name = packet.SubParameter,
+                            Channel = packet.Parameter,
+                            Type = (byte)Types.SeenType.Parting,
+                            Timestamp = Bot.EpochTimestamp
+                        });
+                    }
+                }
+            }
 
             // Update channel data
             lock (ChannelData[packet.Parameter.ToLower()])
@@ -205,26 +233,6 @@ namespace lulzbot.Extensions
 
                     if (ChannelData[packet.Parameter.ToLower()].Members[packet.SubParameter.ToLower()].ConnectionCount <= 0)
                         ChannelData[packet.Parameter.ToLower()].Members.Remove(packet.SubParameter.ToLower());
-                }
-            }
-
-            lock (BDS._seen_database)
-            {
-                if (BDS._seen_database.ContainsKey(packet.SubParameter.ToLower()))
-                {
-                    BDS._seen_database[packet.SubParameter.ToLower()].Channel = packet.Parameter;
-                    BDS._seen_database[packet.SubParameter.ToLower()].Type = (byte)Types.SeenType.Parting;
-                    BDS._seen_database[packet.SubParameter.ToLower()].Timestamp = Bot.EpochTimestamp;
-                }
-                else
-                {
-                    BDS._seen_database.Add(packet.SubParameter.ToLower(), new SeenInfo()
-                    {
-                        Name = packet.SubParameter,
-                        Channel = packet.Parameter,
-                        Type = (byte)Types.SeenType.Parting,
-                        Timestamp = Bot.EpochTimestamp
-                    });
                 }
             }
         }
@@ -265,10 +273,32 @@ namespace lulzbot.Extensions
         {
             // Don't display DataShare messages.
             if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
+            {
                 if (packet.Body.Length > 0)
                     ConIO.Write(String.Format("*** {0} has been kicked by {1}: {2}", packet.SubParameter, packet.Arguments["by"], packet.Body), Tools.FormatChat(packet.Parameter));
                 else
                     ConIO.Write(String.Format("*** {0} has been kicked by {1}", packet.SubParameter, packet.Arguments["by"]), Tools.FormatChat(packet.Parameter));
+
+                lock (BDS._seen_database)
+                {
+                    if (BDS._seen_database.ContainsKey(packet.SubParameter.ToLower()))
+                    {
+                        BDS._seen_database[packet.SubParameter.ToLower()].Channel = packet.Parameter;
+                        BDS._seen_database[packet.SubParameter.ToLower()].Type = (byte)Types.SeenType.Kicked;
+                        BDS._seen_database[packet.SubParameter.ToLower()].Timestamp = Bot.EpochTimestamp;
+                    }
+                    else
+                    {
+                        BDS._seen_database.Add(packet.SubParameter.ToLower(), new SeenInfo()
+                        {
+                            Name = packet.SubParameter,
+                            Channel = packet.Parameter,
+                            Type = (byte)Types.SeenType.Kicked,
+                            Timestamp = Bot.EpochTimestamp
+                        });
+                    }
+                }
+            }
 
             if (packet.Arguments["by"].ToLower() == bot.Config.Username.ToLower())
             {
@@ -291,26 +321,6 @@ namespace lulzbot.Extensions
 
                     if (ChannelData[packet.Parameter.ToLower()].Members[packet.SubParameter.ToLower()].ConnectionCount <= 0)
                         ChannelData[packet.Parameter.ToLower()].Members.Remove(packet.SubParameter.ToLower());
-                }
-            }
-
-            lock (BDS._seen_database)
-            {
-                if (BDS._seen_database.ContainsKey(packet.SubParameter.ToLower()))
-                {
-                    BDS._seen_database[packet.SubParameter.ToLower()].Channel = packet.Parameter;
-                    BDS._seen_database[packet.SubParameter.ToLower()].Type = (byte)Types.SeenType.Kicked;
-                    BDS._seen_database[packet.SubParameter.ToLower()].Timestamp = Bot.EpochTimestamp;
-                }
-                else
-                {
-                    BDS._seen_database.Add(packet.SubParameter.ToLower(), new SeenInfo()
-                    {
-                        Name = packet.SubParameter,
-                        Channel = packet.Parameter,
-                        Type = (byte)Types.SeenType.Kicked,
-                        Timestamp = Bot.EpochTimestamp
-                    });
                 }
             }
         }

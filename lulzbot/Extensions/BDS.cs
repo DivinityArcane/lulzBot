@@ -98,7 +98,7 @@ namespace lulzbot.Extensions
             if (packet.Parameter.ToLower() == "chat:datashare")
             {
                 // IDS-NOTE, XFER, BOTCHECK-SYNC ?
-                String[] caps = new String[] { "BOTCHECK", "BOTCHECK-EXT", "LDS-UPDATE", "LDS-BOTCHECK" };
+                String[] caps = new String[] { "BOTCHECK", "BOTCHECK-EXT", "SEEN"};
                 bot.NPSay(packet.Parameter, "BDS:PROVIDER:CAPS:" + String.Join(",", caps));
             }
         }
@@ -181,7 +181,8 @@ namespace lulzbot.Extensions
                 else
                 {
                     var info = _seen_database[who];
-                    bot.Say(ns, String.Format("<b>&raquo; :dev{0}:</b> was last seen {1} {2}, {3} ago.", info.Name, SeenMsg((SeenType)info.Type), Tools.FormatNamespace(info.Channel, NamespaceFormat.Channel), Tools.FormatTime(Bot.EpochTimestamp - info.Timestamp)));
+                    var time = Tools.FormatTime(Bot.EpochTimestamp - info.Timestamp);
+                    bot.Say(ns, String.Format("<b>&raquo; :dev{0}:</b> was last seen {1} {2} {3}.", info.Name, SeenMsg((SeenType)info.Type), Tools.FormatNamespace(info.Channel, NamespaceFormat.Channel), time == "0 seconds" ? "just now" : time + " ago"));
                 }
             }
         }
@@ -1066,9 +1067,25 @@ namespace lulzbot.Extensions
                             else
                             {
                                 var info = BDS._seen_database[who];
-                                bot.NPSay(ns, String.Format("BDS:SEEN:RESPONSE:{0},{1},{2},{3}", from, info.Name, info.Type, info.Timestamp));
+                                bot.NPSay(ns, String.Format("BDS:SEEN:RESPONSE:{0},{1},{2},{3},{4}", from, info.Name, info.Type, info.Channel, info.Timestamp));
                             }
                         }
+                    }
+
+                    else if (bits[2] == "PROVIDER" && bits[3].ToLower() == username.ToLower())
+                    {
+                        // Set provider to "from"
+                    }
+                }
+
+                else if (bits.Length >= 4 && bits[1] == "PROVIDER" && bits[2] == "CAPS" && IsPoliceBot(username, pboverride: true))
+                {
+                    if (bits[3].Contains(',') && from.ToLower() != username.ToLower())
+                    {
+                        var payload = new List<String>(bits[3].ToLower().Split(','));
+
+                        if (payload.Contains("seen"))
+                            bot.NPSay(ns, "BDS:SEEN:PROVIDER:" + from);
                     }
                 }
 

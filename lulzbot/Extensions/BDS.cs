@@ -22,6 +22,7 @@ namespace lulzbot.Extensions
         private static List<String> _botcheck_privclasses                           = new List<String>() { "Bots", "TestBots", "BrokenBots", "SuspiciousBots", "PoliceBot" };
         private static List<String> _clientcheck_privclasses                        = new List<String>() { "Clients", "BrokenClients", "Members", "Seniors", "CoreTeam" };
         private static Dictionary<string, string> KickTimers                        = new Dictionary<string, string>();
+        private static List<string> SeenProviders                                   = new List<string>();
         private const int UPDATE_TIME = 604800;
         private static bool Policing = false;
         public const double Version = 0.4;
@@ -1058,7 +1059,7 @@ namespace lulzbot.Extensions
                     {
                         var payload = bits[3].Split(',');
 
-                        if (payload.Length >= 2)
+                        if (payload.Length >= 2 && payload[0].ToLower() == username.ToLower())
                         {
                             var who = payload[1].ToLower();
 
@@ -1074,7 +1075,8 @@ namespace lulzbot.Extensions
 
                     else if (bits[2] == "PROVIDER" && bits[3].ToLower() == username.ToLower())
                     {
-                        // Set provider to "from"
+                        if (!SeenProviders.Contains(from.ToLower()) && IsPoliceBot(from, ns))
+                            SeenProviders.Add(from.ToLower());
                     }
                 }
 
@@ -1086,6 +1088,11 @@ namespace lulzbot.Extensions
 
                         if (payload.Contains("seen"))
                             bot.NPSay(ns, "BDS:SEEN:PROVIDER:" + from);
+                    }
+
+                    else if (bits[3].ToLower() == "seen")
+                    {
+                        bot.NPSay(ns, "BDS:SEEN:PROVIDER:" + from);
                     }
                 }
 

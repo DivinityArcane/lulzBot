@@ -826,7 +826,7 @@ namespace lulzbot.Extensions
         {
             if (packet.Parameter == "chat:Botdom" && packet.Body.ToLower().StartsWith("<abbr title=\"" + bot.Config.Username.ToLower() + ": botcheck\"></abbr>"))
             {
-                String hash = Tools.md5((bot.Config.Trigger + packet.Arguments["from"] + bot.Config.Username).ToLower()).Replace(" ", "").ToLower();
+                String hash = Tools.md5((bot.Config.Trigger + packet.Arguments["from"] + bot.Config.Username).Replace(" ", "").ToLower());
                 bot.Say(packet.Parameter, String.Format("Beep! <abbr title=\"botresponse: {0} {1} {2} {3} {4} {5}\"></abbr>", packet.Arguments["from"], bot.Config.Owner, Program.BotName, Program.Version, hash, bot.Config.Trigger));
                 return;
             }

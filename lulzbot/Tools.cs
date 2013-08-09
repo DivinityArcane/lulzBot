@@ -781,6 +781,7 @@ namespace lulzbot
                 HttpWebRequest page_request = (HttpWebRequest)HttpWebRequest.Create(new Uri(url).AbsoluteUri);
 
                 page_request.AllowAutoRedirect = true;
+                page_request.MaximumAutomaticRedirections = 5;
                 page_request.Method = "GET";
                 //page_request.KeepAlive = false;
                 page_request.Proxy = null;
@@ -811,7 +812,7 @@ namespace lulzbot
             }
         }
 
-        private static Regex _devinfo_regex = new Regex(@"(<title>(?<username>[^\s]+) on deviantART</title>)|(<strong>(?<number>[^<]+)</strong>(?<type>[^\t]+))|(<div id=""super-secret-\w+""[^>]*>(?<tagline>[^<]+))|(<d. class=""f h"">(?<item>[^<]+)</d.>)|(<div>Deviant for (?<years>[^<]+)</div><div>(?<member>[^<]+)</div>)", RegexOptions.Compiled);
+        private static Regex _devinfo_regex = new Regex(@"(<title>(?<username>[^\s]+)[^<]+</title>)|(<strong>(?<number>[^<]+)</strong>(?<type>[^\t]+))|(<div id=""super-secret-\w+""[^>]*>(?<tagline>[^<]+))|(<d. class=""f h"">(?<item>[^<]+)</d.>)|(<div>Deviant for (?<years>[^<]+)</div><div>(?<member>[^<]+)</div>)", RegexOptions.Compiled);
         private static Regex _multispace_regex = new Regex(@"\s+", RegexOptions.Compiled);
         public static Dictionary<string, string> DeviantInfo (string who)
         {

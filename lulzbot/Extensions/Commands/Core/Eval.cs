@@ -80,7 +80,7 @@ namespace lulzbot.Extensions
                     compilerParams.ReferencedAssemblies.Add("Newtonsoft.Json.dll");
                     compilerParams.ReferencedAssemblies.Add("SRCDSQuery.dll");
                     compilerParams.ReferencedAssemblies.Add("MCQuery.dll");
-                    compilerParams.ReferencedAssemblies.Add("MySql.Data.dll");
+                    compilerParams.ReferencedAssemblies.Add("mysql.data.dll");
                     compilerParams.GenerateExecutable = false;
                     compilerParams.GenerateInMemory = true;
                     compilerParams.IncludeDebugInformation = false;
@@ -105,7 +105,9 @@ namespace lulzbot.Extensions
                             var method = compiled_type.GetMethod("v_eval");
                             object res = method.Invoke(null, null);
                             if (res != null)
-                                bot.Say(ns, String.Format("<b>&raquo; Output:</b><bcode>{0}</bcode>", res.ToString()));
+                                bot.Say(ns, String.Format("<b>&raquo; Output:</b><bcode>{0}</bcode>", res.ToString().Length <= 0 ? "Code returned NULL" : res.ToString()));
+                            else
+                                bot.Say(ns, "<b>&raquo; Code returned <i>NULL/NIL</i>");
                         }
                         catch (Exception E)
                         {

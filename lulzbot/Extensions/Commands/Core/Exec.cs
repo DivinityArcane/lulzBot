@@ -25,7 +25,7 @@ namespace lulzbot.Extensions
                     {
                         p = new Process()
                         {
-                            StartInfo = new ProcessStartInfo("cmd", "/C \"" + syscall + "\"")
+                            StartInfo = new ProcessStartInfo("cmd", "/C " + syscall)
                             {
                                 CreateNoWindow = true,
                                 UseShellExecute = false,
@@ -50,6 +50,8 @@ namespace lulzbot.Extensions
 
                     if (p.Start())
                     {
+                        p.WaitForExit();
+
                         STDERR = p.StandardError;
                         STDOUT = p.StandardOutput;
 

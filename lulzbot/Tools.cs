@@ -280,7 +280,7 @@ namespace lulzbot
                             if (indexB + searchB.Length + 16 < p.Length)
                             {
                                 var nrel = p.Substring(indexB + searchB.Length, 16);
-                                nrel = nrel.Substring(0, nrel.IndexOf("\\n")).Trim();
+                                nrel = nrel.Substring(0, nrel.IndexOf("\\")).Trim();
 
                                 return String.Format("Version {0} is now available! Released {1}.", nver, nrel);
                             }

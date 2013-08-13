@@ -156,10 +156,14 @@ namespace lulzbot.Extensions
             // Police bot stuff.
             if ((packet.Parameter == "chat:DSGateway" || packet.Parameter == "chat:DataShare") && BDS.IsPoliceBot(bot.Config.Username, packet.Parameter))
             {
-                bot.NPSay(packet.Parameter, "BDS:BOTCHECK:DIRECT:" + packet.SubParameter);
+                if (!BDS.GateChecks.Contains(packet.SubParameter))
+                {
+                    bot.NPSay(packet.Parameter, "BDS:BOTCHECK:DIRECT:" + packet.SubParameter);
 
-                BDS.ClearKickTimers(packet.SubParameter);
-                BDS.KickAfter(packet.Parameter, packet.SubParameter, 30, "No response to or invalid BDS:BOTCHECK. If you are not a bot, please do not join this room. Thanks.");
+                    BDS.ClearKickTimers(packet.SubParameter);
+                    BDS.KickAfter(packet.Parameter, packet.SubParameter, 30, "No response to or invalid BDS:BOTCHECK. If you are not a bot, please do not join this room. Thanks.");
+                }
+                else BDS.GateChecks.Remove(packet.SubParameter);
             }
 
             // Update channel data

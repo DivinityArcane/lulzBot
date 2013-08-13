@@ -45,6 +45,33 @@ namespace lulzbot.Types
         }
     }
 
+    public class KickInfo
+    {
+        private List<ulong> times = new List<ulong>();
+        public ulong MaxLife = 5;
+
+        public int Count
+        {
+            get
+            {
+                return times.Count;
+            }
+        }
+
+        public void Kick ()
+        {
+            var t = Bot.EpochTimestamp;
+            if (!times.Contains(t))
+                times.Add(t);
+
+            foreach (var k in times.ToArray())
+            {
+                if (t - k > MaxLife)
+                    times.Remove(k);
+            }
+        }
+    }
+
     /// <summary>
     /// BotInfo object. Holds information on a specific bot.
     /// </summary>

@@ -23,6 +23,8 @@ namespace lulzbot.Extensions
         private static List<String> _clientcheck_privclasses                        = new List<String>() { "Clients", "BrokenClients", "Members", "Seniors", "CoreTeam" };
         private static Dictionary<string, string> KickTimers                        = new Dictionary<string, string>();
         private static List<string> SeenProviders                                   = new List<string>();
+        public  static List<string> GateChecks                                      = new List<string>();
+        private static Dictionary<string, KickInfo> Kicks                           = new Dictionary<string, KickInfo>();
         private const int UPDATE_TIME = 604800;
         private static bool Policing = false;
         public const double Version = 0.4;
@@ -1044,7 +1046,7 @@ namespace lulzbot.Extensions
                             syncing = false;
                             isrequester = false;
                         }
-                        else if (bits[2] == "REQUEST" && syncing && from.ToLower() == syncwith)
+                        else if (bits[2] == "REQUEST" && !syncing && from.ToLower() == syncwith)
                         {
                             syncing = true;
                             bot.NPSay(ns, "BDS:LINK:ACCEPT:" + from);
@@ -1223,6 +1225,19 @@ namespace lulzbot.Extensions
 
                                 bot.Kick(ns, from, "No response to or invalid BDS:BOTCHECK. If you are not a bot, please do not join this room. Thanks.");
                                 bot.Promote("chat:DataShare", from, "BrokenBots");
+
+                                if (!Kicks.ContainsKey(from))
+                                    Kicks.Add(from, new KickInfo());
+
+                                Kicks[from].Kick();
+
+                                if (Kicks[from].Count >= 3)
+                                {
+                                    bot.Ban(ns, from);
+                                    var t = new Timer(5000);
+                                    t.Elapsed += delegate { bot.UnBan(ns, from); };
+                                    t.Start();
+                                }
                             }
 
                             if (Program.Debug)
@@ -1234,7 +1249,11 @@ namespace lulzbot.Extensions
                             if ((ns == "chat:DSGateway" || ns == "chat:DataShare") && IsPoliceBot(username, ns))
                             {
                                 if (ns == "chat:DSGateway")
+                                {
+                                    if (!GateChecks.Contains(from))
+                                        GateChecks.Add(from);
                                     bot.NPSay(ns, "BDS:BOTCHECK:OK:" + from);
+                                }
 
                                 bot.Promote("chat:DataShare", from, "Bots");
                             }
@@ -1315,6 +1334,19 @@ namespace lulzbot.Extensions
 
                                 bot.Kick(ns, from, "No response to or invalid BDS:BOTCHECK. If you are not a bot, please do not join this room. Thanks.");
                                 bot.Promote("chat:DataShare", from, "BrokenClients");
+
+                                if (!Kicks.ContainsKey(from))
+                                    Kicks.Add(from, new KickInfo());
+
+                                Kicks[from].Kick();
+
+                                if (Kicks[from].Count >= 3)
+                                {
+                                    bot.Ban(ns, from);
+                                    var t = new Timer(5000);
+                                    t.Elapsed += delegate { bot.UnBan(ns, from); };
+                                    t.Start();
+                                }
                             }
 
                             if (Program.Debug)
@@ -1326,7 +1358,11 @@ namespace lulzbot.Extensions
                             if ((ns == "chat:DSGateway" || ns == "chat:DataShare") && IsPoliceBot(username, ns))
                             {
                                 if (ns == "chat:DSGateway")
+                                {
+                                    if (!GateChecks.Contains(from))
+                                        GateChecks.Add(from);
                                     bot.NPSay(ns, "BDS:BOTCHECK:OK:" + from);
+                                }
 
                                 bot.Promote("chat:DataShare", from, "Clients");
                             }

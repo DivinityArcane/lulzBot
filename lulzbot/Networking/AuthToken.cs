@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.Cache;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
@@ -9,8 +10,9 @@ namespace lulzbot.Networking
 {
     public class AuthToken
     {
-        private const String _login_uri = "https://www.deviantart.com/users/login";
-        private const String _chat_uri  = "http://chat.deviantart.com/chat/datashare";
+        private const String _users_uri = @"https://www.deviantart.com/users/rockedout";
+        private const String _login_uri = @"https://www.deviantart.com/users/login";
+        private const String _chat_uri  = @"http://chat.deviantart.com/chat/datashare";
         private const String _regex     = "dAmn_Login\\( \"[^\"]*\", \"([^\"]*)\" \\);";
 
         /// <summary>
@@ -29,15 +31,44 @@ namespace lulzbot.Networking
             // Initialize the request and variables.
             String page_content         = String.Empty;
             CookieContainer cookie_jar  = new CookieContainer();
-            HttpWebRequest request      = (HttpWebRequest)HttpWebRequest.Create(_login_uri);
+            HttpWebRequest request      = (HttpWebRequest)HttpWebRequest.Create(_users_uri);
+
+            // Set a few request parameters
+            request.Proxy = null;
+            request.CookieContainer = cookie_jar;
+            request.Host = "www.deviantart.com";
+            request.Accept = "text/html";
+            request.Method = "GET";
+
+            // Create a temporary stream reader
+            using (StreamReader reader = new StreamReader(request.GetResponse().GetResponseStream()))
+            {
+                // Grab the entire page contents
+                page_content = reader.ReadToEnd();
+            }
+
+            if (page_content == null || !page_content.Contains("validate_token") || !page_content.Contains("validate_key")) return null;
+
+            var token_loc = page_content.LastIndexOf("validate_token");
+            var key_loc = page_content.LastIndexOf("validate_key");
+
+            if (token_loc == -1 || key_loc == -1) return null;
+
+            token_loc += 23;
+            key_loc += 21;
 
             // Create our POST data string
-            String post_data = String.Format("&username={0}&password={1}&reusetoken=1", Uri.EscapeUriString(username), Uri.EscapeUriString(password));
+            String post_data = String.Format("&username={0}&password={1}&remember_me=1&validate_token={2}&validate_key={3}", Uri.EscapeUriString(username), Uri.EscapeUriString(password), page_content.Substring(token_loc, 20), page_content.Substring(key_loc, 10));
+
+            request = (HttpWebRequest)HttpWebRequest.Create(_login_uri);
 
             // Set a few request parameters
             request.KeepAlive = false;
             request.Proxy = null;
             request.CookieContainer = cookie_jar;
+            request.Host = "www.deviantart.com";
+            request.Referer = @"https://www.deviantart.com/users/rockedout";
+            request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.49 Safari/537.36";
             request.Accept = "text/html";
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";

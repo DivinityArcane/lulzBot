@@ -117,6 +117,14 @@ namespace lulzbot.Extensions
                         // Increment x for the blank line.
                         x++;
                     }
+
+                    if (ns == "chat:DataShare")
+                    {
+                        foreach (var m in Core.ChannelData["chat:datashare"].Members.Keys)
+                        {
+                            BDS.ToggleOnline(m);
+                        }
+                    }
                 }
                 else if (type == "info")
                 {

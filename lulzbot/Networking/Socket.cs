@@ -115,9 +115,7 @@ namespace lulzbot.Networking
                 if (Program.Debug)
                     ConIO.Warning("Socket", "Error while creating socket: " + E.Message);
                 ConIO.Warning("Socket", "Unable to connect to the internet. Check your connection.");
-                ConIO.Notice("Attempting to reconnect in 10 seconds...");
-                System.Threading.Thread.Sleep(10000);
-                Program.ForceReconnect = true;
+                Program.Running = false;
                 Program.wait_event.Set();
                 return;
             }
@@ -127,7 +125,7 @@ namespace lulzbot.Networking
         {
             if (_socket == null) return;
 
-            if ((!IsConnected && !Closed) || Bot.EpochTimestampMS - LastPacket >= 120000)
+            if ((!IsConnected && !Closed) || Bot.EpochTimestampMS - LastPacket >= 140000)
             {
                 Closed = true;
                 on_disconnect();

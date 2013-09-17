@@ -124,6 +124,11 @@ namespace lulzbot.Extensions
                 return;
             }
 
+            if (packet.Parameter == "chat:DataShare")
+            {
+                BDS.ToggleOnline(packet.SubParameter);
+            }
+
             // Due to the odd format of this packet, arguments are pushed to the body.
             packet.PullBodyArguments();
 
@@ -197,6 +202,11 @@ namespace lulzbot.Extensions
             {
                 ConIO.Write(String.Format("** {0} left.", packet.SubParameter), Tools.FormatNamespace(packet.Parameter, Types.NamespaceFormat.PrivateChat));
                 return;
+            }
+
+            if (packet.Parameter == "chat:DataShare")
+            {
+                BDS.ToggleOnline(packet.SubParameter);
             }
 
             // Don't display DataShare messages.
@@ -275,6 +285,11 @@ namespace lulzbot.Extensions
 
         public static void evt_recv_kicked (Bot bot, dAmnPacket packet)
         {
+            if (packet.Parameter == "chat:DataShare")
+            {
+                BDS.ToggleOnline(packet.SubParameter);
+            }
+
             // Don't display DataShare messages.
             if (!Program.NoDisplay.Contains(Tools.FormatNamespace(packet.Parameter.ToLower(), Types.NamespaceFormat.Channel)))
             {

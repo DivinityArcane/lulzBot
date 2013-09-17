@@ -83,7 +83,8 @@ namespace lulzbot.Types
         public String Version       = String.Empty;
         public String Trigger       = String.Empty;
         public double BDSVersion    = 0.0;
-        public ulong Modified         = 0;
+        public ulong Modified       = 0;
+        public bool Online          = false; // Online at the time of the last update?
 
         /// <summary>
         /// Constructor
@@ -112,11 +113,12 @@ namespace lulzbot.Types
     /// </summary>
     public class ClientInfo
     {
-        public String Name      = String.Empty;
-        public String Type      = String.Empty;
-        public String Version   = String.Empty;
+        public String Name       = String.Empty;
+        public String Type       = String.Empty;
+        public String Version    = String.Empty;
         public Double BDSVersion = 0.3;
-        public ulong Modified     = 0;
+        public ulong Modified    = 0;
+        public bool Online       = false; // Online at the time of the last update?
 
         /// <summary>
         /// Constructor

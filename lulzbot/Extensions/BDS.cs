@@ -80,6 +80,17 @@ namespace lulzbot.Extensions
             if (Program.Debug)
                 ConIO.Write(String.Format("Loaded databases. Got {0} BotDEF entries, {1} BotINFO entries, {2} ClientINFO entries, and {3} SEEN entries.", _botdef_database.Count, _botinfo_database.Count, _clientinfo_database.Count, _seen_database.Count), "BDS");
 
+
+            foreach (var b in _botinfo_database)
+            {
+                _botinfo_database[b.Key].Online = false;
+            }
+
+            foreach (var c in _clientinfo_database)
+            {
+                _clientinfo_database[c.Key].Online = false;
+            }
+
             // We will save on a timer. 
             if (AutoSave)
             {
@@ -114,10 +125,34 @@ namespace lulzbot.Extensions
             if (Program.Debug)
                 ConIO.Write("Saving databases.", "BDS");
 
-            Storage.Save("bds_botdef_database", _botdef_database);
-            Storage.Save("bds_botinfo_database", _botinfo_database);
-            Storage.Save("bds_clientinfo_database", _clientinfo_database);
-            Storage.Save("bds_seen_database", _seen_database);
+            lock (_botdef_database)
+                Storage.Save("bds_botdef_database", _botdef_database);
+
+            lock (_botinfo_database)
+                Storage.Save("bds_botinfo_database", _botinfo_database);
+
+            lock (_clientinfo_database)
+                Storage.Save("bds_clientinfo_database", _clientinfo_database);
+
+            lock (_seen_database)
+                Storage.Save("bds_seen_database", _seen_database);
+        }
+
+        public static void ToggleOnline (string who)
+        {
+            var key = who.ToLower();
+
+            if (Core.ChannelData.ContainsKey("chat:datashare"))
+            {
+                lock (_botdef_database)
+                {
+                    if (_botinfo_database.ContainsKey(key))
+                        _botinfo_database[key].Online = Core.ChannelData["chat:datashare"].Members.ContainsKey(key);
+
+                    if (_clientinfo_database.ContainsKey(key))
+                        _clientinfo_database[key].Online = Core.ChannelData["chat:datashare"].Members.ContainsKey(key);
+                }
+            }
         }
 
         /// <summary>
@@ -1105,10 +1140,10 @@ namespace lulzbot.Extensions
                         if (!from_policebot || from.ToLower() == username.ToLower())
                             return;
 
-                        bot.Join("chat:DataShare");
-
                         if (!IsPoliceBot(username, "chat:DSGateway", true))
                             bot.Part("chat:DSGateWay");
+
+                        bot.Join("chat:DataShare");
                     }
                     else if (bits[2] == "DENIED" && bits.Length >= 4 && bits[3].ToLower().StartsWith(username.ToLower() + ','))
                     {
@@ -1138,7 +1173,7 @@ namespace lulzbot.Extensions
                     else if (bits[2] == "ALL" || (bits.Length >= 4 && bits[2] == "DIRECT" && bits[3].ToLower() == username.ToLower()))
                     {
                         // If it's not a police bot, return.
-                        if (!from_policebot)
+                        if (bits[2] == "ALL" && !from_policebot)
                             return;
 
                         String hashkey = Tools.md5((trigger + from + username).Replace(" ", "").ToLower());
@@ -1150,10 +1185,6 @@ namespace lulzbot.Extensions
 
                         if (bots.Contains(username.ToLower()))
                         {
-                            // If it's not a police bot, return.
-                            if (!from_policebot)
-                                return;
-
                             String hashkey = Tools.md5((trigger + from + username).Replace(" ", "").ToLower());
                             bot.NPSay(ns, String.Format("BDS:BOTCHECK:RESPONSE:{0},{1},{2},{3}/{4},{5},{6}", from, owner, Program.BotName, Program.Version, Version, hashkey, trigger));
                         }
@@ -1302,21 +1333,39 @@ namespace lulzbot.Extensions
                             return;
 
                         String name   = data[1];
-                        String[] vers = data[2].Split('/');
-                        String ver    = vers[0];
+                        String[] vers;
+                        String ver    = String.Empty;
                         String hash   = data[3];
+                        double bdsver = 0.0;
 
-                        double bdsver = 0.2;
+                        if (data[2].Contains('/'))
+                        {
+                            vers = data[2].Split('/');
+                            ver = vers[0];
 
-                        if (!Double.TryParse(vers[vers.Length - 1], out bdsver))
-                            bdsver = 0.2;
+                            if (!Double.TryParse(vers[vers.Length - 1], out bdsver))
+                                bdsver = 0.2;
 
-                        if (vers.Length > 2)
-                            ver = data[2].Substring(0, data[2].LastIndexOf('/'));
+                            if (vers.Length > 2)
+                                ver = data[2].Substring(0, data[2].LastIndexOf('/'));
+                        }
+                        else
+                        {
+                            ver = data[2];
+                        }
 
                         Types.ClientInfo client_info = new ClientInfo(from, name, ver, bdsver, Bot.EpochTimestamp);
 
-                        String hashkey = Tools.md5((name + ver + "/" + bdsver + from + data[0]).Replace(" ", "").ToLower()).ToLower();
+                        String hashkey = String.Empty;
+
+                        if (bdsver == 0.0)
+                        {
+                            hashkey = Tools.md5((name + ver + from + data[0]).Replace(" ", "").ToLower()).ToLower();
+                        }
+                        else
+                        {
+                            hashkey = Tools.md5((name + ver + "/" + bdsver + from + data[0]).Replace(" ", "").ToLower()).ToLower();
+                        }
 
                         ClearKickTimers(from);
 

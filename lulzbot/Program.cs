@@ -81,8 +81,10 @@ namespace lulzbot
                             ret = "Windows Vista";
                         else if (min == 1)
                             ret = "Windows 7";
-                        else
+                        else if (min == 2)
                             ret = "Windows 8";
+                        else // 6.3
+                            ret = "Windows 8.1";
                     }
                 }
 
@@ -121,7 +123,7 @@ namespace lulzbot
         public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations", "#damnidlers" };
         public static List<String> NoDisplay        = new List<String>() { "#datashare", "#dsgateway" };
         public const String BotName                 = "lulzBot";
-        public const String Version                 = "1.22";
+        public const String Version                 = "1.25";
         public const String ReleaseName             = "Synergy";
 
         static void Main (string[] args)
@@ -145,6 +147,22 @@ namespace lulzbot
             // Just a bit of a simple title.
             ConIO.Write(String.Format("{0} [{1}], version {2}", BotName, ReleaseName, Version));
             ConIO.Write("Written and developed by DivinityArcane.");
+
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                // Prevent the bot being run on a Windows NT OS earlier than 6.0 (Vista)
+                // TL Note: it won't run on anything earlier than NT 5 anyway, so no need for a check there.
+                if (Environment.OSVersion.Version.Major < 6)
+                {
+                    ConIO.Warning("Compatibility", "The bot cannot be run on Windows operating systems older than Windows Vista.");
+                    ConIO.Notice("If you are running Windows XP or earlier, you will not be able to use this bot.");
+                    ConIO.Notice("It is recommended that you either upgrade your operating system to something that's not over a decade old, or use a different bot.");
+                    ConIO.Notice("Sorry for the inconvenience!");
+                    Environment.Exit(-1);
+                }
+            }
+
+            ConIO.Write("Looks like we're running on " + OS);
 
             try
             {

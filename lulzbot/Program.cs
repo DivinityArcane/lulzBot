@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Mono.Unix.Native;
+using lulzbot.Networking;
 
 namespace lulzbot
 {
@@ -123,7 +124,7 @@ namespace lulzbot
         public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations", "#damnidlers" };
         public static List<String> NoDisplay        = new List<String>() { "#datashare", "#dsgateway" };
         public const String BotName                 = "lulzBot";
-        public const String Version                 = "1.25";
+        public const String Version                 = "1.26";
         public const String ReleaseName             = "Synergy";
 
         static void Main (string[] args)
@@ -353,9 +354,6 @@ namespace lulzbot
             _thread.IsBackground = false;
             _thread.Start();
 
-            // We could call Bot.Connect() or whatever from here, but, eh. Let's do it
-            //  from within the constructor of Bot() instead.
-
             while (Running)
             {
                 // Wait for a signal
@@ -367,6 +365,12 @@ namespace lulzbot
                     ForceReconnect = false;
                     Timers.Clear();
                     _thread.Abort();
+                    SocketWrapper.Reconnects++;
+                    if (SocketWrapper.Reconnects >= 3)
+                    {
+                        ConIO.Warning("Socket", "Failed to reconnect too many times. Killing the bot...");
+                        Program.Kill();
+                    }
                     if (!Running)
                         break;
                     _thread = new Thread(new ThreadStart(Start));
@@ -393,6 +397,19 @@ namespace lulzbot
             if (!Program.Running || (Program.Bot != null && Program.Bot.Quitting)) return;
             Program.Bot = null;
             Program.Bot = new Bot(Config, host, port);
+        }
+
+        public static void Kill ()
+        {
+            try
+            {
+                _thread.Abort();
+            }
+            catch { }
+            Running = false;
+            Bot = null;
+            ConIO.Read("Press ENTER/RETURN to close this window...");
+            Environment.Exit(-1);
         }
 
         public static bool RenewToken ()

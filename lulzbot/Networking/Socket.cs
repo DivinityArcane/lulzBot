@@ -48,6 +48,8 @@ namespace lulzbot.Networking
             }
         }
 
+        public static int Reconnects = 0;
+
         // We need to check for timeouts.
         private Timer timeout_timer;
         private ulong LastPacket = Bot.EpochTimestampMS;
@@ -102,9 +104,7 @@ namespace lulzbot.Networking
                 if (_socket == null)
                 {
                     ConIO.Warning("Socket", "Unable to obtain a socket! Does the bot have privileges, or is a firewall blocking it?");
-                    Program.Running = false;
-                    Program.wait_event.Set();
-                    return;
+                    Program.Kill();
                 }
 
                 _socket.Blocking = false;
@@ -115,9 +115,7 @@ namespace lulzbot.Networking
                 if (Program.Debug)
                     ConIO.Warning("Socket", "Error while creating socket: " + E.Message);
                 ConIO.Warning("Socket", "Unable to connect to the internet. Check your connection.");
-                Program.Running = false;
-                Program.wait_event.Set();
-                return;
+                Program.Kill();
             }
         }
 
@@ -171,6 +169,8 @@ namespace lulzbot.Networking
 
                 // Announce ourselves
                 Events.CallEvent("on_connect", null);
+
+                Reconnects = 0;
 
                 // Wait for data
                 _socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(on_receive), null);

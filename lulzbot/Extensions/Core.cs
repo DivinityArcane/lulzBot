@@ -15,6 +15,7 @@ namespace lulzbot.Extensions
 
         public static List<String> _disabled_commands;
         public static List<String> _disabled_extensions;
+        public static Dictionary<String, Privs> _command_overrides;
 
         /// <summary>
         /// Constructor. Add basic events.
@@ -73,6 +74,7 @@ namespace lulzbot.Extensions
             Events.AddCommand("netusage", new Command(this, "cmd_netinfo", "DivinityArcane", 25, "Gets information on the network usage of the bot.", "[trig]netusage <i>verbose</i>", ext: info));
             Events.AddCommand("netinfo", new Command(this, "cmd_netinfo", "DivinityArcane", 25, "Gets information on the network usage of the bot.", "[trig]netinfo <i>verbose</i>", ext: info));
             Events.AddCommand("npsay", new Command(this, "cmd_npsay", "DivinityArcane", 75, "Makes the bot say the specified message to the specified channel.", "[trig]npsay <i>#chan</i> msg", ext: info));
+            Events.AddCommand("override", new Command(this, "cmd_override", "DivinityArcane", 100, "Changes the minimum required priv level for a specified command.", "[trig]override command_name priv_level", ext: info));
             Events.AddCommand("part", new Command(this, "cmd_part", "DivinityArcane", 75, "Makes the bot leave the specified channel.", "[trig]part <i>#chan</i>", ext: info));
             Events.AddCommand("ping", new Command(this, "cmd_ping", "DivinityArcane", 25, "Tests the latency between the bot and the server.", "", ext: info));
             Events.AddCommand("promote", new Command(this, "cmd_promote", "DivinityArcane", 75, "Promotes the specified user in the specified channel.", "[trig]promote <i>#chan</i> username <i>privclass</i>", ext: info));
@@ -102,12 +104,22 @@ namespace lulzbot.Extensions
 
             if (_disabled_extensions == null)
                 _disabled_extensions = new List<String>();
+
+            _command_overrides = Storage.Load<Dictionary<String, Privs>>("overridden_commands");
+
+            if (_command_overrides == null)
+                _command_overrides = new Dictionary<String, Privs>();
         }
 
         private static void SaveDisabled ()
         {
             Storage.Save("disabled_commands", _disabled_commands);
             Storage.Save("disabled_extensions", _disabled_extensions);
+        }
+
+        private static void SaveOverrides ()
+        {
+            Storage.Save("overridden_commands", _command_overrides);
         }
     }
 }

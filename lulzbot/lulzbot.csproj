@@ -198,6 +198,7 @@
     <Compile Include="Extensions\Commands\Core\Kill.cs" />
     <Compile Include="Extensions\Commands\Core\NetInfo.cs" />
     <Compile Include="Extensions\Commands\Core\NpSay.cs" />
+    <Compile Include="Extensions\Commands\Core\Override.cs" />
     <Compile Include="Extensions\Commands\Core\Promote.cs" />
     <Compile Include="Extensions\Commands\Core\Say.cs" />
     <Compile Include="Extensions\Commands\Core\Set.cs" />

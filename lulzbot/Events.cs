@@ -119,9 +119,11 @@ namespace lulzbot
         /// </summary>
         /// <param name="cmd_name">Command name</param>
         /// <returns>Priv level or -1</returns>
-        public static int GetCommandAccess (String cmd_name)
+        public static int GetCommandAccess (String cmd_name, bool ignore_override = false)
         {
-            if (_commands.ContainsKey(cmd_name))
+            if (!ignore_override && Core._command_overrides.ContainsKey(cmd_name))
+                return (int)Core._command_overrides[cmd_name];
+            else if (_commands.ContainsKey(cmd_name))
                 return _commands[cmd_name].MinimumPrivs;
             else if (_external_commands.ContainsKey(cmd_name))
                 return _external_commands[cmd_name].MinimumPrivs;
@@ -376,7 +378,7 @@ namespace lulzbot
                     }
 
                     // Access denied
-                    if (!Users.CanAccess(from, callback.MinimumPrivs, cmd_name.ToLower()))
+                    if (!Users.CanAccess(from, GetCommandAccess(cmd_name), cmd_name.ToLower()))
                         return;
 
                     _last_command[from] = Bot.EpochTimestampMS;
@@ -430,7 +432,7 @@ namespace lulzbot
                 }
 
                 // Access denied
-                if (!Users.CanAccess(from, callback.MinimumPrivs, cmd_name.ToLower()))
+                if (!Users.CanAccess(from, GetCommandAccess(cmd_name), cmd_name.ToLower()))
                     return;
 
                 _last_command[from] = Bot.EpochTimestampMS;
@@ -527,7 +529,7 @@ namespace lulzbot
                     if (blacklist.Contains(KVP.Key)) continue;
                     if (Core._disabled_commands.Contains(KVP.Key)) continue;
                     if (Core._disabled_extensions.Contains(KVP.Value.Extension.Name.ToLower())) continue;
-                    if (KVP.Value.MinimumPrivs <= pl || whitelist.Contains(KVP.Key))
+                    if (GetCommandAccess(KVP.Key) <= pl || whitelist.Contains(KVP.Key))
                         list.Add(KVP.Key);
                 }
             }
@@ -539,7 +541,7 @@ namespace lulzbot
                     if (blacklist.Contains(KVP.Key)) continue;
                     if (Core._disabled_commands.Contains(KVP.Key)) continue;
                     if (Core._disabled_extensions.Contains(KVP.Value.Extension.Name.ToLower())) continue;
-                    if (KVP.Value.MinimumPrivs <= pl || whitelist.Contains(KVP.Key))
+                    if (GetCommandAccess(KVP.Key) <= pl || whitelist.Contains(KVP.Key))
                         list.Add(KVP.Key);
                 }
             }

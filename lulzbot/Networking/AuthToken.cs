@@ -90,7 +90,10 @@ namespace lulzbot.Networking
             page_request.Method = "GET";
             page_request.KeepAlive = false;
             page_request.Proxy = null;
+            page_request.Host = "chat.deviantart.com";
             page_request.CookieContainer = cookie_jar;
+            page_request.Referer = @"http://chat.deviantart.com/";
+            page_request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.49 Safari/537.36";
             page_request.Accept = "text/html";
 
             // Create a temporary stream reader

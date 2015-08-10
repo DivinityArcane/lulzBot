@@ -124,7 +124,7 @@ namespace lulzbot
         public static List<String> OfficialChannels = new List<String>() { "#devart", "#help", "#mnadmin", "#seniors", "#communityrelations", "#damnidlers" };
         public static List<String> NoDisplay        = new List<String>() { "#datashare", "#dsgateway" };
         public const String BotName                 = "lulzBot";
-        public const String Version                 = "1.27 Final";
+        public const String Version                 = "1.28 Final-er";
         public const String ReleaseName             = "Synergy";
 
         static void Main (string[] args)

@@ -14,6 +14,7 @@ namespace lulzbot.Networking
         private const String _login_uri = @"https://www.deviantart.com/users/login";
         private const String _chat_uri  = @"http://chat.deviantart.com/chat/datashare";
         private const String _regex     = "dAmn_Login\\( \"[^\"]*\", \"([^\"]*)\" \\);";
+        private const String _useragent = @"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.61 Safari/537.36";
 
         /// <summary>
         /// Grabs the authtoken for the username and password.
@@ -24,7 +25,7 @@ namespace lulzbot.Networking
         public static String Grab (String username, String password)
         {
             // This should really be replaced with an OAuth method, or the likes.
-
+        
             // Make sure we can bypass certificate checks on Linux machines.
             ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback(ValidateRemoteCertificate);
 
@@ -34,17 +35,26 @@ namespace lulzbot.Networking
             HttpWebRequest request      = (HttpWebRequest)HttpWebRequest.Create(_users_uri);
 
             // Set a few request parameters
+            request.KeepAlive = false;
             request.Proxy = null;
             request.CookieContainer = cookie_jar;
             request.Host = "www.deviantart.com";
+            request.UserAgent = _useragent;
             request.Accept = "text/html";
             request.Method = "GET";
 
-            // Create a temporary stream reader
-            using (StreamReader reader = new StreamReader(request.GetResponse().GetResponseStream()))
+            try
             {
-                // Grab the entire page contents
-                page_content = reader.ReadToEnd();
+                // Create a temporary stream reader
+                using (StreamReader reader = new StreamReader(request.GetResponse().GetResponseStream()))
+                {
+                    // Grab the entire page contents
+                    page_content = reader.ReadToEnd();
+                }
+            }
+            catch (Exception Ex)
+            {
+                ConIO.Warning("AuthToken", "AT.Grab[R1]: " + Ex.Message);
             }
 
             if (page_content == null || !page_content.Contains("validate_token") || !page_content.Contains("validate_key")) return null;
@@ -67,20 +77,27 @@ namespace lulzbot.Networking
             request.Proxy = null;
             request.CookieContainer = cookie_jar;
             request.Host = "www.deviantart.com";
-            request.Referer = @"https://www.deviantart.com/users/rockedout";
-            request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.49 Safari/537.36";
+            request.Referer = _users_uri;
+            request.UserAgent = _useragent;
             request.Accept = "text/html";
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
             request.ContentLength = post_data.Length;
 
-            // Create a temporary stream writer
-            using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
+            try
             {
-                // Write the post data to the request, and POST the request.
-                writer.Write(post_data);
-                writer.Flush();
-                request.GetResponse();
+                // Create a temporary stream writer
+                using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
+                {
+                    // Write the post data to the request, and POST the request.
+                    writer.Write(post_data);
+                    writer.Flush();
+                    request.GetResponse();
+                }
+            }
+            catch (Exception Ex)
+            {
+                ConIO.Warning("AuthToken", "AT.Grab[R2]: " + Ex.Message);
             }
 
             // Now we make a request to the chat page to get the real authtoken
@@ -93,14 +110,21 @@ namespace lulzbot.Networking
             page_request.Host = "chat.deviantart.com";
             page_request.CookieContainer = cookie_jar;
             page_request.Referer = @"http://chat.deviantart.com/";
-            page_request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.49 Safari/537.36";
+            page_request.UserAgent = _useragent;
             page_request.Accept = "text/html";
 
-            // Create a temporary stream reader
-            using (StreamReader reader = new StreamReader(page_request.GetResponse().GetResponseStream()))
+            try
             {
-                // Grab the entire page contents
-                page_content = reader.ReadToEnd();
+                // Create a temporary stream reader
+                using (StreamReader reader = new StreamReader(page_request.GetResponse().GetResponseStream()))
+                {
+                    // Grab the entire page contents
+                    page_content = reader.ReadToEnd();
+                }
+            }
+            catch (Exception Ex)
+            {
+                ConIO.Warning("AuthToken", "AT.Grab[R3]: " + Ex.Message);
             }
 
             // If the page contains the dAmn_Login function

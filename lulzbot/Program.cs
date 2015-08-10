@@ -87,6 +87,11 @@ namespace lulzbot
                         else // 6.3
                             ret = "Windows 8.1";
                     }
+
+                    else if (maj == 10)
+                    {
+                        ret = "Windows 10";
+                    }
                 }
 
                 else if (plat == PlatformID.MacOSX)
